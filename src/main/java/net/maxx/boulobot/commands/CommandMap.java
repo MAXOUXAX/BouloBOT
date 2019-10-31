@@ -1,6 +1,6 @@
 package net.maxx.boulobot.commands;
 
-import com.github.twitch4j.tmi.domain.Chatters;
+import com.github.twitch4j.common.enums.CommandPermission;
 import com.samuelmaddock.strawpollwrapper.StrawPoll;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -42,7 +42,7 @@ public final class CommandMap {
         this.botDiscord = botDiscord;
 
         registerCommands(new CommandDefault(botDiscord, this), new RoleCommand(botDiscord, this), new HelpCommand(this), new MusicCommand(botDiscord, this), new CommandWeather(botDiscord, this), new CommandNotif(botDiscord, this), new CommandChangelog(botDiscord, this), new CommandVersion(botDiscord, this), new CommandMigrate(botDiscord, this));
-        registerTwitchCommands(new TwitchWeather(botDiscord, this), new TwitchHelp(botDiscord, this), new TwitchGame(botDiscord, this), new TwitchKappa(botDiscord, this), new TwitchRandom(botDiscord, this), new TwitchNotif(botDiscord, this), new TwitchPwned(botDiscord, this), new TwitchVersion(botDiscord, this), new TwitchAquoijouer(botDiscord, this), new TwitchClipThat(botDiscord, this), new TwitchSCP(botDiscord, this));
+        registerTwitchCommands(new TwitchWeather(botDiscord, this), new TwitchHelp(botDiscord, this), new TwitchKappa(botDiscord, this), new TwitchRandom(botDiscord, this), new TwitchNotif(botDiscord, this), new TwitchPwned(botDiscord, this), new TwitchVersion(botDiscord, this), new TwitchAquoijouer(botDiscord, this), new TwitchClipThat(botDiscord, this), new TwitchSCP(botDiscord, this));
 
         load();
     }
@@ -388,15 +388,14 @@ public final class CommandMap {
         simpleTwitchCommand.getMethod().invoke(simpleTwitchCommand.getObject(), objects);
     }
 
-    public TwitchCommand.ExecutorRank getRank(String broadcaster, Chatters chatters, String user){
-        if(broadcaster.equalsIgnoreCase(user))return TwitchCommand.ExecutorRank.OWNER;
-        if(chatters.getModerators().contains(user))return TwitchCommand.ExecutorRank.MOD;
-        if(chatters.getVips().contains(user))return TwitchCommand.ExecutorRank.VIP;
-        if(chatters.getViewers().contains(user))return TwitchCommand.ExecutorRank.EVERYONE;
-        return TwitchCommand.ExecutorRank.EVERYONE;
-    }
-
     public List<String> getUserIds() {
         return userIds;
+    }
+
+    public TwitchCommand.ExecutorRank getRank(Set<CommandPermission> permissions) {
+        if(permissions.contains(CommandPermission.BROADCASTER))return TwitchCommand.ExecutorRank.OWNER;
+        if(permissions.contains(CommandPermission.MODERATOR))return TwitchCommand.ExecutorRank.MOD;
+        if(permissions.contains(CommandPermission.VIP))return TwitchCommand.ExecutorRank.VIP;
+        return TwitchCommand.ExecutorRank.EVERYONE;
     }
 }

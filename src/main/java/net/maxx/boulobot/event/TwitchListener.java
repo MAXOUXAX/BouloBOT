@@ -32,7 +32,7 @@ public class TwitchListener {
             botDiscord.getLogger().log(Level.INFO, "User getted");
             String userName = user.getName();
             String broadcaster = channelMessageEvent.getChannel().getName();
-            TwitchCommand.ExecutorRank executorRank = commandMap.getRank(broadcaster, botDiscord.getTwitchClient().getMessagingInterface().getChatters(broadcaster).execute(), userName);
+            TwitchCommand.ExecutorRank executorRank = commandMap.getRank(channelMessageEvent.getPermissions());
             botDiscord.getLogger().log(Level.INFO, "rank getted");
             message = message.replaceFirst(commandMap.getTwitchTag(), "");
             commandMap.twitchCommandUser(userUser, broadcaster, executorRank, message);

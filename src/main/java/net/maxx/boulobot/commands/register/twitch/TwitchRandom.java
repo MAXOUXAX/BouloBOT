@@ -2,14 +2,12 @@ package net.maxx.boulobot.commands.register.twitch;
 
 import com.github.twitch4j.common.enums.CommandPermission;
 import com.github.twitch4j.helix.domain.User;
+import com.github.twitch4j.tmi.domain.Chatters;
 import net.maxx.boulobot.BOT;
 import net.maxx.boulobot.commands.CommandMap;
 import net.maxx.boulobot.commands.TwitchCommand;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.logging.Level;
 
 public class TwitchRandom {
@@ -23,9 +21,10 @@ public class TwitchRandom {
     }
 
     @TwitchCommand(name = "random", description = "Petite commande aléatoire", example = "&random Lyorine", help = "&random <pseudo sans @>", rank = TwitchCommand.ExecutorRank.EVERYONE)
-    public void random(User user, String broadcaster, String[] args, CommandPermission[] commandPermissions) {
-        List<User> usersList = botDiscord.getTwitchClient().getHelix().getUsers(null, null, Arrays.asList(args[0])).execute().getUsers();
-        if (commandMap.getRank(new HashSet<>(Arrays.asList(commandPermissions))).getPower() >= TwitchCommand.ExecutorRank.VIP.getPower()) {
+    public void random(User user, String broadcaster, String[] args, Set<CommandPermission> commandPermissions) {
+        Chatters chat = botDiscord.getTwitchClient().getMessagingInterface().getChatters(broadcaster).execute();
+        botDiscord.getLogger().log(Level.INFO, "getChatters");
+        if (commandMap.getRank(commandPermissions).getPower() >= TwitchCommand.ExecutorRank.VIP.getPower()) {
             botDiscord.getLogger().log(Level.INFO, "People VIP or more");
             int inte = new Random().nextInt(TrollSentences.values().length);
             botDiscord.getLogger().log(Level.INFO, "Got random number");
@@ -41,19 +40,22 @@ public class TwitchRandom {
                 botDiscord.getLogger().log(Level.INFO, "Phrase pas race");
                 if(args.length == 0) {
                     botDiscord.getLogger().log(Level.INFO, "No args so getting a random viewer");
+                    List<String> chatters = chat.getAllViewers();
                     botDiscord.getLogger().log(Level.INFO, "Got chatters");
-                    int randomInt = new Random().nextInt(usersList.size());
+                    int randomInt = new Random().nextInt(chatters.size());
                     botDiscord.getLogger().log(Level.INFO, "Got random number");
-                    random = usersList.get(randomInt).getDisplayName();
+                    random = chatters.get(randomInt);
                     botDiscord.getLogger().log(Level.INFO, "Got random people username");
                     while(random.equalsIgnoreCase(user.getDisplayName())){
-                        int randomInto = new Random().nextInt(usersList.size());
+                        int randomInto = new Random().nextInt(chatters.size());
                         botDiscord.getLogger().log(Level.INFO, "WHILE Got random number");
-                        random = usersList.get(randomInto).getDisplayName();
+                        random = chatters.get(randomInto);
                         botDiscord.getLogger().log(Level.INFO, "WHILE Got random people username");
                     }
+                    random = botDiscord.getTwitchClient().getHelix().getUsers(null, null, Collections.singletonList(random)).execute().getUsers().get(0).getDisplayName();
                 }else{
                     botDiscord.getLogger().log(Level.INFO, "Args so getting given username");
+                    List<User> usersList = botDiscord.getTwitchClient().getHelix().getUsers(null, null, Arrays.asList(args[0])).execute().getUsers();
                     botDiscord.getLogger().log(Level.INFO, "Got user list");
                     User finalUser;
                     if(usersList != null && !usersList.isEmpty()) {
@@ -96,19 +98,22 @@ public class TwitchRandom {
                 botDiscord.getLogger().log(Level.INFO, "Phrase pas race");
                 if(args.length == 0) {
                     botDiscord.getLogger().log(Level.INFO, "No args so getting a random viewer");
+                    List<String> chatters = chat.getAllViewers();
                     botDiscord.getLogger().log(Level.INFO, "Got chatters");
-                    int randomInt = new Random().nextInt(usersList.size());
+                    int randomInt = new Random().nextInt(chatters.size());
                     botDiscord.getLogger().log(Level.INFO, "Got random number");
-                    random = usersList.get(randomInt).getDisplayName();
+                    random = chatters.get(randomInt);
                     botDiscord.getLogger().log(Level.INFO, "Got random people username");
                     while(random.equalsIgnoreCase(user.getDisplayName())){
-                        int randomInto = new Random().nextInt(usersList.size());
+                        int randomInto = new Random().nextInt(chatters.size());
                         botDiscord.getLogger().log(Level.INFO, "WHILE Got random number");
-                        random = usersList.get(randomInto).getDisplayName();
+                        random = chatters.get(randomInto);
                         botDiscord.getLogger().log(Level.INFO, "WHILE Got random people username");
                     }
+                    random = botDiscord.getTwitchClient().getHelix().getUsers(null, null, Collections.singletonList(random)).execute().getUsers().get(0).getDisplayName();
                 }else{
                     botDiscord.getLogger().log(Level.INFO, "Args so getting given username");
+                    List<User> usersList = botDiscord.getTwitchClient().getHelix().getUsers(null, null, Arrays.asList(args[0])).execute().getUsers();
                     botDiscord.getLogger().log(Level.INFO, "Got user list");
                     User finalUser;
                     if(usersList != null && !usersList.isEmpty()) {

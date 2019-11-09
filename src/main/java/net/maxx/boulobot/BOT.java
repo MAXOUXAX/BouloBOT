@@ -40,6 +40,7 @@ public class BOT implements Runnable{
 
     private boolean running;
     private String version;
+    private String channelName;
 
     public BOT() throws LoginException, IllegalArgumentException, NullPointerException, IOException, InterruptedException {
         //Loading the log system
@@ -55,6 +56,8 @@ public class BOT implements Runnable{
         this.version = string;
 
         loadConfig();
+
+        channelName = configurationManager.getStringValue("channelName");
 
         //Log the startup messages
         logger.log(Level.INFO, "--------------- STARTING ---------------");
@@ -103,8 +106,8 @@ public class BOT implements Runnable{
 
         //Connecting to the BOT's tchats
         twitchClient.getChat().connect();
-        twitchClient.getChat().joinChannel("lyorine");
-        logger.log(Level.INFO, "> Lyorine's channel joined!");
+        twitchClient.getChat().joinChannel(channelName);
+        logger.log(Level.INFO, "> "+channelName+"'s channel joined!");
 
         //Registering SessionManager and loading all passed sessions
         //this.sessionManager = new SessionManager(this);
@@ -124,7 +127,7 @@ public class BOT implements Runnable{
                         if(!commandMap.isKnown(id)) {
                             //logger.log(Level.WARNING, commandMap.getUsersOnLive().toString());
                             commandMap.addKnownUser(id);
-                            event.getTwitchChat().sendMessage("lyorine", "Coucou @" + username + " ! Passe un bon moment sur le stream, et pose toi avec ton PopCorn !");
+                            event.getTwitchChat().sendMessage(channelName, "Coucou @" + username + " ! Passe un bon moment sur le stream, et pose toi avec ton PopCorn !");
                         }
                     }else{
                         logger.log(Level.WARNING, event.getRawMessage());
@@ -141,7 +144,7 @@ public class BOT implements Runnable{
     }
 
     private void loadNotifications() {
-        twitchClient.getClientHelper().enableStreamEventListener("lyorine");
+        twitchClient.getClientHelper().enableStreamEventListener(channelName);
         twitchClient.getEventManager().onEvent(ChannelGoLiveEvent.class).subscribe((channelGoLiveEvent) -> {
             sendGoLiveNotif();
         });
@@ -163,14 +166,14 @@ public class BOT implements Runnable{
         TextChannel toSend = jda.getGuildById(Reference.GuildID.getString()).getTextChannelById(Reference.NotifTextChannelID.getString());
         Message message = new MessageBuilder(notif.getAsMention()).setEmbed(embedBuilder.build()).build();
         toSend.sendMessage(message).queue();
-        twitchClient.getChat().sendMessage("lyorine", "Coucou imGlitch ! \n» Je viens d'envoyer la notification à tous les chats ! Bon live ! LUL");
-        jda.getPresence().setActivity(Activity.streaming("avec sa reine", "https://twitch.tv/LYORINE"));
+        twitchClient.getChat().sendMessage(channelName, "Coucou imGlitch ! \n» Je viens d'envoyer la notification à tous les chats ! Bon live ! LUL");
+        jda.getPresence().setActivity(Activity.streaming("avec sa reine", "https://twitch.tv/"+channelName.toUpperCase()));
     }
 
     public void sendGoOfflineNotif(){
         logger.log(Level.INFO, "> Le stream est OFFLINE!");
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/Lyorine");
+        embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());
         embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
         embedBuilder.setColor(15158332);
         embedBuilder.setDescription("Coucou !\nLe live est désormais terminé, merci à tous de l'avoir suivi !\nVous pourrez me retrouver une prochaine fois, à l'adresse suivante !\n» https://twitch.lyorine.com");

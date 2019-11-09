@@ -384,7 +384,7 @@ public final class CommandMap {
             else if(parameters[i].getType() == com.github.twitch4j.helix.domain.User.class) objects[i] = user;
             else if(parameters[i].getType() == String.class) objects[i] = chat;
             else if(parameters[i].getType() == SimpleTwitchCommand.class) objects[i] = simpleTwitchCommand;
-            else if(parameters[i].getType() == CommandPermission[].class) objects[i] = commandPermissions.toArray();
+            else if(parameters[i].getType() == Set.class) objects[i] = commandPermissions;
         }
         simpleTwitchCommand.getMethod().invoke(simpleTwitchCommand.getObject(), objects);
     }

@@ -141,9 +141,6 @@ public class BOT implements Runnable{
 
         //Registering the listener in order to make the events work
         twitchClient.getEventManager().registerListener(new TwitchListener(commandMap, this));
-
-        org.apache.logging.log4j.Logger logger4j = org.apache.logging.log4j.Logger.getRootLogger();
-        logger4j.setLevel(org.apache.logging.log4j.Level.toLevel("ERROR"));
     }
 
     private void loadNotifications() {

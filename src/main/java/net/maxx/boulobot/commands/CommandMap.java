@@ -1,6 +1,6 @@
 package net.maxx.boulobot.commands;
 
-import com.github.twitch4j.tmi.domain.Chatters;
+import com.github.twitch4j.common.enums.CommandPermission;
 import com.samuelmaddock.strawpollwrapper.StrawPoll;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -41,8 +41,8 @@ public final class CommandMap {
     public CommandMap(BOT botDiscord) {
         this.botDiscord = botDiscord;
 
-        registerCommands(new CommandDefault(botDiscord, this), new RoleCommand(botDiscord, this), new HelpCommand(this), new MusicCommand(botDiscord, this), new CommandWeather(botDiscord, this), new CommandNotif(botDiscord, this), new CommandChangelog(botDiscord, this), new CommandVersion(botDiscord, this), new CommandMigrate(botDiscord, this));
-        registerTwitchCommands(new TwitchWeather(botDiscord, this), new TwitchHelp(botDiscord, this), new TwitchGame(botDiscord, this), new TwitchKappa(botDiscord, this), new TwitchRandom(botDiscord, this), new TwitchNotif(botDiscord, this), new TwitchPwned(botDiscord, this), new TwitchVersion(botDiscord, this), new TwitchAquoijouer(botDiscord, this), new TwitchClipThat(botDiscord, this), new TwitchSCP(botDiscord, this));
+        registerCommands(new CommandDefault(botDiscord, this), new RoleCommand(botDiscord, this), new HelpCommand(this), new MusicCommand(botDiscord, this), new CommandWeather(botDiscord, this), new CommandNotif(botDiscord, this), new CommandChangelog(botDiscord, this), new CommandVersion(botDiscord, this));
+        registerTwitchCommands(new TwitchWeather(botDiscord, this), new TwitchHelp(botDiscord, this), new TwitchKappa(botDiscord, this), new TwitchRandom(botDiscord, this), new TwitchNotif(botDiscord, this), new TwitchPwned(botDiscord, this), new TwitchVersion(botDiscord, this), new TwitchAquoijouer(botDiscord, this), new TwitchClipThat(botDiscord, this), new TwitchSCP(botDiscord, this));
 
         load();
     }
@@ -352,11 +352,11 @@ public final class CommandMap {
         }
     }
 
-    public boolean twitchCommandUser(com.github.twitch4j.helix.domain.User user, String broadcaster, TwitchCommand.ExecutorRank executorRank, String command){
+    public boolean twitchCommandUser(com.github.twitch4j.helix.domain.User user, String broadcaster, TwitchCommand.ExecutorRank executorRank, String command, Set<CommandPermission> commandPermissions){
         Object[] object = getTwitchCommand(command);
         if(object[0] == null || ((SimpleTwitchCommand)object[0]).getExecutorRank().getPower() > executorRank.getPower()) return false;
         try{
-            executeTwitchCommand(((SimpleTwitchCommand)object[0]), broadcaster, user, (String[])object[1]);
+            executeTwitchCommand(((SimpleTwitchCommand)object[0]), broadcaster, user, (String[])object[1], commandPermissions);
         }catch(Exception e){
             botDiscord.getLogger().log(Level.SEVERE,"La methode "+((SimpleTwitchCommand)object[0]).getMethod().getName()+" n'est pas correctement initialisé.");
             botDiscord.getErrorHandler().handleException(e);
@@ -376,7 +376,7 @@ public final class CommandMap {
         return twitchCommands.get(command);
     }
 
-    private void executeTwitchCommand(SimpleTwitchCommand simpleTwitchCommand, String chat, com.github.twitch4j.helix.domain.User user, String[] args) throws Exception{
+    private void executeTwitchCommand(SimpleTwitchCommand simpleTwitchCommand, String chat, com.github.twitch4j.helix.domain.User user, String[] args, Set<CommandPermission> commandPermissions) throws Exception{
         Parameter[] parameters = simpleTwitchCommand.getMethod().getParameters();
         Object[] objects = new Object[parameters.length];
         for(int i = 0; i < parameters.length; i++){
@@ -384,19 +384,19 @@ public final class CommandMap {
             else if(parameters[i].getType() == com.github.twitch4j.helix.domain.User.class) objects[i] = user;
             else if(parameters[i].getType() == String.class) objects[i] = chat;
             else if(parameters[i].getType() == SimpleTwitchCommand.class) objects[i] = simpleTwitchCommand;
+            else if(parameters[i].getType() == Set.class) objects[i] = commandPermissions;
         }
         simpleTwitchCommand.getMethod().invoke(simpleTwitchCommand.getObject(), objects);
     }
 
-    public TwitchCommand.ExecutorRank getRank(String broadcaster, Chatters chatters, String user){
-        if(broadcaster.equalsIgnoreCase(user))return TwitchCommand.ExecutorRank.OWNER;
-        if(chatters.getModerators().contains(user))return TwitchCommand.ExecutorRank.MOD;
-        if(chatters.getVips().contains(user))return TwitchCommand.ExecutorRank.VIP;
-        if(chatters.getViewers().contains(user))return TwitchCommand.ExecutorRank.EVERYONE;
-        return TwitchCommand.ExecutorRank.EVERYONE;
-    }
-
     public List<String> getUserIds() {
         return userIds;
+    }
+
+    public TwitchCommand.ExecutorRank getRank(Set<CommandPermission> permissions) {
+        if(permissions.contains(CommandPermission.BROADCASTER))return TwitchCommand.ExecutorRank.OWNER;
+        if(permissions.contains(CommandPermission.MODERATOR))return TwitchCommand.ExecutorRank.MOD;
+        if(permissions.contains(CommandPermission.VIP))return TwitchCommand.ExecutorRank.VIP;
+        return TwitchCommand.ExecutorRank.EVERYONE;
     }
 }

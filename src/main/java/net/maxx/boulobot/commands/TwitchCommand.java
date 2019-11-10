@@ -16,7 +16,10 @@ public @interface TwitchCommand {
     ExecutorRank rank() default ExecutorRank.EVERYONE;
 
     enum ExecutorRank{
-        EVERYONE("EVERYONE", 0), VIP("VIP", 1), MOD("MOD", 2), OWNER("OWNER", 3);
+        EVERYONE("EVERYONE", 0),
+        VIP("VIP", 1),
+        MOD("MOD", 2),
+        OWNER("OWNER", 3);
 
         ExecutorRank(String name, Integer power) {
             this.name = name;

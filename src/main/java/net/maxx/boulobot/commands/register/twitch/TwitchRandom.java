@@ -1,15 +1,13 @@
 package net.maxx.boulobot.commands.register.twitch;
 
+import com.github.twitch4j.common.enums.CommandPermission;
 import com.github.twitch4j.helix.domain.User;
 import com.github.twitch4j.tmi.domain.Chatters;
 import net.maxx.boulobot.BOT;
 import net.maxx.boulobot.commands.CommandMap;
 import net.maxx.boulobot.commands.TwitchCommand;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.logging.Level;
 
 public class TwitchRandom {
@@ -23,10 +21,10 @@ public class TwitchRandom {
     }
 
     @TwitchCommand(name = "random", description = "Petite commande aléatoire", example = "&random Lyorine", help = "&random <pseudo sans @>", rank = TwitchCommand.ExecutorRank.EVERYONE)
-    public void random(User user, String broadcaster, String[] args) {
+    public void random(User user, String broadcaster, String[] args, Set<CommandPermission> commandPermissions) {
         Chatters chat = botDiscord.getTwitchClient().getMessagingInterface().getChatters(broadcaster).execute();
         botDiscord.getLogger().log(Level.INFO, "getChatters");
-        if (commandMap.getRank(broadcaster, chat, user.getDisplayName().toLowerCase()).getPower() >= TwitchCommand.ExecutorRank.VIP.getPower()) {
+        if (commandMap.getRank(commandPermissions).getPower() >= TwitchCommand.ExecutorRank.VIP.getPower()) {
             botDiscord.getLogger().log(Level.INFO, "People VIP or more");
             int inte = new Random().nextInt(TrollSentences.values().length);
             botDiscord.getLogger().log(Level.INFO, "Got random number");

@@ -145,15 +145,11 @@ public class BOT implements Runnable{
 
     private void loadNotifications() {
         twitchClient.getClientHelper().enableStreamEventListener(channelName);
-        twitchClient.getEventManager().onEvent(ChannelGoLiveEvent.class).subscribe((channelGoLiveEvent) -> {
-            sendGoLiveNotif();
-        });
-        twitchClient.getEventManager().onEvent(ChannelGoOfflineEvent.class).subscribe((channelGoOfflineEvent) -> {
-            sendGoOfflineNotif();
-        });
+        twitchClient.getEventManager().onEvent(ChannelGoLiveEvent.class).subscribe(this::sendGoLiveNotif);
+        twitchClient.getEventManager().onEvent(ChannelGoOfflineEvent.class).subscribe(this::sendGoOfflineNotif);
     }
 
-    public void sendGoLiveNotif(){
+    public void sendGoLiveNotif(ChannelGoLiveEvent channelGoLiveEvent){
         Member lyorine = jda.getGuildById(Reference.GuildID.getString()).getMemberById(Reference.LyorineClientID.getString());
         Role notif = lyorine.getGuild().getRoleById(Reference.NotifRoleID.getString());
         logger.log(Level.INFO, "> Le stream est ONLINE!");
@@ -170,7 +166,7 @@ public class BOT implements Runnable{
         jda.getPresence().setActivity(Activity.streaming("avec sa reine", "https://twitch.tv/"+channelName.toUpperCase()));
     }
 
-    public void sendGoOfflineNotif(){
+    public void sendGoOfflineNotif(ChannelGoOfflineEvent channelGoOfflineEvent){
         logger.log(Level.INFO, "> Le stream est OFFLINE!");
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());

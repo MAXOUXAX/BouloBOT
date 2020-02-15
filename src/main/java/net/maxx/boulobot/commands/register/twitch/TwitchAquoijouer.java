@@ -22,7 +22,7 @@ public class TwitchAquoijouer {
         StringBuilder str = new StringBuilder();
         GameTopList resultList = botDiscord.getTwitchClient().getHelix().getTopGames(null, null, null, "10").execute();
         resultList.getGames().forEach(game -> {
-            str.append(game.getName()).append(" SMOrc ");
+            str.append(game.getName()).append(", ");
         });
         botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "Voici quelques idées de jeux: ");
         botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, str.toString());

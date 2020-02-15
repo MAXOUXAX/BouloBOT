@@ -24,9 +24,13 @@ public class SessionManager {
     }
 
     public Session startNewSession() {
-        currentSession = new Session(System.currentTimeMillis());
+        currentSession = new Session(System.currentTimeMillis(), bot);
         sessions.add(currentSession);
         return currentSession;
+    }
+
+    public void endSession() {
+        currentSession.setEndDateMillis(System.currentTimeMillis());
     }
 
     public Session getCurrentSession() {
@@ -55,13 +59,14 @@ public class SessionManager {
                     for (int i = 0; i < array.length(); i++) {
                         JSONObject object = array.getJSONObject(i);
                         long startTime = object.getLong("startDate");
-                        Session loadingSession = new Session(startTime);
+                        Session loadingSession = new Session(startTime, bot);
                         loadingSession.setEndDateMillis(object.getLong("endDate"));
 
                         loadingSession.setAvgViewers(object.getInt("avgViewers"));
                         loadingSession.setMaxViewers(object.getInt("maxViewers"));
                         loadingSession.setBansAndTimeouts(object.getInt("bansAndTimeouts"));
                         loadingSession.setNewViewers(object.getInt("newViewers"));
+                        loadingSession.setNewFollowers(object.getInt("newFollowers"));
                         loadingSession.setCommandUsed(object.getInt("commandUsed"));
                         loadingSession.setMessageSended(object.getInt("messageSended"));
                         loadingSession.setCommandsUsed(decrushMap(object.getString("commandsUsed")));
@@ -98,6 +103,7 @@ public class SessionManager {
             object.accumulate("endDate", session.getEndDate());
             object.accumulate("messageSended", session.getMessageSended());
             object.accumulate("newViewers", session.getNewViewers());
+            object.accumulate("newFollowers", session.getNewFollowers());
             object.accumulate("commandsUsed", crushMap(session.getCommandsUsed()));
             object.accumulate("usedEmotes", crushMap(session.getUsedEmotes()));
 
@@ -131,4 +137,15 @@ public class SessionManager {
         });
         return decrushedMap;
     }
+
+    public void updateTitle(String newTitle) {
+        this.currentSession.newTitle(newTitle);
+        this.currentSession.updateMessage();
+    }
+
+    public void updateGame(String newGameId) {
+        this.currentSession.newGame(newGameId);
+        this.currentSession.updateMessage();
+    }
+
 }

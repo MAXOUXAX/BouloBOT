@@ -5,6 +5,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +23,7 @@ public final class JSONReader{
 
     public JSONReader(File file, BOT botDiscord) throws IOException
     {
-        this(new InputStreamReader(new FileInputStream(file)), botDiscord);
+        this(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), botDiscord);
     }
 
     public JSONReader(Reader reader, BOT botDiscord) throws IOException
@@ -56,7 +57,7 @@ public final class JSONReader{
     {
         try
         {
-            return toList(new InputStreamReader(new FileInputStream(file)), botDiscord);
+            return toList(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), botDiscord);
         }
         catch(IOException e)
         {
@@ -103,7 +104,7 @@ public final class JSONReader{
     {
         try
         {
-            return toMap(new InputStreamReader(new FileInputStream(file)), botDiscord);
+            return toMap(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), botDiscord);
         }
         catch(IOException e)
         {

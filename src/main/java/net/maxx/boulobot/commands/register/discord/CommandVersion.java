@@ -21,7 +21,7 @@ public class CommandVersion {
     private void version(MessageChannel channel){
         try{
             EmbedBuilder builder = new EmbedBuilder();
-            builder.setTitle("BouloBOT • A bot developped by Maxx_", Reference.WebsiteURL.getString());
+            builder.setTitle("BouloBOT by MAXOUXAX • Amazingly powerful.", Reference.WebsiteURL.getString());
             builder.setColor(3447003);
             builder.addField("Je suis en version", botDiscord.getVersion(), true);
             builder.addField("Je gère", commandMap.getDiscordCommands().size()+" commandes Discord", true);

@@ -23,8 +23,8 @@ public class SessionManager {
         SESSIONS_FOLDER = new File("sessions" + File.separator);
     }
 
-    public Session startNewSession() {
-        currentSession = new Session(System.currentTimeMillis(), bot);
+    public Session startNewSession(String channelId) {
+        currentSession = new Session(System.currentTimeMillis(), channelId, bot);
         sessions.add(currentSession);
         return currentSession;
     }
@@ -59,9 +59,9 @@ public class SessionManager {
                     for (int i = 0; i < array.length(); i++) {
                         JSONObject object = array.getJSONObject(i);
                         long startTime = object.getLong("startDate");
-                        Session loadingSession = new Session(startTime, bot);
+                        String channelId = object.getString("channelId");
+                        Session loadingSession = new Session(startTime, channelId, bot);
                         loadingSession.setEndDateMillis(object.getLong("endDate"));
-
                         loadingSession.setAvgViewers(object.getInt("avgViewers"));
                         loadingSession.setMaxViewers(object.getInt("maxViewers"));
                         loadingSession.setBansAndTimeouts(object.getInt("bansAndTimeouts"));
@@ -95,6 +95,7 @@ public class SessionManager {
 
             JSONObject object = new JSONObject();
             object.accumulate("uuid", session.getUuid().toString());
+            object.accumulate("channelId", session.getChannelId());
             object.accumulate("maxViewers", session.getMaxViewers());
             object.accumulate("avgViewers", session.getAvgViewers());
             object.accumulate("banAndTimeouts", session.getBansAndTimeouts());

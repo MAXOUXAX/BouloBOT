@@ -17,7 +17,7 @@ public class TwitchVersion {
     @TwitchCommand(name="version",description="Affiche les informations sur la version du BOT", help = "&version", example = "&version")
     private void version(String broadcaster){
         try {
-            botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "BouloBOT • A bot developped by Maxx_ | Je suis en version " + botDiscord.getVersion() + " | Je gère " + commandMap.getDiscordCommands().size() + " commandes Discord | Je gère " + commandMap.getTwitchCommands().size() + " commandes Twitch | J'ai souhaité la bienvenue à " + commandMap.getUserIds().size() + " viewers !");
+            botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "BouloBOT by MAXOUXAX • Amazingly powerful. | Je suis en version " + botDiscord.getVersion() + " | Je gère " + commandMap.getDiscordCommands().size() + " commandes Discord | Je gère " + commandMap.getTwitchCommands().size() + " commandes Twitch | J'ai souhaité la bienvenue à " + commandMap.getUserIds().size() + " viewers !");
         }catch (Exception e){
             botDiscord.getErrorHandler().handleException(e);
             e.printStackTrace();

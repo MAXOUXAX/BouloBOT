@@ -10,6 +10,8 @@ import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import com.github.twitch4j.common.events.channel.ChannelGoLiveEvent;
 import com.github.twitch4j.common.events.channel.ChannelGoOfflineEvent;
 import com.github.twitch4j.helix.domain.GameList;
+import com.github.twitch4j.helix.domain.Stream;
+import com.github.twitch4j.helix.domain.StreamList;
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.*;
 import net.maxx.boulobot.commands.CommandMap;
@@ -147,33 +149,45 @@ public class BOT implements Runnable{
 
     private void loadNotifications() {
         twitchClient.getClientHelper().enableStreamEventListener(channelName);
-        twitchClient.getEventManager().onEvent(ChannelGoLiveEvent.class).subscribe(this::sendGoLiveNotif);
+        twitchClient.getEventManager().onEvent(ChannelGoLiveEvent.class).subscribe(channelGoLiveEvent -> {
+            sendGoLiveNotif(channelGoLiveEvent.getTitle(), channelGoLiveEvent.getGameId(), channelGoLiveEvent.getChannel().getId());
+        });
         twitchClient.getEventManager().onEvent(ChannelGoOfflineEvent.class).subscribe(channelGoOfflineEvent -> {
             sendGoOfflineNotif();
         });
     }
 
-    public void sendGoLiveNotif(ChannelGoLiveEvent channelGoLiveEvent){
-        Member lyorine = jda.getGuildById(Reference.GuildID.getString()).getMemberById(Reference.LyorineClientID.getString());
-        Role notif = lyorine.getGuild().getRoleById(Reference.NotifRoleID.getString());
+    public void sendGoLiveNotif(String title, String gameId, String channelId){
+        Session session = new Session(System.currentTimeMillis(), channelId, this);
+
+        Guild discord = jda.getGuildById(Reference.GuildID.getString());
+        Member lyorine = discord.getMemberById(Reference.LyorineClientID.getString());
+        Role notif = discord.getRoleById(Reference.NotifRoleID.getString());
         logger.log(Level.INFO, "> Le stream est ONLINE!");
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.lyorine.com");
         embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
         embedBuilder.setColor(3066993);
         embedBuilder.setDescription("Oyé oyé les "+notif.getAsMention()+" !\n**"+lyorine.getAsMention()+"** part en stream !\n» https://twitch.lyorine.com");
-        embedBuilder.addField(new MessageEmbed.Field("Titre", channelGoLiveEvent.getTitle(), true));
-        GameList resultList = twitchClient.getHelix().getGames(Collections.singletonList(channelGoLiveEvent.getGameId()), null).execute();
+        embedBuilder.addField(new MessageEmbed.Field("Titre", title, true));
+        GameList resultList = twitchClient.getHelix().getGames(Collections.singletonList(gameId), null).execute();
         final String[] gameName = {"Aucun jeu"};
         resultList.getGames().forEach(game -> {
             gameName[0] = game.getName();
-            embedBuilder.setImage(game.getBoxArtUrl());
+            embedBuilder.setThumbnail(game.getBoxArtUrl());
         });
         embedBuilder.addField(new MessageEmbed.Field("Jeu", gameName[0], true));
-        embedBuilder.setThumbnail(Reference.BellImage.getString()+"?size=256");
-        TextChannel toSend = jda.getGuildById(Reference.GuildID.getString()).getTextChannelById(Reference.NotifTextChannelID.getString());
+
+        StreamList streamResultList = twitchClient.getHelix().getStreams(configurationManager.getStringValue("oauth2Token"), "", "", null, null, null, null, Collections.singletonList(channelId), null).execute();
+        final Stream[] currentStream = new Stream[1];
+        streamResultList.getStreams().forEach(stream -> {
+            currentStream[0] = stream;
+        });
+
+        embedBuilder.setImage(currentStream[0].getThumbnailUrl());
+        TextChannel toSend = discord.getTextChannelById(Reference.NotifTextChannelID.getString());
         Message message = new MessageBuilder(notif.getAsMention()).setEmbed(embedBuilder.build()).build();
-        toSend.sendMessage(message).queue();
+        toSend.sendMessage(message).queue(session::setSessionMessage);
         twitchClient.getChat().sendMessage(channelName, "Coucou imGlitch ! \n» Je viens d'envoyer la notification à tous les chats ! Bon live ! LUL");
         jda.getPresence().setActivity(Activity.streaming("avec sa reine à "+gameName, "https://twitch.tv/"+channelName.toUpperCase()));
     }

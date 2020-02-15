@@ -1,6 +1,8 @@
 package net.maxx.boulobot.event;
 
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+import com.github.twitch4j.common.events.channel.ChannelChangeGameEvent;
+import com.github.twitch4j.common.events.channel.ChannelChangeTitleEvent;
 import com.github.twitch4j.common.events.domain.EventUser;
 import com.github.twitch4j.helix.domain.User;
 import net.maxx.boulobot.BOT;
@@ -19,6 +21,16 @@ public class TwitchListener {
         this.botDiscord = botDiscord;
 
         botDiscord.getTwitchClient().getEventManager().onEvent(ChannelMessageEvent.class).subscribe(this::onMessageEvent);
+        botDiscord.getTwitchClient().getEventManager().onEvent(ChannelChangeGameEvent.class).subscribe(this::onGameUpdate);
+        botDiscord.getTwitchClient().getEventManager().onEvent(ChannelChangeTitleEvent.class).subscribe(this::onStateUpdate);
+    }
+
+    private void onStateUpdate(ChannelChangeTitleEvent channelChangeTitleEvent) {
+        botDiscord.getSessionManager().updateTitle(channelChangeTitleEvent.getTitle());
+    }
+
+    private void onGameUpdate(ChannelChangeGameEvent channelChangeGameEvent) {
+        botDiscord.getSessionManager().updateGame(channelChangeGameEvent.getGameId());
     }
 
     private void onMessageEvent(ChannelMessageEvent channelMessageEvent) {

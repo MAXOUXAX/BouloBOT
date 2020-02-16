@@ -28,6 +28,12 @@ public class SessionManager {
 
     public void endSession() {
         currentSession.setEndDateMillis(System.currentTimeMillis());
+        Optional<Session> sessionOpt = getSession(currentSession.getUuid().toString());
+        if(sessionOpt.isPresent()){
+            Session session = sessionOpt.get();
+            sessions.set(sessions.indexOf(session), currentSession);
+        }
+        this.currentSession = null;
     }
 
     public Session getCurrentSession() {

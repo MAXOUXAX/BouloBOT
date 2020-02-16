@@ -198,6 +198,7 @@ public class BOT implements Runnable{
     }
 
     public void sendGoOfflineNotif(){
+        sessionManager.endSession();
         logger.log(Level.INFO, "> Le stream est OFFLINE!");
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());

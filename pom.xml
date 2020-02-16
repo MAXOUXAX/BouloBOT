@@ -7,7 +7,7 @@
     <version>1.1.12-RELEASE</version>
 
     <name>BouloBOT</name>
-    <description>Petit bot discord réalisé avec la librairie de JDA et LavaPlayer.</description>
+    <description>BouloBOT • Amazingly powerful</description>
 
     <build>
         <plugins>

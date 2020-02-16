@@ -133,13 +133,18 @@ public class SessionManager {
     }
 
     private HashMap<String, Integer> decrushMap(String crushedMap) {
-        HashMap<String, Integer> decrushedMap = new HashMap<>();
-        List<String> cuttedStrings = Arrays.asList(crushedMap.split("&&&"));
-        cuttedStrings.forEach(s -> {
-            String[] values = s.split("::");
-            decrushedMap.put(values[0], Integer.valueOf(values[1]));
-        });
-        return decrushedMap;
+        try {
+            HashMap<String, Integer> decrushedMap = new HashMap<>();
+            List<String> cuttedStrings = Arrays.asList(crushedMap.split("&&&"));
+            cuttedStrings.forEach(s -> {
+                String[] values = s.split("::");
+                decrushedMap.put(values[0], Integer.valueOf(values[1]));
+            });
+            return decrushedMap;
+        }catch (Exception e){
+            bot.getErrorHandler().handleException(e);
+        }
+        return new HashMap<>();
     }
 
     public void updateGame(String newGameId) {

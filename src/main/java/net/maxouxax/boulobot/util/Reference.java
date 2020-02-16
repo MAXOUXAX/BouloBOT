@@ -27,7 +27,7 @@ public enum Reference {
     CheckEmoteID("530393425762320419"),
     RulesTextChannelID("530439257534365710"),
     BCTextChannelID("529324645766397953"),
-    NotifTextChannelID("541034954386309150"),
+    NotifTextChannelID("678644069437669386"),
     RankTextChannelID("530411062864904212"),
     RulesRoleID("529317720366514196"),
     RescueRoleID("529319914385702932"),

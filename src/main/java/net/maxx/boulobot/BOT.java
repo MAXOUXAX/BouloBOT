@@ -121,6 +121,7 @@ public class BOT implements Runnable{
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
+                twitchClient.getEventManager().registerEventHandler();
                 twitchClient.getEventManager().onEvent(IRCMessageEvent.class).subscribe(event -> {
                     if(event.getMessage().isPresent()) {
                         String message = event.getMessage().get();

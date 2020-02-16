@@ -63,7 +63,8 @@ public class SessionManager {
                         JSONObject object = array.getJSONObject(i);
                         long startTime = object.getLong("startDate");
                         String channelId = object.getString("channelId");
-                        Session loadingSession = new Session(startTime, channelId, bot);
+                        UUID uuid = UUID.fromString(object.getString("uuid"));
+                        Session loadingSession = new Session(startTime, uuid, channelId, bot);
                         loadingSession.setEndDateMillis(object.getLong("endDate"));
                         loadingSession.setAvgViewers(object.getInt("avgViewers"));
                         loadingSession.setMaxViewers(object.getInt("maxViewers"));

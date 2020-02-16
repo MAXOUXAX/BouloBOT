@@ -2,7 +2,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.max</groupId>
+    <groupId>net.maxouxax.boulobot</groupId>
     <artifactId>BouloBOT</artifactId>
     <version>1.1.8-RELEASE</version>
 
@@ -18,7 +18,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>net.maxx.boulobot.BOT</mainClass>
+                            <mainClass>net.maxouxax.boulobot.BOT</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

@@ -34,7 +34,7 @@ public class Session {
 
     private String title;
     private String currentGameId;
-    private ArrayList<String> gameIds;
+    private ArrayList<String> gameIds = new ArrayList<>();
 
     public Session(long currentTimeMillis, String channelId, BOT botDiscord) {
         this.botDiscord = botDiscord;

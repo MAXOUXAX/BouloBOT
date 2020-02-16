@@ -6,10 +6,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
 
 public class SessionManager {
 
@@ -131,7 +128,7 @@ public class SessionManager {
 
     private HashMap<String, Integer> decrushMap(String crushedMap) {
         HashMap<String, Integer> decrushedMap = new HashMap<>();
-        ArrayList<String> cuttedStrings = (ArrayList<String>) Arrays.asList(crushedMap.split("&&&"));
+        List<String> cuttedStrings = Arrays.asList(crushedMap.split("&&&"));
         cuttedStrings.forEach(s -> {
             String[] values = s.split("::");
             decrushedMap.put(values[0], Integer.valueOf(values[1]));

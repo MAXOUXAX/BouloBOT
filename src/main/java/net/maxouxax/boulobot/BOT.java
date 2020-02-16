@@ -198,7 +198,6 @@ public class BOT implements Runnable{
     }
 
     public void sendGoOfflineNotif(){
-        sessionManager.endSession();
         logger.log(Level.INFO, "> Le stream est OFFLINE!");
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());
@@ -207,6 +206,11 @@ public class BOT implements Runnable{
         embedBuilder.setDescription("Coucou !\nLe live est désormais terminé, merci à tous de l'avoir suivi !\nVous pourrez me retrouver une prochaine fois, à l'adresse suivante !\n» https://twitch.lyorine.com");
         jda.getGuildById(Reference.GuildID.getString()).getTextChannelById(Reference.NotifTextChannelID.getString()).sendMessage(embedBuilder.build()).queue();
         jda.getPresence().setActivity(Activity.playing("attendre sa reine"));
+
+        Message newMessage = new MessageBuilder(embedBuilder.build()).build();
+        sessionManager.getCurrentSession().getSessionMessage().editMessage(newMessage).queue();
+        logger.log(Level.INFO, "> Updated!");
+        sessionManager.endSession();
     }
 
     private void loadDiscord() throws LoginException, InterruptedException {

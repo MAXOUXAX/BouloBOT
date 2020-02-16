@@ -22,13 +22,13 @@ public class CommandSession {
         textChannel.sendTyping().queue();
         StringBuilder strB = new StringBuilder();
         botDiscord.getSessionManager().getSessions().forEach(session -> {
-            strB.append("session.getUuid() = ").append(session.getUuid());
-            strB.append("session.getAvgViewers() = ").append(session.getAvgViewers());
-            strB.append("session.getBansAndTimeouts() = ").append(session.getBansAndTimeouts());
-            strB.append("session.getChannelId() = ").append(session.getChannelId());
-            strB.append("session.getCommandsUsed() = ").append(session.getCommandsUsed());
-            strB.append("session.getCurrentGameId() = ").append(session.getCurrentGameId());
-            strB.append("session.getStartDate() = ").append(session.getStartDate());
+            strB.append("\nsession.getUuid() = ").append(session.getUuid());
+            strB.append("\nsession.getAvgViewers() = ").append(session.getAvgViewers());
+            strB.append("\nsession.getBansAndTimeouts() = ").append(session.getBansAndTimeouts());
+            strB.append("\nsession.getChannelId() = ").append(session.getChannelId());
+            strB.append("\nsession.getCommandsUsed() = ").append(session.getCommandsUsed());
+            strB.append("\nsession.getCurrentGameId() = ").append(session.getCurrentGameId());
+            strB.append("\nsession.getStartDate() = ").append(session.getStartDate());
         });
         textChannel.sendMessage(strB.toString()).queue();
     }

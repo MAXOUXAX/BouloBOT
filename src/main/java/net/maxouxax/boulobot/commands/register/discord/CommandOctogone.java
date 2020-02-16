@@ -55,6 +55,7 @@ public class CommandOctogone {
                 embedBuilder.setDescription("Bien joué à "+winner.getAsMention()+" qui a écrabouillé(e) ses adversaires. Quel(le) malade !");
                 embedBuilder.setColor(15528177);
                 embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
+                textChannel.sendMessage(embedBuilder.build()).queue();
             }
         }
     }

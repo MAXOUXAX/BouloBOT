@@ -36,6 +36,10 @@ public class SessionManager {
         this.currentSession = null;
     }
 
+    public ArrayList<Session> getSessions() {
+        return sessions;
+    }
+
     public Session getCurrentSession() {
         return currentSession;
     }

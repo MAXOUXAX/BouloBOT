@@ -32,7 +32,7 @@ public class Session {
     private HashMap<String, Integer> usedEmotes = new HashMap<>();
     private Message sessionMessage;
 
-    private String currentTitle;
+    private String title;
     private String currentGameId;
     private ArrayList<String> gameIds;
 
@@ -189,12 +189,12 @@ public class Session {
         this.currentGameId = newGameId;
     }
 
-    public String getCurrentTitle() {
-        return currentTitle;
+    public String getTitle() {
+        return title;
     }
 
-    public void setCurrentTitle(String currentTitle) {
-        this.currentTitle = currentTitle;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getCurrentGameId() {
@@ -255,7 +255,7 @@ public class Session {
         embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
         embedBuilder.setColor(3066993);
         embedBuilder.setDescription("Oyé oyé les "+notif.getAsMention()+" !\n**"+lyorine.getAsMention()+"** part en stream !\n» https://twitch.lyorine.com");
-        embedBuilder.addField(new MessageEmbed.Field("Titre", currentTitle, true));
+        embedBuilder.addField(new MessageEmbed.Field("Titre", title, true));
         GameList resultList = botDiscord.getTwitchClient().getHelix().getGames(Collections.singletonList(currentGameId), null).execute();
         final String[] gameName = {"Aucun jeu"};
         resultList.getGames().forEach(game -> {

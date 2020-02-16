@@ -158,7 +158,9 @@ public class BOT implements Runnable{
     }
 
     public void sendGoLiveNotif(String title, String gameId, String channelId){
-        Session session = new Session(System.currentTimeMillis(), channelId, this);
+        Session session = sessionManager.startNewSession(channelId);
+        session.newGame(gameId);
+        session.setTitle(title);
 
         Guild discord = jda.getGuildById(Reference.GuildID.getString());
         Member lyorine = discord.getMemberById(Reference.LyorineClientID.getString());

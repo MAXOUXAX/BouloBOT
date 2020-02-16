@@ -4,7 +4,7 @@
 
     <groupId>net.max</groupId>
     <artifactId>BouloBOT</artifactId>
-    <version>1.1.1-RELEASE</version>
+    <version>1.1.2-RELEASE</version>
 
     <name>BouloBOT</name>
     <description>Petit bot discord réalisé avec la librairie de JDA et LavaPlayer.</description>
@@ -61,14 +61,14 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>4.0.0_54</version>
+            <version>4.1.1_108</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.sedmelluq</groupId>
             <artifactId>lavaplayer</artifactId>
-            <version>1.3.22</version>
+            <version>1.3.34</version>
             <scope>compile</scope>
         </dependency>
 
@@ -96,7 +96,7 @@
         <dependency>
             <groupId>com.github.twitch4j</groupId>
             <artifactId>twitch4j</artifactId>
-            <version>1.0.0-alpha.17</version>
+            <version>1.0.0-alpha.19</version>
             <scope>compile</scope>
         </dependency>
 
@@ -110,7 +110,7 @@
         <dependency>
             <groupId>net.aksingh</groupId>
             <artifactId>owm-japis</artifactId>
-            <version>2.5.2.3</version>
+            <version>2.5.3.0</version>
             <scope>compile</scope>
         </dependency>
 

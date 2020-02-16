@@ -114,8 +114,8 @@ public class BOT implements Runnable{
         logger.log(Level.INFO, "> "+channelName+"'s channel joined!");
 
         //Registering SessionManager and loading all passed sessions
-        //this.sessionManager = new SessionManager(this);
-        //sessionManager.loadSessions();
+        this.sessionManager = new SessionManager(this);
+        sessionManager.loadSessions();
 
         //Registering the events
         new Timer().schedule(new TimerTask() {

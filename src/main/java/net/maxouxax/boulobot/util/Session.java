@@ -249,7 +249,7 @@ public class Session {
         Guild discord = botDiscord.getJda().getGuildById(Reference.GuildID.getString());
         Member lyorine = discord.getMemberById(Reference.LyorineClientID.getString());
         Role notif = discord.getRoleById(Reference.NotifRoleID.getString());
-        botDiscord.getLogger().log(Level.INFO, "> Le stream est ONLINE!");
+        botDiscord.getLogger().log(Level.INFO, "> Updating session message!");
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.lyorine.com");
         embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
@@ -276,5 +276,6 @@ public class Session {
         embedBuilder.setImage(currentStream[0].getThumbnailUrl());
         Message newMessage = new MessageBuilder(notif.getAsMention()).setEmbed(embedBuilder.build()).build();
         this.sessionMessage.editMessage(newMessage).queue();
+        botDiscord.getLogger().log(Level.INFO, "> Updated!");
     }
 }

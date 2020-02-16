@@ -260,7 +260,10 @@ public class Session {
         final String[] gameName = {"Aucun jeu"};
         resultList.getGames().forEach(game -> {
             gameName[0] = game.getName();
-            embedBuilder.setThumbnail(game.getBoxArtUrl());
+            String boxUrl = game.getBoxArtUrl();
+            boxUrl = boxUrl.replace("{width}", "600");
+            boxUrl = boxUrl.replace("{height}", "800");
+            embedBuilder.setThumbnail(boxUrl);
         });
         embedBuilder.addField(new MessageEmbed.Field("Jeu", gameName[0], true));
 

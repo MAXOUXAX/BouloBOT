@@ -174,7 +174,10 @@ public class BOT implements Runnable{
         final String[] gameName = {"Aucun jeu"};
         resultList.getGames().forEach(game -> {
             gameName[0] = game.getName();
-            embedBuilder.setThumbnail(game.getBoxArtUrl());
+            String boxUrl = game.getBoxArtUrl();
+            boxUrl = boxUrl.replace("{width}", "600");
+            boxUrl = boxUrl.replace("{height}", "800");
+            embedBuilder.setThumbnail(boxUrl);
         });
         embedBuilder.addField(new MessageEmbed.Field("Jeu", gameName[0], true));
 
@@ -189,7 +192,7 @@ public class BOT implements Runnable{
         Message message = new MessageBuilder(notif.getAsMention()).setEmbed(embedBuilder.build()).build();
         toSend.sendMessage(message).queue(session::setSessionMessage);
         twitchClient.getChat().sendMessage(channelName, "Coucou imGlitch ! \n» Je viens d'envoyer la notification à tous les chats ! Bon live ! LUL");
-        jda.getPresence().setActivity(Activity.streaming("avec sa reine à "+gameName, "https://twitch.tv/"+channelName.toUpperCase()));
+        jda.getPresence().setActivity(Activity.streaming("avec sa reine à "+gameName[0], "https://twitch.tv/"+channelName.toUpperCase()));
     }
 
     public void sendGoOfflineNotif(){

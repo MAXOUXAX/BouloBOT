@@ -5,7 +5,7 @@ import java.util.Date;
 
 public enum Reference {
 
-    EmbedFooter("BouloBOT - Deserved by Lyo. Inc"),
+    EmbedFooter("BouloBOT - Amazingly powerful"),
     WebsiteURL("https://lyorine.com"),
     EmbedIcon("https://image.noelshack.com/fichiers/2019/20/5/1558109488-boulobot-f.png"),
     DiscordBanner("http://image.noelshack.com/fichiers/2019/01/4/1546534189-lyorinediscordbanner.png"),

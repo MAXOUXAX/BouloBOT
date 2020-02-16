@@ -4,7 +4,7 @@
 
     <groupId>net.max</groupId>
     <artifactId>BouloBOT</artifactId>
-    <version>1.1.4-RELEASE</version>
+    <version>1.1.5-RELEASE</version>
 
     <name>BouloBOT</name>
     <description>Petit bot discord réalisé avec la librairie de JDA et LavaPlayer.</description>

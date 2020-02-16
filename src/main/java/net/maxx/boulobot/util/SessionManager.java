@@ -98,7 +98,7 @@ public class SessionManager {
             object.accumulate("channelId", session.getChannelId());
             object.accumulate("maxViewers", session.getMaxViewers());
             object.accumulate("avgViewers", session.getAvgViewers());
-            object.accumulate("banAndTimeouts", session.getBansAndTimeouts());
+            object.accumulate("bansAndTimeouts", session.getBansAndTimeouts());
             object.accumulate("commandUsed", session.getCommandUsed());
             object.accumulate("startDate", session.getStartDate());
             object.accumulate("endDate", session.getEndDate());

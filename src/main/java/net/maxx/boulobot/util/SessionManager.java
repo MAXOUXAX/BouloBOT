@@ -139,11 +139,6 @@ public class SessionManager {
         return decrushedMap;
     }
 
-    public void updateTitle(String newTitle) {
-        this.currentSession.newTitle(newTitle);
-        this.currentSession.updateMessage();
-    }
-
     public void updateGame(String newGameId) {
         this.currentSession.newGame(newGameId);
         this.currentSession.updateMessage();

@@ -121,7 +121,6 @@ public class BOT implements Runnable{
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                twitchClient.getEventManager().registerEventHandler();
                 twitchClient.getEventManager().onEvent(IRCMessageEvent.class).subscribe(event -> {
                     if(event.getMessage().isPresent()) {
                         String message = event.getMessage().get();
@@ -269,7 +268,7 @@ public class BOT implements Runnable{
         logger.log(Level.INFO, "> Logger saved");
         configurationManager.saveData();
         logger.log(Level.INFO, "> Configuration saved");
-        //sessionManager.saveSessions();
+        sessionManager.saveSessions();
         logger.log(Level.INFO, "> Sessions saved");
         logger.log(Level.INFO, "--------------- STOPPING ---------------");
         logger.log(Level.INFO, "Arrêt du BOT réussi");

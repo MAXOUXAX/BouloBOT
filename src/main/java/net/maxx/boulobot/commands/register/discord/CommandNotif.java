@@ -19,7 +19,7 @@ public class CommandNotif {
 
     @Command(name = "notif", description = "Permet de manuellement déclencher l'envoi de la notif de début de live", help = ".notif", example = ".notif", power = 100, type = Command.ExecutorType.USER)
     public void notif(User user, TextChannel textChannel, Message message, String[] args){
-        botDiscord.sendGoLiveNotif();
+        //botDiscord.sendGoLiveNotif();
     }
 
 }

@@ -17,7 +17,7 @@ public class TwitchNotif {
 
     @TwitchCommand(name = "notif", example = "&notif", help = "&notif", description = "Permet de manuellement déclencher l'envoi de la notif de début de live", rank = TwitchCommand.ExecutorRank.MOD)
     private void notif(User user, String broadcaster, String[] args){
-        botDiscord.sendGoLiveNotif();
+        //botDiscord.sendGoLiveNotif();
     }
 
 }

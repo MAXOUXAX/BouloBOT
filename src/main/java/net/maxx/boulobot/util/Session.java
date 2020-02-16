@@ -4,6 +4,7 @@ import com.github.twitch4j.helix.domain.GameList;
 import com.github.twitch4j.helix.domain.Stream;
 import com.github.twitch4j.helix.domain.StreamList;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.maxx.boulobot.BOT;
 
@@ -32,7 +33,6 @@ public class Session {
     private Message sessionMessage;
 
     private String currentTitle;
-    private ArrayList<String> titles;
     private String currentGameId;
     private ArrayList<String> gameIds;
 
@@ -184,11 +184,6 @@ public class Session {
         this.sessionMessage = sessionMessage;
     }
 
-    public void newTitle(String newTitle){
-        this.titles.add(currentTitle);
-        this.currentTitle = newTitle;
-    }
-
     public void newGame(String newGameId){
         this.gameIds.add(newGameId);
         this.currentGameId = newGameId;
@@ -200,14 +195,6 @@ public class Session {
 
     public void setCurrentTitle(String currentTitle) {
         this.currentTitle = currentTitle;
-    }
-
-    public ArrayList<String> getTitles() {
-        return titles;
-    }
-
-    public void setTitles(ArrayList<String> titles) {
-        this.titles = titles;
     }
 
     public String getCurrentGameId() {
@@ -284,5 +271,7 @@ public class Session {
         });
 
         embedBuilder.setImage(currentStream[0].getThumbnailUrl());
+        Message newMessage = new MessageBuilder(notif.getAsMention()).setEmbed(embedBuilder.build()).build();
+        this.sessionMessage.editMessage(newMessage).queue();
     }
 }

@@ -193,7 +193,7 @@ public class BOT implements Runnable{
             currentStream[0] = stream;
         });
 
-        embedBuilder.setImage(currentStream[0].getThumbnailUrl());
+        embedBuilder.setImage(currentStream[0].getThumbnailUrl(1280, 720));
         TextChannel toSend = discord.getTextChannelById(Reference.NotifTextChannelID.getString());
         Message message = new MessageBuilder(notif.getAsMention()).setEmbed(embedBuilder.build()).build();
         toSend.sendMessage(message).queue(session::setSessionMessage);
@@ -211,11 +211,9 @@ public class BOT implements Runnable{
         embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
         embedBuilder.setColor(15158332);
         embedBuilder.setDescription("Coucou !\nLe live est désormais terminé, merci à tous de l'avoir suivi !\nVous pourrez me retrouver une prochaine fois, à l'adresse suivante !\n» https://twitch.lyorine.com");
-        jda.getGuildById(Reference.GuildID.getString()).getTextChannelById(Reference.NotifTextChannelID.getString()).sendMessage(embedBuilder.build()).queue();
         jda.getPresence().setActivity(Activity.playing("Amazingly powerful"));
 
-        Message newMessage = new MessageBuilder(embedBuilder.build()).build();
-        sessionManager.getCurrentSession().getSessionMessage().editMessage(newMessage).queue();
+        sessionManager.getCurrentSession().getSessionMessage().editMessage(" ").embed(embedBuilder.build()).queue();
         logger.log(Level.INFO, "> Updated!");
         sessionManager.endSession();
     }

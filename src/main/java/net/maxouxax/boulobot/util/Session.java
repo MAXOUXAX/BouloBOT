@@ -264,9 +264,8 @@ public class Session {
         streamResultList.getStreams().forEach(stream -> {
             currentStream[0] = stream;
         });
-        System.out.println("currentStream[0] = " + currentStream[0]);
-        System.out.println("currentStream[0].getThumbnailUrl() = " + currentStream[0].getThumbnailUrl());
-        embedBuilder.setImage(currentStream[0].getThumbnailUrl());
+
+        embedBuilder.setImage(currentStream[0].getThumbnailUrl(1280, 720));
         Message newMessage = new MessageBuilder(notif.getAsMention()).setEmbed(embedBuilder.build()).build();
         this.sessionMessage.editMessage(newMessage).queue();
         botDiscord.getLogger().log(Level.INFO, "> Updated!");

@@ -27,7 +27,7 @@ public class CommandSession {
             strB.append("\nsession.getBansAndTimeouts() = ").append(session.getBansAndTimeouts());
             strB.append("\nsession.getChannelId() = ").append(session.getChannelId());
             strB.append("\nsession.getCommandsUsed() = ").append(session.getCommandsUsed());
-            strB.append("\nsession.getCurrentGameId() = ").append(session.getCurrentGameId());
+            strB.append("\nsession.getGameIds().toString() = ").append(session.getGameIds().toString());
             strB.append("\nsession.getStartDate() = ").append(session.getStartDate());
         });
         textChannel.sendMessage(strB.toString()).queue();

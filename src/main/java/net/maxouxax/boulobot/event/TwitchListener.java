@@ -1,6 +1,8 @@
 package net.maxouxax.boulobot.event;
 
 import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
+import com.github.twitch4j.chat.events.channel.UserBanEvent;
+import com.github.twitch4j.chat.events.channel.UserTimeoutEvent;
 import com.github.twitch4j.common.events.channel.ChannelChangeGameEvent;
 import com.github.twitch4j.common.events.domain.EventUser;
 import com.github.twitch4j.helix.domain.User;
@@ -21,6 +23,14 @@ public class TwitchListener {
 
         botDiscord.getTwitchClient().getEventManager().onEvent(ChannelMessageEvent.class).subscribe(this::onMessageEvent);
         botDiscord.getTwitchClient().getEventManager().onEvent(ChannelChangeGameEvent.class).subscribe(this::onGameUpdate);
+        botDiscord.getTwitchClient().getEventManager().onEvent(UserTimeoutEvent.class).subscribe(this::onTimeOut);
+        botDiscord.getTwitchClient().getEventManager().onEvent(UserBanEvent.class).subscribe(this::onBan);
+    }
+
+    private void onBan(UserBanEvent userBanEvent) {
+    }
+
+    private void onTimeOut(UserTimeoutEvent userTimeoutEvent) {
     }
 
     private void onGameUpdate(ChannelChangeGameEvent channelChangeGameEvent) {

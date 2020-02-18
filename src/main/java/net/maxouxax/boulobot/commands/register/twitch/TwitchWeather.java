@@ -63,7 +63,7 @@ public class TwitchWeather {
                 botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, weatherString.toString());
             }
         } catch (Exception e) {
-            String errorString = "Une erreur est survenue"+" | Message d'erreur » "+ e.getMessage();
+            String errorString = "Une erreur est survenue | Message d'erreur » "+ e.getMessage();
             botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, errorString);
             botDiscord.getErrorHandler().handleException(e);
         }

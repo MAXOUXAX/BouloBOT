@@ -241,12 +241,13 @@ public class Session {
         Guild discord = botDiscord.getJda().getGuildById(Reference.GuildID.getString());
         Member lyorine = discord.getMemberById(Reference.LyorineClientID.getString());
         Role notif = discord.getRoleById(Reference.NotifRoleID.getString());
+        String channelName = botDiscord.getChannelName();
         botDiscord.getLogger().log(Level.INFO, "> Updating session message!");
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.lyorine.com");
+        embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());
         embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
         embedBuilder.setColor(3066993);
-        embedBuilder.setDescription("Oyé oyé les "+notif.getAsMention()+" !\n**"+lyorine.getAsMention()+"** part en stream !\n» https://twitch.lyorine.com");
+        embedBuilder.setDescription("Coucou les "+notif.getAsMention()+" !\n**"+lyorine.getAsMention()+"** vient de démarrer son live, v'nez voir !\n» https://twitch.tv/"+channelName.toUpperCase());
         embedBuilder.addField(new MessageEmbed.Field("Titre", title, true));
         GameList resultList = botDiscord.getTwitchClient().getHelix().getGames(Collections.singletonList(currentGameId), null).execute();
         final String[] gameName = {"Aucun jeu"};

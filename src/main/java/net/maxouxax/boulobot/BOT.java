@@ -171,10 +171,10 @@ public class BOT implements Runnable{
         Role notif = discord.getRoleById(Reference.NotifRoleID.getString());
         logger.log(Level.INFO, "> Le stream est ONLINE!");
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.lyorine.com");
+        embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());
         embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
         embedBuilder.setColor(3066993);
-        embedBuilder.setDescription("Oyé oyé les "+notif.getAsMention()+" !\n**"+lyorine.getAsMention()+"** part en stream !\n» https://twitch.lyorine.com");
+        embedBuilder.setDescription("Coucou les "+notif.getAsMention()+" !\n**"+lyorine.getAsMention()+"** vient de démarrer son live, v'nez voir !\n» https://twitch.tv/"+channelName.toUpperCase());
         embedBuilder.addField(new MessageEmbed.Field("Titre", title, true));
         GameList resultList = twitchClient.getHelix().getGames(Collections.singletonList(gameId), null).execute();
         final String[] gameName = {"Aucun jeu"};
@@ -207,10 +207,10 @@ public class BOT implements Runnable{
         }
         logger.log(Level.INFO, "> Le stream est OFFLINE!");
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());
+        embedBuilder.setTitle("Live terminé \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());
         embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
         embedBuilder.setColor(15158332);
-        embedBuilder.setDescription("Coucou !\nLe live est désormais terminé, merci à tous de l'avoir suivi !\nVous pourrez me retrouver une prochaine fois, à l'adresse suivante !\n» https://twitch.lyorine.com");
+        embedBuilder.setDescription("Oh dommage...\nLe live est désormais terminé !\nVous pourrez retrouver "+channelName+" une prochaine fois, à l'adresse suivante !\n» https://twitch.tv/"+channelName.toUpperCase());
         jda.getPresence().setActivity(Activity.playing("Amazingly powerful"));
 
         sessionManager.getCurrentSession().getSessionMessage().editMessage(" ").embed(embedBuilder.build()).queue();
@@ -313,5 +313,9 @@ public class BOT implements Runnable{
 
     public SessionManager getSessionManager() {
         return sessionManager;
+    }
+
+    public String getChannelName() {
+        return channelName;
     }
 }

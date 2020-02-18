@@ -158,6 +158,10 @@ public class BOT implements Runnable{
     }
 
     public void sendGoLiveNotif(String title, String gameId, String channelId){
+        if(sessionManager.getCurrentSession() != null){
+            logger.log(Level.SEVERE, "Gosh! We're in trouble... Session wasn't null, it means that a session was already started! We need to fix that!");
+            return;
+        }
         Session session = sessionManager.startNewSession(channelId);
         session.newGame(gameId);
         session.setTitle(title);
@@ -198,6 +202,9 @@ public class BOT implements Runnable{
     }
 
     public void sendGoOfflineNotif(){
+        if(sessionManager.getCurrentSession() == null){
+            logger.log(Level.SEVERE, "Hmmm... There's a problem, a GoOffline has been sended, but no session was running... Erhm.");
+        }
         logger.log(Level.INFO, "> Le stream est OFFLINE!");
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());

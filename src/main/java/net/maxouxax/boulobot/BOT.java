@@ -205,7 +205,7 @@ public class BOT implements Runnable{
         embedBuilder.setColor(15158332);
         embedBuilder.setDescription("Coucou !\nLe live est désormais terminé, merci à tous de l'avoir suivi !\nVous pourrez me retrouver une prochaine fois, à l'adresse suivante !\n» https://twitch.lyorine.com");
         jda.getGuildById(Reference.GuildID.getString()).getTextChannelById(Reference.NotifTextChannelID.getString()).sendMessage(embedBuilder.build()).queue();
-        jda.getPresence().setActivity(Activity.playing("attendre sa reine"));
+        jda.getPresence().setActivity(Activity.playing("Amazingly powerful"));
 
         Message newMessage = new MessageBuilder(embedBuilder.build()).build();
         sessionManager.getCurrentSession().getSessionMessage().editMessage(newMessage).queue();
@@ -217,7 +217,7 @@ public class BOT implements Runnable{
         //Creating the credentials, adding the listeners, and load the roles
         jda = new JDABuilder(AccountType.BOT).setToken(configurationManager.getStringValue("botToken")).build();
         jda.addEventListener(new BotListener(commandMap, this));
-        jda.getPresence().setActivity(Activity.playing("attendre sa reine"));
+        jda.getPresence().setActivity(Activity.playing("Amazingly powerful"));
         jda.awaitReady();
         loadRolesManager();
     }
@@ -251,7 +251,7 @@ public class BOT implements Runnable{
 
     @Override
     public void run() {
-        //Startup of the BOT
+        //Startup
         running = true;
 
         while (running) {

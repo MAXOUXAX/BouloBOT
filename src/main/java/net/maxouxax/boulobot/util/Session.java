@@ -19,8 +19,8 @@ public class Session {
     private BOT botDiscord;
     private UUID uuid;
     private String channelId;
-    private long startDateMillis;
-    private long endDateMillis;
+    private long startDate;
+    private long endDate;
     private int maxViewers;
     private int avgViewers;
     private int commandUsed;
@@ -39,7 +39,7 @@ public class Session {
     public Session(long currentTimeMillis, String channelId, BOT botDiscord) {
         this.botDiscord = botDiscord;
         this.channelId = channelId;
-        this.startDateMillis = currentTimeMillis;
+        this.startDate = currentTimeMillis;
         this.uuid = UUID.randomUUID();
         this.maxViewers = 0;
         this.avgViewers = 0;
@@ -53,7 +53,7 @@ public class Session {
     public Session(long currentTimeMillis, UUID uuid, String channelId, BOT botDiscord) {
         this.botDiscord = botDiscord;
         this.channelId = channelId;
-        this.startDateMillis = currentTimeMillis;
+        this.startDate = currentTimeMillis;
         this.uuid = uuid;
         this.maxViewers = 0;
         this.avgViewers = 0;
@@ -70,14 +70,6 @@ public class Session {
 
     public String getChannelId() {
         return channelId;
-    }
-
-    public long getStartDate() {
-        return startDateMillis;
-    }
-
-    public long getEndDate() {
-        return endDateMillis;
     }
 
     public int getMaxViewers() {
@@ -100,12 +92,12 @@ public class Session {
         return newViewers;
     }
 
-    public long getStartDateMillis() {
-        return startDateMillis;
+    public long getStartDate() {
+        return startDate;
     }
 
-    public long getEndDateMillis() {
-        return endDateMillis;
+    public long getEndDate() {
+        return endDate;
     }
 
     public HashMap<String, Integer> getCommandsUsed() {
@@ -124,12 +116,12 @@ public class Session {
         this.uuid = uuid;
     }
 
-    public void setStartDateMillis(long startDateMillis) {
-        this.startDateMillis = startDateMillis;
+    public void setStartDate(long startDate) {
+        this.startDate = startDate;
     }
 
-    public void setEndDateMillis(long endDateMillis) {
-        this.endDateMillis = endDateMillis;
+    public void setEndDate(long endDate) {
+        this.endDate = endDate;
     }
 
     public void setMaxViewers(int maxViewers) {
@@ -272,7 +264,8 @@ public class Session {
         streamResultList.getStreams().forEach(stream -> {
             currentStream[0] = stream;
         });
-
+        System.out.println("currentStream[0] = " + currentStream[0]);
+        System.out.println("currentStream[0].getThumbnailUrl() = " + currentStream[0].getThumbnailUrl());
         embedBuilder.setImage(currentStream[0].getThumbnailUrl());
         Message newMessage = new MessageBuilder(notif.getAsMention()).setEmbed(embedBuilder.build()).build();
         this.sessionMessage.editMessage(newMessage).queue();

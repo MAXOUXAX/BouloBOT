@@ -27,7 +27,7 @@ public class SessionManager {
     }
 
     public void endSession() {
-        currentSession.setEndDateMillis(System.currentTimeMillis());
+        currentSession.setEndDate(System.currentTimeMillis());
         Optional<Session> sessionOpt = getSession(currentSession.getUuid().toString());
         if(sessionOpt.isPresent()){
             Session session = sessionOpt.get();
@@ -69,16 +69,19 @@ public class SessionManager {
                         String channelId = object.getString("channelId");
                         UUID uuid = UUID.fromString(object.getString("uuid"));
                         Session loadingSession = new Session(startTime, uuid, channelId, bot);
-                        loadingSession.setEndDateMillis(object.getLong("endDate"));
-                        loadingSession.setAvgViewers(object.getInt("avgViewers"));
+
                         loadingSession.setMaxViewers(object.getInt("maxViewers"));
+                        loadingSession.setAvgViewers(object.getInt("avgViewers"));
                         loadingSession.setBansAndTimeouts(object.getInt("bansAndTimeouts"));
+                        loadingSession.setCommandUsed(object.getInt("commandUsed"));
+                        loadingSession.setEndDate(object.getLong("endDate"));
+                        loadingSession.setMessageSended(object.getInt("messageSended"));
                         loadingSession.setNewViewers(object.getInt("newViewers"));
                         loadingSession.setNewFollowers(object.getInt("newFollowers"));
-                        loadingSession.setCommandUsed(object.getInt("commandUsed"));
-                        loadingSession.setMessageSended(object.getInt("messageSended"));
                         loadingSession.setCommandsUsed(decrushMap(object.getString("commandsUsed")));
                         loadingSession.setUsedEmotes(decrushMap(object.getString("usedEmotes")));
+                        loadingSession.setGameIds(decrushList(object.getString("gameIds")));
+                        loadingSession.setTitle(object.getString("title"));
 
                         sessions.add(loadingSession);
                     }
@@ -115,6 +118,8 @@ public class SessionManager {
             object.accumulate("newFollowers", session.getNewFollowers());
             object.accumulate("commandsUsed", crushMap(session.getCommandsUsed()));
             object.accumulate("usedEmotes", crushMap(session.getUsedEmotes()));
+            object.accumulate("gameIds", crushList(session.getGameIds()));
+            object.accumulate("title", session.getTitle());
 
             array.put(object);
 
@@ -129,10 +134,28 @@ public class SessionManager {
         }
     }
 
+    private String crushList(ArrayList<String> decrushedList) {
+        StringBuilder str = new StringBuilder();
+        decrushedList.forEach(s -> {
+            str.append(s).append("&&&");
+        });
+        return str.toString();
+    }
+
+    private ArrayList<String> decrushList(String crushedList) {
+        try {
+            ArrayList<String> decrushedList = new ArrayList<>(Arrays.asList(crushedList.split("&&&")));
+            return decrushedList;
+        }catch (Exception e){
+            bot.getErrorHandler().handleException(e);
+        }
+        return new ArrayList<>();
+    }
+
     private String crushMap(HashMap<String, Integer> decrushedMap) {
         StringBuilder str = new StringBuilder();
         decrushedMap.forEach((s, integer) -> {
-            str.append(s+"::"+integer+"&&&");
+            str.append(s).append("::").append(integer).append("&&&");
         });
         return str.toString();
     }

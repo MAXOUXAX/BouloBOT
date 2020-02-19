@@ -1,12 +1,16 @@
 package net.maxouxax.boulobot.util;
 
+import com.github.twitch4j.helix.domain.Stream;
 import net.maxouxax.boulobot.BOT;
+import net.maxouxax.boulobot.tasks.TaskViewerCheck;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class SessionManager {
 
@@ -14,15 +18,18 @@ public class SessionManager {
     private Session currentSession;
     private File SESSIONS_FOLDER;
     private ArrayList<Session> sessions = new ArrayList<>();
+    private ArrayList<Integer> viewerCountList = new ArrayList<>();
+    private ScheduledFuture scheduleViewerCheck;
 
     public SessionManager(BOT bot) {
         this.bot = bot;
         SESSIONS_FOLDER = new File("sessions" + File.separator);
     }
 
-    public Session startNewSession(String channelId) {
+    public Session startNewSession(String channelId, Stream stream) {
         currentSession = new Session(System.currentTimeMillis(), channelId, bot);
         sessions.add(currentSession);
+        scheduleViewerCheck = bot.getScheduler().scheduleAtFixedRate(new TaskViewerCheck(bot, stream), 5, 5, TimeUnit.MINUTES);
         return currentSession;
     }
 
@@ -33,7 +40,15 @@ public class SessionManager {
             Session session = sessionOpt.get();
             sessions.set(sessions.indexOf(session), currentSession);
         }
+        scheduleViewerCheck.cancel(true);
+        calculateAverage();
         this.currentSession = null;
+    }
+
+    private void calculateAverage() {
+        int sum = viewerCountList.stream().mapToInt(integer -> integer).sum();
+        int average = sum/viewerCountList.size();
+        currentSession.setAvgViewers(average);
     }
 
     public ArrayList<Session> getSessions() {
@@ -46,6 +61,10 @@ public class SessionManager {
 
     public Optional<Session> getSession(String uuid) {
         return sessions.stream().filter(session -> session.getUuid().toString().equalsIgnoreCase(uuid)).findFirst();
+    }
+
+    public boolean isSessionStarted(){
+        return currentSession != null;
     }
 
     public void loadSessions() {
@@ -79,7 +98,6 @@ public class SessionManager {
                         loadingSession.setNewViewers(object.getInt("newViewers"));
                         loadingSession.setNewFollowers(object.getInt("newFollowers"));
                         loadingSession.setCommandsUsed(decrushMap(object.getString("commandsUsed")));
-                        loadingSession.setUsedEmotes(decrushMap(object.getString("usedEmotes")));
                         loadingSession.setGameIds(decrushList(object.getString("gameIds")));
                         loadingSession.setTitle(object.getString("title"));
 
@@ -117,7 +135,6 @@ public class SessionManager {
             object.accumulate("newViewers", session.getNewViewers());
             object.accumulate("newFollowers", session.getNewFollowers());
             object.accumulate("commandsUsed", crushMap(session.getCommandsUsed()));
-            object.accumulate("usedEmotes", crushMap(session.getUsedEmotes()));
             object.accumulate("gameIds", crushList(session.getGameIds()));
             object.accumulate("title", session.getTitle());
 
@@ -182,4 +199,11 @@ public class SessionManager {
         this.currentSession.updateMessage();
     }
 
+    public void addViewerCount(int viewerCount){
+        viewerCountList.add(viewerCount);
+    }
+
+    public ArrayList<Integer> getViewerCountList() {
+        return viewerCountList;
+    }
 }

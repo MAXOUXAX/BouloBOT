@@ -29,7 +29,6 @@ public class Session {
     private int newFollowers;
     private HashMap<String, Integer> commandsUsed = new HashMap<>();
     private int bansAndTimeouts;
-    private HashMap<String, Integer> usedEmotes = new HashMap<>();
     private Message sessionMessage;
 
     private String title;
@@ -108,10 +107,6 @@ public class Session {
         return bansAndTimeouts;
     }
 
-    public HashMap<String, Integer> getUsedEmotes() {
-        return usedEmotes;
-    }
-
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
     }
@@ -154,10 +149,6 @@ public class Session {
 
     public void setBansAndTimeouts(int bansAndTimeouts) {
         this.bansAndTimeouts = bansAndTimeouts;
-    }
-
-    public void setUsedEmotes(HashMap<String, Integer> usedEmotes) {
-        this.usedEmotes = usedEmotes;
     }
 
     public int getNewFollowers() {
@@ -205,7 +196,7 @@ public class Session {
         this.gameIds = gameIds;
     }
 
-    public void addCommand() {
+    private void addCommand() {
         commandUsed++;
     }
 
@@ -221,16 +212,11 @@ public class Session {
         int current = commandsUsed.get(command);
         current++;
         commandsUsed.put(command, current);
+        addCommand();
     }
 
     public void addBanOrTimeout() {
         bansAndTimeouts++;
-    }
-
-    public void addUsedEmote(String emoteUsed) {
-        int current = usedEmotes.get(emoteUsed);
-        current++;
-        usedEmotes.put(emoteUsed, current);
     }
 
     public void addFollower() {

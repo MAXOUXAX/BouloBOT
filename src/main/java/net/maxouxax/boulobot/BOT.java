@@ -6,7 +6,6 @@ import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.auth.providers.TwitchIdentityProvider;
-import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
 import com.github.twitch4j.common.events.channel.ChannelGoLiveEvent;
 import com.github.twitch4j.common.events.channel.ChannelGoOfflineEvent;
 import com.github.twitch4j.helix.domain.GameList;
@@ -25,8 +24,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Scanner;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 
 public class BOT implements Runnable{
@@ -37,6 +36,7 @@ public class BOT implements Runnable{
     private final Logger logger;
     private final ErrorHandler errorHandler;
     private TwitchClient twitchClient;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private RolesManager rolesManager;
     private ConfigurationManager configurationManager;
@@ -117,29 +117,6 @@ public class BOT implements Runnable{
         this.sessionManager = new SessionManager(this);
         sessionManager.loadSessions();
 
-        //Registering the events
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                twitchClient.getEventManager().onEvent(IRCMessageEvent.class).subscribe(event -> {
-                    if(event.getMessage().isPresent()) {
-                        String message = event.getMessage().get();
-                        String username = event.getUser().getName();
-                        logger.log(Level.INFO, "LiveTchat > "+username + " > " + message);
-                        String id = event.getUser().getId();
-                        if(id == null)return;
-                        if(!commandMap.isKnown(id)) {
-                            //logger.log(Level.WARNING, commandMap.getUsersOnLive().toString());
-                            commandMap.addKnownUser(id);
-                            event.getTwitchChat().sendMessage(channelName, "Coucou @" + username + " ! Passe un bon moment sur le stream, et pose toi avec ton PopCorn !");
-                        }
-                    }else{
-                        logger.log(Level.WARNING, event.getRawMessage());
-                    }
-                });
-            }
-        }, 5000);
-
         //Notification system
         loadNotifications();
 
@@ -162,7 +139,13 @@ public class BOT implements Runnable{
             logger.log(Level.SEVERE, "Gosh! We're in trouble... Session wasn't null, it means that a session was already started! We need to fix that!");
             return;
         }
-        Session session = sessionManager.startNewSession(channelId);
+        StreamList streamResultList = twitchClient.getHelix().getStreams(configurationManager.getStringValue("oauth2Token"), "", "", null, null, null, null, Collections.singletonList(channelId), null).execute();
+        final Stream[] currentStream = new Stream[1];
+        streamResultList.getStreams().forEach(stream -> {
+            currentStream[0] = stream;
+        });
+
+        Session session = sessionManager.startNewSession(channelId, currentStream[0]);
         session.newGame(gameId);
         session.setTitle(title);
 
@@ -186,12 +169,6 @@ public class BOT implements Runnable{
             embedBuilder.setThumbnail(boxUrl);
         });
         embedBuilder.addField(new MessageEmbed.Field("Jeu", gameName[0], true));
-
-        StreamList streamResultList = twitchClient.getHelix().getStreams(configurationManager.getStringValue("oauth2Token"), "", "", null, null, null, null, Collections.singletonList(channelId), null).execute();
-        final Stream[] currentStream = new Stream[1];
-        streamResultList.getStreams().forEach(stream -> {
-            currentStream[0] = stream;
-        });
 
         embedBuilder.setImage(currentStream[0].getThumbnailUrl(1280, 720));
         TextChannel toSend = discord.getTextChannelById(Reference.NotifTextChannelID.getString());
@@ -317,5 +294,9 @@ public class BOT implements Runnable{
 
     public String getChannelName() {
         return channelName;
+    }
+
+    public ScheduledExecutorService getScheduler() {
+        return scheduler;
     }
 }

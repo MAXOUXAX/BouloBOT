@@ -209,7 +209,7 @@ public class Session {
     }
 
     public void addCommandUse(String command) {
-        int current = commandsUsed.get(command);
+        int current = commandsUsed.getOrDefault(command, 0);
         current++;
         commandsUsed.put(command, current);
         addCommand();

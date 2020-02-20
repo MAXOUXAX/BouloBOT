@@ -256,5 +256,6 @@ public class Session {
         Message newMessage = new MessageBuilder(notif.getAsMention()).setEmbed(embedBuilder.build()).build();
         this.sessionMessage.editMessage(newMessage).queue();
         botDiscord.getLogger().log(Level.INFO, "> Updated!");
+        botDiscord.getJda().getPresence().setActivity(Activity.streaming("avec sa reine à "+gameName[0], "https://twitch.tv/"+channelName.toUpperCase()));
     }
 }

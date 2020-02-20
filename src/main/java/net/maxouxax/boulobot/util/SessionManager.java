@@ -42,10 +42,13 @@ public class SessionManager {
         }
         scheduleViewerCheck.cancel(true);
         calculateAverage();
+    }
+
+    public void deleteCurrentSession(){
         this.currentSession = null;
     }
 
-    private void calculateAverage() {
+    public void calculateAverage() {
         int sum = viewerCountList.stream().mapToInt(integer -> integer).sum();
         int average = sum/viewerCountList.size();
         currentSession.setAvgViewers(average);

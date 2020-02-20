@@ -32,6 +32,7 @@ public class CommandSession {
                 strB.append("\nsession.getCommandsUsed() = ").append(session.getCommandsUsed());
                 strB.append("\nsession.getGameIds().toString() = ").append(session.getGameIds().toString());
                 strB.append("\nsession.getStartDate() = ").append(session.getStartDate());
+                strB.append("\n\n");
             });
             textChannel.sendMessage(strB.toString()).queue();
         }

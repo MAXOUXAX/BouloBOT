@@ -29,9 +29,9 @@ public class TwitchClipThat {
         });
 
         CreateClipList clipData = botDiscord.getTwitchClient().getHelix().createClip(botDiscord.getConfigurationManager().getStringValue("oauth2Token"), broadcasterUser[0].getId(), false).execute();
-        botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "Création du clip... ClappyHype ");
+        botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "Création du clip... ClappyHype  ");
         botDiscord.getScheduler().schedule(() -> clipData.getData().forEach(clip -> {
-            botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "Clappy Clip créé et disponible ici (le lien peut ne pas fonctionner immédiatement) > "+clip.getEditUrl());
+            botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "Clappy  Clip créé et disponible ici (le lien peut ne pas fonctionner immédiatement) > "+clip.getEditUrl());
         }), 2, TimeUnit.SECONDS);
     }
 

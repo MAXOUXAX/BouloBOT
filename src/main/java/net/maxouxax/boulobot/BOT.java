@@ -194,7 +194,7 @@ public class BOT implements Runnable{
         embedBuilder.setTitle("Live terminé \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());
         embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
         embedBuilder.setColor(15158332);
-        embedBuilder.setDescription("Oh dommage...\nLe live est désormais terminé !\nVous pourrez retrouver "+channelName+" une prochaine fois, à l'adresse suivante !\n» https://twitch.tv/"+channelName.toUpperCase());
+        embedBuilder.setDescription("Oh dommage...\nLe live est désormais terminé !\nVous pourrez retrouver "+channelName.toUpperCase()+" une prochaine fois, à l'adresse suivante !\n» https://twitch.tv/"+channelName.toUpperCase());
         embedBuilder.addField("Nombre de viewer maximum", session.getMaxViewers()+"", true);
         embedBuilder.addField("Nombre de viewer moyen", session.getAvgViewers()+"", true);
         embedBuilder.addField("Titre", session.getTitle()+"", true);

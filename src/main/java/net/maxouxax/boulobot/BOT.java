@@ -22,7 +22,11 @@ import net.maxouxax.boulobot.util.*;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -182,17 +186,34 @@ public class BOT implements Runnable{
         if(sessionManager.getCurrentSession() == null){
             logger.log(Level.SEVERE, "Hmmm... There's a problem, a GoOffline has been sended, but no session was running... Erhm.");
         }
+
+        Session session = sessionManager.getCurrentSession();
+        sessionManager.endSession();
         logger.log(Level.INFO, "> Le stream est OFFLINE!");
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Live terminé \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());
         embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
         embedBuilder.setColor(15158332);
         embedBuilder.setDescription("Oh dommage...\nLe live est désormais terminé !\nVous pourrez retrouver "+channelName+" une prochaine fois, à l'adresse suivante !\n» https://twitch.tv/"+channelName.toUpperCase());
-        jda.getPresence().setActivity(Activity.playing("Amazingly powerful"));
+        embedBuilder.addField("Nombre de viewer maximum", session.getMaxViewers()+"", true);
+        embedBuilder.addField("Nombre de viewer moyen", session.getAvgViewers()+"", true);
+        embedBuilder.addField("Titre", session.getTitle()+"", true);
+        embedBuilder.addField("Nombre de ban & timeout", session.getBansAndTimeouts()+"", true);
+        embedBuilder.addField("Nombre de commandes utilisées", session.getCommandUsed()+"", true);
+        embedBuilder.addField("Nombre de messages envoyés", session.getMessageSended()+"", true);
+        embedBuilder.addField("Nombre de followers", session.getNewFollowers()+"", true);
+        embedBuilder.addField("Nombre de nouveaux viewers", session.getNewViewers()+"", true);
+        LocalDateTime start = new Date(session.getStartDate()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        LocalDateTime end = new Date(session.getEndDate()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        int minutesC = Math.toIntExact(Duration.between(start, end).toMinutes());
+        int hours = minutesC / 60;
+        int minutes = minutesC % 60;
 
-        sessionManager.getCurrentSession().getSessionMessage().editMessage(" ").embed(embedBuilder.build()).queue();
+        embedBuilder.addField("Durée", hours+"h"+minutes, true);
+        jda.getPresence().setActivity(Activity.playing("Amazingly powerful"));
+        session.getSessionMessage().editMessage(" ").embed(embedBuilder.build()).queue();
         logger.log(Level.INFO, "> Updated!");
-        sessionManager.endSession();
+        sessionManager.deleteCurrentSession();
     }
 
     private void loadDiscord() throws LoginException, InterruptedException {

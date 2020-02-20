@@ -49,9 +49,11 @@ public class SessionManager {
     }
 
     public void calculateAverage() {
-        int sum = viewerCountList.stream().mapToInt(integer -> integer).sum();
-        int average = sum/viewerCountList.size();
-        currentSession.setAvgViewers(average);
+        if(viewerCountList.size() != 0) {
+            int sum = viewerCountList.stream().mapToInt(integer -> integer).sum();
+            int average = sum / viewerCountList.size();
+            currentSession.setAvgViewers(average);
+        }
     }
 
     public ArrayList<Session> getSessions() {

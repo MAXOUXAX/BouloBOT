@@ -209,7 +209,7 @@ public class BOT implements Runnable{
         int hours = minutesC / 60;
         int minutes = minutesC % 60;
 
-        embedBuilder.addField("Durée", hours+"h"+minutes, true);
+        embedBuilder.addField("Durée", hours+"h"+(minutes < 10 ? "0" : "")+minutes, true);
         jda.getPresence().setActivity(Activity.playing("Amazingly powerful"));
         session.getSessionMessage().editMessage(" ").embed(embedBuilder.build()).queue();
         logger.log(Level.INFO, "> Updated!");

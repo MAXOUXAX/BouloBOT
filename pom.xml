@@ -140,6 +140,7 @@
             <version>1.2.3</version>
             <scope>compile</scope>
         </dependency>
+
     </dependencies>
 
 </project>

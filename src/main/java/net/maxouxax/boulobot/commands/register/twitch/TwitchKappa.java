@@ -30,7 +30,8 @@ public class TwitchKappa {
 
     @TwitchCommand(name="kappa",rank = TwitchCommand.ExecutorRank.VIP,description="Ajoute la KappaSong au songrequest", help = "&kappa", example = "&kappa")
     private void kappa(String broadcaster, Long broadcasterId) throws IOException {
-        botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "!sr "+kappaSongURL);
+        System.out.println(broadcaster);
+        System.out.println(broadcasterId);
         botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "Attention, le tchat va devenir indisponible pendant la Kappa Song, gardez votre calme et BALANCEZ VOS KAPPAS.");
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpPost httppost = new HttpPost("https://api.streamelements.com/kappa/v2/songrequest/"+broadcasterId+"/queue");
@@ -47,6 +48,10 @@ public class TwitchKappa {
 
         if (entity != null) {
             try (InputStream instream = entity.getContent()) {
+                System.out.println(response.getStatusLine().getStatusCode());
+                System.out.println(response.getStatusLine().getProtocolVersion());
+                System.out.println(response.getStatusLine().getReasonPhrase());
+                System.out.println(instream);
             }
         }
     }

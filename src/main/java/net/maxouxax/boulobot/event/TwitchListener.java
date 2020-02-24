@@ -81,12 +81,13 @@ public class TwitchListener {
             EventUser user = channelMessageEvent.getUser();
             User userUser = botDiscord.getTwitchClient().getHelix().getUsers(null, Collections.singletonList(user.getId()), null).execute().getUsers().get(0);
             String broadcaster = channelMessageEvent.getChannel().getName();
+            String broadcasterId = channelMessageEvent.getChannel().getId();
             TwitchCommand.ExecutorRank executorRank = commandMap.getRank(channelMessageEvent.getPermissions());
             message = message.replaceFirst(commandMap.getTwitchTag(), "");
-            if(botDiscord.getSessionManager().isSessionStarted()){
+            if(botDiscord.getSessionManager().isSessionStarted()) {
                 botDiscord.getSessionManager().getCurrentSession().addCommandUse(message.split(" ")[0]);
             }
-            commandMap.twitchCommandUser(userUser, broadcaster, executorRank, message, channelMessageEvent.getPermissions());
+            commandMap.twitchCommandUser(userUser, broadcaster, broadcasterId, executorRank, message, channelMessageEvent.getPermissions());
         }
     }
 

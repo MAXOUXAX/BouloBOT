@@ -4,7 +4,7 @@
 
     <groupId>net.maxouxax.boulobot</groupId>
     <artifactId>BouloBOT</artifactId>
-    <version>1.2.5-RELEASE</version>
+    <version>1.2.6-RELEASE</version>
 
     <name>BouloBOT</name>
     <description>BouloBOT • Amazingly powerful</description>
@@ -96,7 +96,7 @@
         <dependency>
             <groupId>com.github.twitch4j</groupId>
             <artifactId>twitch4j</artifactId>
-            <version>1.0.0-alpha.18</version>
+            <version>1.0.0-alpha.19</version>
             <scope>compile</scope>
         </dependency>
 

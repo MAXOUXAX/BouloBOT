@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +40,7 @@ public class TwitchKappa {
         List<NameValuePair> params = new ArrayList<>(1);
         params.add(new BasicNameValuePair("video", kappaSongURL));
         httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+        httppost.setParams(new BasicHttpParams().setParameter("video", kappaSongURL));
         httppost.addHeader("accept", "application/json");
         httppost.addHeader("content-type", "application/json");
         httppost.addHeader("Authorization", "Bearer "+botDiscord.getConfigurationManager().getStringValue("streamelementsApiKey"));

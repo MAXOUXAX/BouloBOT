@@ -1,5 +1,6 @@
 package net.maxouxax.boulobot.event;
 
+import com.github.philippheuer.events4j.simple.SimpleEventHandler;
 import com.github.twitch4j.chat.events.channel.*;
 import com.github.twitch4j.common.events.channel.ChannelChangeGameEvent;
 import com.github.twitch4j.common.events.domain.EventUser;
@@ -20,12 +21,12 @@ public class TwitchListener {
         this.commandMap = commandMap;
         this.botDiscord = botDiscord;
 
-        botDiscord.getTwitchClient().getEventManager().onEvent(ChannelMessageEvent.class).subscribe(this::onMessageEvent);
-        botDiscord.getTwitchClient().getEventManager().onEvent(ChannelChangeGameEvent.class).subscribe(this::onGameUpdate);
-        botDiscord.getTwitchClient().getEventManager().onEvent(UserTimeoutEvent.class).subscribe(this::onTimeOut);
-        botDiscord.getTwitchClient().getEventManager().onEvent(UserBanEvent.class).subscribe(this::onBan);
-        botDiscord.getTwitchClient().getEventManager().onEvent(IRCMessageEvent.class).subscribe(this::ircMessage);
-        botDiscord.getTwitchClient().getEventManager().onEvent(FollowEvent.class).subscribe(this::followEvent);
+        botDiscord.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(ChannelMessageEvent.class, this::onMessageEvent);
+        botDiscord.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(ChannelChangeGameEvent.class, this::onGameUpdate);
+        botDiscord.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(UserTimeoutEvent.class, this::onTimeOut);
+        botDiscord.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(UserBanEvent.class, this::onBan);
+        botDiscord.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(IRCMessageEvent.class, this::ircMessage);
+        botDiscord.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(FollowEvent.class, this::followEvent);
     }
 
     private void followEvent(FollowEvent followEvent) {

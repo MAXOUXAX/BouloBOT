@@ -3,6 +3,7 @@ package net.maxouxax.boulobot;
 import com.github.philippheuer.credentialmanager.CredentialManager;
 import com.github.philippheuer.credentialmanager.CredentialManagerBuilder;
 import com.github.philippheuer.credentialmanager.domain.OAuth2Credential;
+import com.github.philippheuer.events4j.simple.SimpleEventHandler;
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.auth.providers.TwitchIdentityProvider;
@@ -125,15 +126,15 @@ public class BOT implements Runnable{
         loadNotifications();
 
         //Registering the listener in order to make the events work
-        twitchClient.getEventManager().registerListener(new TwitchListener(commandMap, this));
+        twitchClient.getEventManager().getEventHandler(SimpleEventHandler.class).registerListener(new TwitchListener(commandMap, this));
     }
 
     private void loadNotifications() {
         twitchClient.getClientHelper().enableStreamEventListener(channelName);
-        twitchClient.getEventManager().onEvent(ChannelGoLiveEvent.class).subscribe(channelGoLiveEvent -> {
+        twitchClient.getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(ChannelGoLiveEvent.class, channelGoLiveEvent -> {
             sendGoLiveNotif(channelGoLiveEvent.getTitle(), channelGoLiveEvent.getGameId(), channelGoLiveEvent.getChannel().getId());
         });
-        twitchClient.getEventManager().onEvent(ChannelGoOfflineEvent.class).subscribe(channelGoOfflineEvent -> {
+        twitchClient.getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(ChannelGoOfflineEvent.class, channelGoOfflineEvent -> {
             sendGoOfflineNotif();
         });
     }

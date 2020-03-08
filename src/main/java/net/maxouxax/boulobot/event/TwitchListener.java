@@ -39,15 +39,17 @@ public class TwitchListener {
     private void ircMessage(IRCMessageEvent event) {
         if(event.getMessage().isPresent()) {
             String message = event.getMessage().get();
-            String username = event.getUser().getName();
-            botDiscord.getLogger().log(Level.INFO, "LiveChat > "+username + " > " + message);
-            String id = event.getUser().getId();
-            if(id == null)return;
-            if(!commandMap.isKnown(id)) {
-                commandMap.addKnownUser(id);
-                event.getTwitchChat().sendMessage(botDiscord.getChannelName().toLowerCase(), "Coucou @" + username + " ! Passe un bon moment sur le stream, et pose toi avec ton PopCorn !");
-                if(botDiscord.getSessionManager().isSessionStarted()){
-                    botDiscord.getSessionManager().getCurrentSession().addNewViewer();
+            if(event.getUser() != null) {
+                String username = event.getUser().getName();
+                botDiscord.getLogger().log(Level.INFO, "LiveChat > " + username + " > " + message);
+                String id = event.getUser().getId();
+                if (id == null) return;
+                if (!commandMap.isKnown(id)) {
+                    commandMap.addKnownUser(id);
+                    event.getTwitchChat().sendMessage(botDiscord.getChannelName().toLowerCase(), "Coucou @" + username + " ! Passe un bon moment sur le stream, et pose toi avec ton PopCorn !");
+                    if (botDiscord.getSessionManager().isSessionStarted()) {
+                        botDiscord.getSessionManager().getCurrentSession().addNewViewer();
+                    }
                 }
             }
         }else{

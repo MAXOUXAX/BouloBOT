@@ -6,9 +6,6 @@ import com.mrpowergamerbr.temmiewebhook.TemmieWebhook;
 import com.mrpowergamerbr.temmiewebhook.embed.FooterEmbed;
 import com.mrpowergamerbr.temmiewebhook.embed.ImageEmbed;
 import com.mrpowergamerbr.temmiewebhook.embed.ThumbnailEmbed;
-import me.legrange.haveibeenpwned.Breach;
-import me.legrange.haveibeenpwned.HaveIBeenPwndApi;
-import me.legrange.haveibeenpwned.HaveIBeenPwndException;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
@@ -19,7 +16,6 @@ import net.maxouxax.boulobot.commands.CommandMap;
 import net.maxouxax.boulobot.util.Reference;
 
 import java.awt.*;
-import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
@@ -34,102 +30,6 @@ public class CommandDefault {
     public CommandDefault(BOT botDiscord, CommandMap commandMap){
         this.botDiscord = botDiscord;
         this.commandMap = commandMap;
-    }
-
-    @Command(name="embed",type = ExecutorType.ALL,power = 100,help = ".embed <titre>-²<description>-²<image (url)>",example = ".embed Ceci est une annonce-²Juste pour vous dire que les bananes c'est assez bon mais que la raclette reste au dessus.-²https://lien-de-l-image.fr/image32.png")
-    public void embed(User user, TextChannel textChannel, String[] args) {
-        try {
-            EmbedBuilder em = commandMap.getHelpEmbed("embed");
-            if (args.length == 0) {
-                textChannel.sendMessage(em.build()).queue();
-            } else {
-                StringBuilder str = new StringBuilder();
-
-                for (String arg : args) {
-                    str.append(arg).append(" ");
-                }
-
-                if (!str.toString().contains("-²")) {
-                    textChannel.sendMessage(em.build()).queue();
-                    return;
-                }
-
-                String[] argsReal = str.toString().split("-²");
-
-                String title = argsReal[0];
-
-                String description = "Aucune description n'a été fournie !";
-                if (argsReal.length >= 2) {
-                    description = argsReal[1];
-                }
-
-                String imageURL = null;
-                if (argsReal.length == 3) {
-                    imageURL = argsReal[2];
-                }
-
-                EmbedBuilder embedBuilder = new EmbedBuilder();
-                embedBuilder.setTitle(title, "https://twitch.lyorine.com");
-                embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
-                embedBuilder.setColor(15844367);
-                embedBuilder.setDescription(description);
-                if (imageURL != null) {
-                    embedBuilder.setImage(imageURL);
-                }
-                textChannel.sendMessage(embedBuilder.build()).queue();
-            }
-        }catch (Exception e){
-            botDiscord.getErrorHandler().handleException(e);
-        }
-    }
-
-    @Command(name="pwned",type = ExecutorType.ALL, description = "Permet de récupérer les brèches trouvées via votre adresse e-mail", example = ".pwned example@test.com", help = ".pwned <adresse email>")
-    private void pwned(TextChannel textChannel, User user, String[] args){
-        EmbedBuilder helperEmbed = commandMap.getHelpEmbed("pwned");
-        if(args.length == 0){
-            textChannel.sendMessage(helperEmbed.build()).queue();
-        }else if(args.length == 1){
-            String email = args[0];
-            textChannel.sendMessage("Fetching data...").queue();
-            textChannel.sendTyping().queue();
-
-            try {
-                HaveIBeenPwndApi hibp = new HaveIBeenPwndApi("PwnedDiscordBotCommand");
-                List<Breach> breaches = hibp.getAllBreachesForAccount(email);
-
-                EmbedBuilder reply = new EmbedBuilder();
-                reply.setTitle("';--have i been pwned?", "https://haveibeenpwned.com/")
-                        .setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
-                if(breaches.size() <= 0){
-                    reply.setDescription("Houra !\n» Aucune brèche n'a été trouvée !")
-                         .setColor(3066993);
-                }else{
-                    reply.setDescription("Aie !\n» "+breaches.size()+(breaches.size() == 1 ? " brèche a été trouvée !" : " brèches ont été trouvées !"))
-                         .setColor(15158332);
-                    breaches.forEach(breach -> {
-                        reply.addField(new MessageEmbed.Field(
-                                breach.getName(),
-                                breach.getDomain()+"\n\n» "
-                                        +breach.getDescription().replaceAll("\\<[^>]*>"
-                                        ,"")+"\n\n» "
-                                        +new SimpleDateFormat("EEE, d MMM yyyy")
-                                        .format(breach.getBreachDate()), true));
-                    });
-                }
-
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        textChannel.sendMessage(reply.build()).queue();
-                    }
-                }, 3000);
-            } catch (HaveIBeenPwndException | NoSuchMethodError e) {
-                textChannel.sendMessage("Failure!\nAPI returned error code: " + e.getMessage()).queue();
-                e.printStackTrace();
-            }
-        }else{
-            textChannel.sendMessage("Veuillez spécifier votre email.\n» `.pwned example@test.com`").queue();
-        }
     }
 
     @Command(name="stop",type=ExecutorType.CONSOLE)
@@ -183,7 +83,6 @@ public class CommandDefault {
     }
 
     private int getInt(String arg) {
-
         try {
             return Integer.parseInt(arg);
         } catch (Exception e) {
@@ -202,48 +101,48 @@ public class CommandDefault {
             member = message.getMember();
         }
 
-        String NAME = member.getEffectiveName();
-        String TAG = member.getUser().getName() + "#" + member.getUser().getDiscriminator();
-        String GUILD_JOIN_DATE = member.getTimeJoined().format(DateTimeFormatter.RFC_1123_DATE_TIME);
-        String DISCORD_JOINED_DATE = member.getUser().getTimeCreated().format(DateTimeFormatter.RFC_1123_DATE_TIME);
-        String ID = member.getUser().getId();
-        String STATUS = member.getOnlineStatus().getKey();
-        String ROLES = "";
-        String GAME;
-        String AVATAR = member.getUser().getAvatarUrl();
+        String name = member.getEffectiveName();
+        String tag = member.getUser().getName() + "#" + member.getUser().getDiscriminator();
+        String guildJoinDate = member.getTimeJoined().format(DateTimeFormatter.RFC_1123_DATE_TIME);
+        String discordJoinDate = member.getUser().getTimeCreated().format(DateTimeFormatter.RFC_1123_DATE_TIME);
+        String id = member.getUser().getId();
+        String status = member.getOnlineStatus().getKey();
+        String roles = "";
+        String game;
+        String avatar = member.getUser().getAvatarUrl();
 
         try {
-            GAME = member.getActivities().get(0).getName();
+            game = member.getActivities().get(0).getName();
         } catch (Exception e) {
-            GAME = "-/-";
+            game = "-/-";
         }
 
         for ( Role r : member.getRoles() ) {
-            ROLES += r.getName() + ", ";
+            roles += r.getName() + ", ";
         }
-        if (ROLES.length() > 0)
-            ROLES = ROLES.substring(0, ROLES.length()-2);
+        if (roles.length() > 0)
+            roles = roles.substring(0, roles.length()-2);
         else
-            ROLES = "Aucun rôle.";
+            roles = "Aucun rôle.";
 
-        if (AVATAR == null) {
-            AVATAR = "Pas d'avatar";
+        if (avatar == null) {
+            avatar = "Pas d'avatar";
         }
 
         EmbedBuilder em = new EmbedBuilder().setColor(Color.GREEN);
         em.setDescription(":spy:   **Informations sur " + member.getUser().getName() + ":**")
-                .addField("Nom", NAME, true)
-                .addField("Tag", TAG, true)
-                .addField("ID", ID, true)
-                .addField("Statut", STATUS, true)
-                .addField("Joue à", GAME, true)
-                .addField("Rôles", ROLES, true)
-                .addField("Rejoint le", GUILD_JOIN_DATE, true)
-                .addField("Rejoint discord le", DISCORD_JOINED_DATE, true)
-                .addField("URL de l'avatar", AVATAR, true);
+                .addField("Nom", name, true)
+                .addField("Tag", tag, true)
+                .addField("ID", id, true)
+                .addField("Statut", status, true)
+                .addField("Joue à", game, true)
+                .addField("Rôles", roles, true)
+                .addField("A rejoint le serveur le", guildJoinDate, true)
+                .addField("A rejoint discord le", discordJoinDate, true)
+                .addField("URL de l'avatar", avatar, true);
         em.setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString());
-        if (AVATAR != "Pas d'avatar") {
-            em.setThumbnail(AVATAR);
+        if (!avatar.equals("Pas d'avatar")) {
+            em.setThumbnail(avatar);
         }
 
         textChannel.sendMessage(
@@ -260,7 +159,7 @@ public class CommandDefault {
             builder.setDescription("Mauvais ping");
         }else{
             builder.setColor(Color.GREEN);
-            builder.setDescription("Plus ou moins bon ping");
+            builder.setDescription("Bon ping");
         }
         builder.setTitle("Ping command requested by "+user.getName());
         builder.setThumbnail(user.getAvatarUrl()+"?size=256");
@@ -330,7 +229,7 @@ public class CommandDefault {
 
                 temmieWebhook1.sendMessage(dm1);
             }
-        }, 1000*5);
+        }, 1000*2);
 
     }
 }

@@ -116,6 +116,7 @@ public class BOT implements Runnable{
         //Connecting to the BOT's tchats
         twitchClient.getChat().connect();
         twitchClient.getChat().joinChannel(channelName);
+        twitchClient.getClientHelper().enableFollowEventListener(channelName);
         logger.log(Level.INFO, "> "+channelName+"'s channel joined!");
 
         //Registering SessionManager and loading all passed sessions

@@ -1,7 +1,6 @@
 package net.maxouxax.boulobot.commands;
 
 import com.github.twitch4j.common.enums.CommandPermission;
-import com.samuelmaddock.strawpollwrapper.StrawPoll;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -28,8 +27,6 @@ public final class CommandMap {
     private final BOT botDiscord;
 
     private final Map<Long, Integer> powers = new HashMap<>();
-
-    private final List<String> strawpolls = new ArrayList<>();
 
     private List<String> userIds = new ArrayList<>();
 
@@ -67,27 +64,6 @@ public final class CommandMap {
 
         }catch(IOException e){
             botDiscord.getErrorHandler().handleException(e);
-        }
-
-        //Loading strawpolls
-
-        File file1 = new File("strawpolls.json");
-        if(!file1.exists()) return;
-
-        try{
-            JSONReader reader = new JSONReader(file1, this.botDiscord);
-            JSONArray array = reader.toJSONArray();
-
-            for(int i = 0; i < array.length(); i++)
-            {
-                JSONObject object = array.getJSONObject(i);
-                String id = object.getString("id");
-                strawpolls.add(id);
-                CommandDefault.getStrawPollMap().put(id, new StrawPoll(id));
-            }
-
-        }catch(IOException ioe){
-            ioe.printStackTrace();
         }
 
         //Loading users ids
@@ -135,26 +111,6 @@ public final class CommandMap {
             ioe.printStackTrace();
         }
 
-        //FILE STRAWPOLL
-
-        JSONArray array1 = new JSONArray();
-
-        for(String strawpoll : strawpolls)
-        {
-            JSONObject object = new JSONObject();
-            object.accumulate("id", strawpoll);
-            array1.put(object);
-        }
-
-        try(JSONWriter writter = new JSONWriter("strawpolls.json")){
-
-            writter.write(array1);
-            writter.flush();
-
-        }catch(IOException e){
-            botDiscord.getErrorHandler().handleException(e);
-        }
-
         //FILE IDS
 
         JSONArray array3 = new JSONArray();
@@ -199,18 +155,6 @@ public final class CommandMap {
             ex.printStackTrace();
         }
         return null;
-    }
-
-    public void addStrawpoll(StrawPoll strawPoll){
-        strawpolls.add(strawPoll.getPollURL());
-    }
-
-    public void removeStrawpoll(StrawPoll strawPoll){
-        strawpolls.remove(strawPoll.getPollURL());
-    }
-
-    public List<String> getStrawpolls() {
-        return strawpolls;
     }
 
     public void addKnownUser(String id){

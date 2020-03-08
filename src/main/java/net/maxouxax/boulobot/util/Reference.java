@@ -13,7 +13,6 @@ public enum Reference {
     RulesEmbedThumbnailF("http://image.noelshack.com/fichiers/2019/01/4/1546536705-iconfinder-browser-1055104.png"),
     AttentionWebhookIconURL("http://image.noelshack.com/fichiers/2019/01/4/1546539623-iconfinder-caution-1055096.png"),
     AttentionWebhookFooterIconURL("http://image.noelshack.com/fichiers/2019/01/4/1546539791-iconfinder-arrow-down-1055120.png"),
-    StrawpollThumbnail("http://image.noelshack.com/fichiers/2019/01/4/1546551534-iconfinder-form2-1940831.png"),
     RankThumbnail("https://static.lyorine.com/boulobot/RankWebhookCircle.png"),
 
     RulesWebhookURL("https://discordapp.com/api/webhooks/530439612569485322/3nHhJyjQ1RdySolrz6uq87WW7TtTMP-DKPTyE9i2TSXp1DZJprPKdcvX_ZOWV1_AwpCC"),

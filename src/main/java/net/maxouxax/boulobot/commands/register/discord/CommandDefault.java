@@ -6,7 +6,6 @@ import com.mrpowergamerbr.temmiewebhook.TemmieWebhook;
 import com.mrpowergamerbr.temmiewebhook.embed.FooterEmbed;
 import com.mrpowergamerbr.temmiewebhook.embed.ImageEmbed;
 import com.mrpowergamerbr.temmiewebhook.embed.ThumbnailEmbed;
-import com.samuelmaddock.strawpollwrapper.StrawPoll;
 import me.legrange.haveibeenpwned.Breach;
 import me.legrange.haveibeenpwned.HaveIBeenPwndApi;
 import me.legrange.haveibeenpwned.HaveIBeenPwndException;
@@ -22,8 +21,10 @@ import net.maxouxax.boulobot.util.Reference;
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
-import java.util.*;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class CommandDefault {
 
@@ -33,12 +34,6 @@ public class CommandDefault {
     public CommandDefault(BOT botDiscord, CommandMap commandMap){
         this.botDiscord = botDiscord;
         this.commandMap = commandMap;
-    }
-
-    private static HashMap<String, StrawPoll> strawPollMap = new HashMap<>();
-
-    public static HashMap<String, StrawPoll> getStrawPollMap() {
-        return strawPollMap;
     }
 
     @Command(name="embed",type = ExecutorType.ALL,power = 100,help = ".embed <titre>-²<description>-²<image (url)>",example = ".embed Ceci est une annonce-²Juste pour vous dire que les bananes c'est assez bon mais que la raclette reste au dessus.-²https://lien-de-l-image.fr/image32.png")

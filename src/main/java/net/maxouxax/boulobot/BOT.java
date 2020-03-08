@@ -150,7 +150,7 @@ public class BOT implements Runnable{
             currentStream[0] = stream;
         });
 
-        Session session = sessionManager.startNewSession(channelId, currentStream[0]);
+        Session session = sessionManager.startNewSession(channelId);
         session.newGame(gameId);
         session.setTitle(title);
 

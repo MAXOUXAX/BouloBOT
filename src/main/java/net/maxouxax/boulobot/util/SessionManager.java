@@ -1,6 +1,5 @@
 package net.maxouxax.boulobot.util;
 
-import com.github.twitch4j.helix.domain.Stream;
 import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.tasks.TaskViewerCheck;
 import org.json.JSONArray;
@@ -26,10 +25,10 @@ public class SessionManager {
         SESSIONS_FOLDER = new File("sessions" + File.separator);
     }
 
-    public Session startNewSession(String channelId, Stream stream) {
+    public Session startNewSession(String channelId) {
         currentSession = new Session(System.currentTimeMillis(), channelId, bot);
         sessions.add(currentSession);
-        scheduleViewerCheck = bot.getScheduler().scheduleAtFixedRate(new TaskViewerCheck(bot, stream), 5, 5, TimeUnit.MINUTES);
+        scheduleViewerCheck = bot.getScheduler().scheduleAtFixedRate(new TaskViewerCheck(bot, channelId), 5, 5, TimeUnit.MINUTES);
         return currentSession;
     }
 

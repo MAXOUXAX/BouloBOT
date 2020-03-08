@@ -42,7 +42,7 @@ public final class CommandMap {
         this.botDiscord = botDiscord;
 
         registerCommands(new CommandDefault(botDiscord, this), new RoleCommand(botDiscord, this), new HelpCommand(this), new MusicCommand(botDiscord, this), new CommandWeather(botDiscord, this), new CommandNotif(botDiscord, this), new CommandChangelog(botDiscord, this), new CommandVersion(botDiscord, this), new CommandSession(botDiscord, this), new CommandOctogone(botDiscord, this), new CommandSay(botDiscord, this));
-        registerTwitchCommands(new TwitchWeather(botDiscord, this), new TwitchHelp(botDiscord, this), new TwitchKappa(botDiscord, this), new TwitchRandom(botDiscord, this), new TwitchNotif(botDiscord, this), new TwitchPwned(botDiscord, this), new TwitchVersion(botDiscord, this), new TwitchAquoijouer(botDiscord, this), new TwitchClipThat(botDiscord, this), new TwitchSCP(botDiscord, this));
+        registerTwitchCommands(new TwitchWeather(botDiscord, this), new TwitchHelp(botDiscord, this), new TwitchKappa(botDiscord, this), new TwitchNotif(botDiscord, this), new TwitchPwned(botDiscord, this), new TwitchVersion(botDiscord, this), new TwitchAquoijouer(botDiscord, this), new TwitchClipThat(botDiscord, this), new TwitchSCP(botDiscord, this));
 
         load();
     }

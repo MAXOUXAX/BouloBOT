@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
     <!-- Event Manager -->
-    <logger name="com.github.philippheuer.events4j" level="INFO" />
+    <logger name="com.github.philippheuer.events4j" level="WARN" />
 
     <!-- Configure Twitch4J logger level -->
-    <logger name="twitch4j" level="INFO"/>
+    <logger name="twitch4j" level="WARN"/>
 
     <!-- Appender Configuration [Console] -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

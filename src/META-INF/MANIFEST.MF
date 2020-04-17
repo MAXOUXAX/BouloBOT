@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
-Class-Path: net.max
-Main-Class: net.maxx.boulobot.BOT
+Class-Path: net.maxouxax.boulobot
+Main-Class: net.maxouxax.boulobot.BOT
 

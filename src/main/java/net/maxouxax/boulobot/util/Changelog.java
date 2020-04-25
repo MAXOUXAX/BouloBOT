@@ -8,23 +8,23 @@ import java.util.UUID;
 
 public class Changelog {
 
-    private String name;
-    private String oldVersion;
-    private String version;
-    private UUID uuid;
-    private BOT botDiscord;
-    private HashMap<Platform, ArrayList<Modifications>> hashMap = new HashMap<>();
+    private final String name;
+    private final String oldVersion;
+    private final String version;
+    private final UUID uuid;
+    private final BOT bot;
+    private final HashMap<Platform, ArrayList<Modifications>> hashMap = new HashMap<>();
 
-    public Changelog(BOT botDiscord, String name, String oldVersion) {
-        this.botDiscord = botDiscord;
+    public Changelog(BOT bot, String name, String oldVersion) {
+        this.bot = bot;
         this.name = name;
         this.oldVersion = oldVersion;
-        this.version = botDiscord.getVersion();
+        this.version = bot.getVersion();
         this.uuid = UUID.randomUUID();
     }
 
-    public Changelog(BOT botDiscord, String name, String oldVersion, String version) {
-        this.botDiscord = botDiscord;
+    public Changelog(BOT bot, String name, String oldVersion, String version) {
+        this.bot = bot;
         this.name = name;
         this.oldVersion = oldVersion;
         this.version = version;

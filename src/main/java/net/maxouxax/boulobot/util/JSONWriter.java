@@ -45,7 +45,7 @@ public final class JSONWriter implements Closeable
             if(object instanceof Number || object instanceof Boolean) writer.write(space+object);
             else if(object instanceof JSONObject) write((JSONObject) object, true);
             else if(object instanceof JSONArray) write((JSONArray) object);
-            else writer.write(space+"\""+object.toString()+"\"");
+            else writer.write(space+"\""+object.toString().replace("\"", "'")+"\"");
 
             if(i < array.length()-1) writer.write(",");
             writer.newLine();

@@ -12,10 +12,12 @@ import com.github.twitch4j.common.events.channel.ChannelGoOfflineEvent;
 import com.github.twitch4j.helix.domain.GameList;
 import com.github.twitch4j.helix.domain.Stream;
 import com.github.twitch4j.helix.domain.StreamList;
+import io.sentry.Sentry;
+import io.sentry.SentryClient;
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.*;
 import net.maxouxax.boulobot.commands.CommandMap;
-import net.maxouxax.boulobot.event.BotListener;
+import net.maxouxax.boulobot.event.DiscordListener;
 import net.maxouxax.boulobot.event.TwitchListener;
 import net.maxouxax.boulobot.roles.RolesManager;
 import net.maxouxax.boulobot.util.*;
@@ -41,6 +43,7 @@ public class BOT implements Runnable{
     private final Logger logger;
     private final ErrorHandler errorHandler;
     private TwitchClient twitchClient;
+    private static SentryClient sentry;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private RolesManager rolesManager;
@@ -48,8 +51,8 @@ public class BOT implements Runnable{
     private SessionManager sessionManager;
 
     private boolean running;
-    private String version;
-    private String channelName;
+    private final String version;
+    private final String channelName;
 
     public BOT() throws LoginException, IllegalArgumentException, NullPointerException, IOException, InterruptedException {
         //Loading the log system
@@ -70,6 +73,11 @@ public class BOT implements Runnable{
 
         //Log the startup messages
         logger.log(Level.INFO, "--------------- STARTING ---------------");
+
+        logger.log(Level.INFO, "> Initializing Sentry...");
+        Sentry.init();
+        logger.log(Level.INFO, "> Sentry initialized !");
+
         logger.log(Level.INFO, "> Generated new BOT instance");
         logger.log(Level.INFO, "> BOT thread started, loading libraries and joining DiscordAPI channel");
         this.commandMap = new CommandMap(this);
@@ -92,7 +100,7 @@ public class BOT implements Runnable{
             this.configurationManager = new ConfigurationManager(this, "config.json");
             configurationManager.loadData();
         } catch (IOException e) {
-            e.printStackTrace();
+            getErrorHandler().handleException(e);
         }
     }
 
@@ -221,7 +229,7 @@ public class BOT implements Runnable{
     private void loadDiscord() throws LoginException, InterruptedException {
         //Creating the credentials, adding the listeners, and load the roles
         jda = new JDABuilder(AccountType.BOT).setToken(configurationManager.getStringValue("botToken")).build();
-        jda.addEventListener(new BotListener(commandMap, this));
+        jda.addEventListener(new DiscordListener(commandMap, this));
         jda.getPresence().setActivity(Activity.playing("Amazingly powerful"));
         jda.awaitReady();
         loadRolesManager();
@@ -292,8 +300,8 @@ public class BOT implements Runnable{
 
     public static void main(String[] args) {
         try {
-            BOT botDiscord = new BOT();
-            new Thread(botDiscord, "bot").start();
+            BOT bot = new BOT();
+            new Thread(bot, "bot").start();
         } catch (LoginException | IllegalArgumentException | NullPointerException | IOException | InterruptedException e) {
             e.printStackTrace();
         }

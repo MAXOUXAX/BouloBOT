@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.Command;
 import net.maxouxax.boulobot.commands.CommandMap;
 import net.maxouxax.boulobot.util.Reference;
@@ -19,8 +20,10 @@ import java.util.TimerTask;
 public class CommandPwned {
 
     private final CommandMap commandMap;
+    private final BOT bot;
 
-    public CommandPwned(CommandMap commandMap){
+    public CommandPwned(BOT bot, CommandMap commandMap) {
+        this.bot = bot;
         this.commandMap = commandMap;
     }
 
@@ -66,7 +69,7 @@ public class CommandPwned {
                 }, 3000);
             } catch (HaveIBeenPwndException | NoSuchMethodError e) {
                 textChannel.sendMessage("Failure!\nAPI returned error code: " + e.getMessage()).queue();
-                e.printStackTrace();
+                bot.getErrorHandler().handleException(e);
             }
         }else{
             textChannel.sendMessage("Veuillez spécifier votre email.\n» `.pwned example@test.com`").queue();

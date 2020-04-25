@@ -10,11 +10,11 @@ import net.maxouxax.boulobot.util.Reference;
 
 public class CommandEmbed {
 
-    private final BOT botDiscord;
+    private final BOT bot;
     private final CommandMap commandMap;
 
-    public CommandEmbed(BOT botDiscord, CommandMap commandMap){
-        this.botDiscord = botDiscord;
+    public CommandEmbed(BOT bot, CommandMap commandMap){
+        this.bot = bot;
         this.commandMap = commandMap;
     }
 
@@ -61,7 +61,7 @@ public class CommandEmbed {
                 textChannel.sendMessage(embedBuilder.build()).queue();
             }
         }catch (Exception e){
-            botDiscord.getErrorHandler().handleException(e);
+            bot.getErrorHandler().handleException(e);
         }
     }
 

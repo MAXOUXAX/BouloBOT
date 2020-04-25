@@ -18,11 +18,11 @@ import java.time.Duration;
 public class MusicCommand {
 
     private final MusicManager manager = new MusicManager();
-    private final BOT botDiscord;
+    private final BOT bot;
     private final CommandMap commandMap;
 
-    public MusicCommand(BOT botDiscord, CommandMap commandMap) {
-        this.botDiscord = botDiscord;
+    public MusicCommand(BOT bot, CommandMap commandMap) {
+        this.bot = bot;
         this.commandMap = commandMap;
     }
 
@@ -164,11 +164,10 @@ public class MusicCommand {
     @Command(name = "pause", description = "Permet d'arrêter ou de jouer la musique (un play/pause quoi)", type = Command.ExecutorType.USER, example = ".pause", help = ".pause")
     private void pause(TextChannel textChannel, User user){
         MusicPlayer player = manager.getPlayer(textChannel.getGuild());
-        if(player.getAudioPlayer().isPaused()){//si la musique est en pause
-            player.getAudioPlayer().setPaused(false);//on retire la pause (donc on fait play)
-        }else {//sinon (donc si la musique est pas en pause donc qu'elle JOUE
-            player.getAudioPlayer().setPaused(true);//on pause
-        }
+        //si la musique est en pause
+        //sinon (donc si la musique est pas en pause donc qu'elle JOUE
+        //on pause
+        player.getAudioPlayer().setPaused(!player.getAudioPlayer().isPaused());//on retire la pause (donc on fait play)
     }
 
     @Command(name = "volume",description = "Permet de modifier le volume de la musique", type = Command.ExecutorType.USER, help = ".volume <volume>", example = ".volume 50")

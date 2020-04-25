@@ -13,11 +13,11 @@ import net.maxouxax.boulobot.util.Reference;
 
 public class CommandWeather {
 
-    private final BOT botDiscord;
+    private final BOT bot;
     private final CommandMap commandMap;
 
-    public CommandWeather(BOT botDiscord, CommandMap commandMap) {
-        this.botDiscord = botDiscord;
+    public CommandWeather(BOT bot, CommandMap commandMap) {
+        this.bot = bot;
         this.commandMap = commandMap;
     }
 
@@ -37,7 +37,7 @@ public class CommandWeather {
                 }
 
                 String city = str.toString();
-                OWM owm = new OWM(botDiscord.getConfigurationManager().getStringValue("owmApiKey"));
+                OWM owm = new OWM(bot.getConfigurationManager().getStringValue("owmApiKey"));
                 owm.setLanguage(OWM.Language.FRENCH);
                 owm.setUnit(OWM.Unit.METRIC);
                 CurrentWeather cwd = owm.currentWeatherByCityName(city);
@@ -79,7 +79,7 @@ public class CommandWeather {
             errorEmbed.setColor(15158332);
             errorEmbed.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
             textChannel.sendMessage(errorEmbed.build()).queue();
-            botDiscord.getErrorHandler().handleException(e);
+            bot.getErrorHandler().handleException(e);
         }
 
     }

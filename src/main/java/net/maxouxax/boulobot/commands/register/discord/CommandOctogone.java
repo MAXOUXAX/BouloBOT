@@ -15,11 +15,11 @@ import java.util.Random;
 
 public class CommandOctogone {
 
-    private final BOT botDiscord;
+    private final BOT bot;
     private final CommandMap commandMap;
 
-    public CommandOctogone(BOT botDiscord, CommandMap commandMap){
-        this.botDiscord = botDiscord;
+    public CommandOctogone(BOT bot, CommandMap commandMap){
+        this.bot = bot;
         this.commandMap = commandMap;
     }
 

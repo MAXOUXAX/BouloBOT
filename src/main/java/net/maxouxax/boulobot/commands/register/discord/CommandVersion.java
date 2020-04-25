@@ -9,11 +9,11 @@ import net.maxouxax.boulobot.util.Reference;
 
 public class CommandVersion {
 
-    private final BOT botDiscord;
+    private final BOT bot;
     private final CommandMap commandMap;
 
-    public CommandVersion(BOT botDiscord, CommandMap commandMap) {
-        this.botDiscord = botDiscord;
+    public CommandVersion(BOT bot, CommandMap commandMap) {
+        this.bot = bot;
         this.commandMap = commandMap;
     }
 
@@ -23,7 +23,7 @@ public class CommandVersion {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setTitle("BouloBOT by MAXOUXAX • Amazingly powerful.", Reference.WebsiteURL.getString());
             builder.setColor(3447003);
-            builder.addField("Je suis en version", botDiscord.getVersion(), true);
+            builder.addField("Je suis en version", bot.getVersion(), true);
             builder.addField("Je gère", commandMap.getDiscordCommands().size()+" commandes Discord", true);
             builder.addField("Je gère", commandMap.getTwitchCommands().size()+" commandes Twitch", true);
             builder.addField("J'ai souhaité la bienvenue à", commandMap.getUserIds().size()+" viewers", true);

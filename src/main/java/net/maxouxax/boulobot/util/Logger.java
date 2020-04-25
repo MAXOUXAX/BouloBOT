@@ -12,12 +12,12 @@ import java.util.logging.Level;
 
 public class Logger {
 
-    private File file;
-    private Date date;
-    private BOT botDiscord;
+    private final File file;
+    private final Date date;
+    private final BOT bot;
 
-    public Logger(BOT botDiscord) throws IOException {
-        this.botDiscord = botDiscord;
+    public Logger(BOT bot) throws IOException {
+        this.bot = bot;
         this.date = new Date();
         this.file = new File("logs", "currentlogs.log");
         this.file.mkdirs();
@@ -30,7 +30,7 @@ public class Logger {
         try(BufferedWriter bw = new BufferedWriter(new FileWriter(this.file, true))) {
             bw.write("("+date+")"+" | BouloBOT > ["+level.getName()+"] "+str+"\n");
         }catch (IOException e){
-            botDiscord.getErrorHandler().handleException(e);
+            bot.getErrorHandler().handleException(e);
         }
     }
 
@@ -42,7 +42,7 @@ public class Logger {
                 String date = new SimpleDateFormat("HH:mm:ss").format(new Date());
                 bw.write("("+date+")"+" | BouloBOT > ["+level.getName()+"] "+str+"\n");
             } catch (IOException e) {
-                botDiscord.getErrorHandler().handleException(e);
+                bot.getErrorHandler().handleException(e);
             }
         }
     }

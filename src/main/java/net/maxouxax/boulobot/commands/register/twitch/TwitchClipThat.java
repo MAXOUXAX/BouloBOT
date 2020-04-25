@@ -12,26 +12,26 @@ import java.util.concurrent.TimeUnit;
 
 public class TwitchClipThat {
 
-    private final BOT botDiscord;
+    private final BOT bot;
     private final CommandMap commandMap;
 
-    public TwitchClipThat(BOT botDiscord, CommandMap commandMap){
-        this.botDiscord = botDiscord;
+    public TwitchClipThat(BOT bot, CommandMap commandMap){
+        this.bot = bot;
         this.commandMap = commandMap;
     }
 
     @TwitchCommand(name = "clipthat", example = "&clipthat", help = "&clipthat", description = "Créer un clip automatiquement", rank = TwitchCommand.ExecutorRank.EVERYONE)
     private void clipThat(User user, String broadcaster, String[] args){
-        UserList resultList = botDiscord.getTwitchClient().getHelix().getUsers(null, null, Arrays.asList(broadcaster)).execute();
+        UserList resultList = bot.getTwitchClient().getHelix().getUsers(null, null, Arrays.asList(broadcaster)).execute();
         final User[] broadcasterUser = new User[1];
         resultList.getUsers().forEach(user1 -> {
             broadcasterUser[0] = user1;
         });
 
-        CreateClipList clipData = botDiscord.getTwitchClient().getHelix().createClip(botDiscord.getConfigurationManager().getStringValue("oauth2Token"), broadcasterUser[0].getId(), false).execute();
-        botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "Création du clip... ClappyHype  ");
-        botDiscord.getScheduler().schedule(() -> clipData.getData().forEach(clip -> {
-            botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "Clappy  Clip créé et disponible ici (le lien peut ne pas fonctionner immédiatement) > "+clip.getEditUrl());
+        CreateClipList clipData = bot.getTwitchClient().getHelix().createClip(bot.getConfigurationManager().getStringValue("oauth2Token"), broadcasterUser[0].getId(), false).execute();
+        bot.getTwitchClient().getChat().sendMessage(broadcaster, "Création du clip... ClappyHype  ");
+        bot.getScheduler().schedule(() -> clipData.getData().forEach(clip -> {
+            bot.getTwitchClient().getChat().sendMessage(broadcaster, "Clappy  Clip créé et disponible ici (le lien peut ne pas fonctionner immédiatement) > "+clip.getEditUrl());
         }), 2, TimeUnit.SECONDS);
     }
 

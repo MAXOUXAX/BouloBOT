@@ -9,10 +9,10 @@ import net.maxouxax.boulobot.commands.TwitchCommand;
 public class TwitchHelp {
 
     private final CommandMap commandMap;
-    private final BOT botDiscord;
+    private final BOT bot;
 
-    public TwitchHelp(BOT botDiscord, CommandMap commandMap) {
-        this.botDiscord = botDiscord;
+    public TwitchHelp(BOT bot, CommandMap commandMap) {
+        this.bot = bot;
         this.commandMap = commandMap;
     }
 
@@ -27,9 +27,8 @@ public class TwitchHelp {
             builder.append("\n | » ").append(command.getName()).append(" • ").append(command.getDescription());
         }
 
-        botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, user.getDisplayName().toLowerCase()+" (faites pas gaff', c'est un test!)");
-        botDiscord.getTwitchClient().getChat().sendPrivateMessage(user.getDisplayName().toLowerCase(), builder.toString());
-        botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, user.getDisplayName()+", veuillez regarder vos message privés.");
+        bot.getTwitchClient().getChat().sendPrivateMessage(user.getDisplayName().toLowerCase(), builder.toString());
+        bot.getTwitchClient().getChat().sendMessage(broadcaster, user.getDisplayName()+", veuillez regarder vos message privés.");
 
     }
 

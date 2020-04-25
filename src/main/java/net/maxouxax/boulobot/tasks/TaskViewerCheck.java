@@ -10,29 +10,35 @@ import java.util.logging.Level;
 
 public class TaskViewerCheck implements Runnable {
 
-    private BOT botDiscord;
+    private final BOT bot;
     private Stream stream;
-    private Session session;
+    private final Session session;
+    private final String channelId;
 
-    public TaskViewerCheck(BOT botDiscord, String channelId) {
-        StreamList streamResultList = botDiscord.getTwitchClient().getHelix().getStreams(botDiscord.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, null, Collections.singletonList(channelId), null).execute();
-        final Stream[] currentStream = new Stream[1];
-        streamResultList.getStreams().forEach(stream -> {
-            currentStream[0] = stream;
-        });
-        this.botDiscord = botDiscord;
-        this.stream = currentStream[0];
-        this.session = botDiscord.getSessionManager().getCurrentSession();
+    public TaskViewerCheck(BOT bot, String channelId) {
+        this.bot = bot;
+        this.channelId = channelId;
+        this.session = bot.getSessionManager().getCurrentSession();
     }
 
     @Override
     public void run() {
+        refreshStreamObject();
         int viewerCount = stream.getViewerCount();
-        botDiscord.getLogger().log(Level.INFO, "viewerCount = "+viewerCount);
+        bot.getLogger().log(Level.INFO, "viewerCount = "+viewerCount);
         if(viewerCount > session.getMaxViewers()){
             session.setMaxViewers(viewerCount);
         }
-        botDiscord.getSessionManager().addViewerCount(viewerCount);
+        bot.getSessionManager().addViewerCount(viewerCount);
+    }
+
+    private void refreshStreamObject() {
+        StreamList streamResultList = bot.getTwitchClient().getHelix().getStreams(bot.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, null, Collections.singletonList(channelId), null).execute();
+        final Stream[] currentStream = new Stream[1];
+        streamResultList.getStreams().forEach(stream -> {
+            currentStream[0] = stream;
+        });
+        this.stream = currentStream[0];
     }
 
 }

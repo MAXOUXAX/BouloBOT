@@ -39,8 +39,8 @@ public final class CommandMap {
     public CommandMap(BOT bot) {
         this.bot = bot;
 
-        registerCommands(new CommandDefault(bot, this), new RoleCommand(bot, this), new HelpCommand(this), new MusicCommand(bot, this), new CommandWeather(bot, this), new CommandNotif(bot, this), new CommandChangelog(bot, this), new CommandVersion(bot, this), new CommandSession(bot, this), new CommandOctogone(bot, this), new CommandSay(bot, this), new CommandEmbed(bot, this), new CommandPwned(bot, this));
-        registerTwitchCommands(new TwitchWeather(bot, this), new TwitchHelp(bot, this), new TwitchKappa(bot, this), new TwitchNotif(bot, this), new TwitchPwned(bot, this), new TwitchVersion(bot, this), new TwitchAquoijouer(bot, this), new TwitchClipThat(bot, this), new TwitchSCP(bot, this), new TwitchJeparticipe(bot, this));
+        registerCommands(new CommandDefault(bot, this), new RoleCommand(bot, this), new HelpCommand(this), new MusicCommand(bot, this), new CommandWeather(bot, this), new CommandNotif(bot, this), new CommandChangelog(bot, this), new CommandVersion(bot, this), new CommandSession(bot, this), new CommandOctogone(bot, this), new CommandSay(bot, this), new CommandEmbed(bot, this));
+        registerTwitchCommands(new TwitchWeather(bot, this), new TwitchHelp(bot, this), new TwitchKappa(bot, this), new TwitchNotif(bot, this), new TwitchVersion(bot, this), new TwitchAquoijouer(bot, this), new TwitchClipThat(bot, this), new TwitchSCP(bot, this), new TwitchJeparticipe(bot, this));
 
         load();
     }

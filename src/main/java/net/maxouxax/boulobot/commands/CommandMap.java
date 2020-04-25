@@ -396,6 +396,7 @@ public final class CommandMap {
         if(permissions.contains(CommandPermission.BROADCASTER))return TwitchCommand.ExecutorRank.OWNER;
         if(permissions.contains(CommandPermission.MODERATOR))return TwitchCommand.ExecutorRank.MOD;
         if(permissions.contains(CommandPermission.VIP))return TwitchCommand.ExecutorRank.VIP;
+        if(permissions.contains(CommandPermission.SUBSCRIBER))return TwitchCommand.ExecutorRank.SUBSCRIBER;
         return TwitchCommand.ExecutorRank.EVERYONE;
     }
 }

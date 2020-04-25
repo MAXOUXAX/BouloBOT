@@ -12,11 +12,11 @@ import java.util.logging.Level;
 
 public class RoleCommand {
 
-    private final BOT botDiscord;
+    private final BOT bot;
     private final CommandMap commandMap;
 
-    public RoleCommand(BOT botDiscord, CommandMap commandMap){
-        this.botDiscord = botDiscord;
+    public RoleCommand(BOT bot, CommandMap commandMap){
+        this.bot = bot;
         this.commandMap = commandMap;
     }
 
@@ -25,14 +25,14 @@ public class RoleCommand {
         EmbedBuilder em = commandMap.getHelpEmbed("addrole");
         if (args.length == 0) {
             textChannel.sendMessage(em.build()).queue();
-            botDiscord.getLogger().log(Level.INFO, "args0");
+            bot.getLogger().log(Level.INFO, "args0");
         } else{
-            botDiscord.getLogger().log(Level.INFO, "!args0");
+            bot.getLogger().log(Level.INFO, "!args0");
             if (message.getMentionedRoles().size() == 0 || message.getEmotes().size() == 0) {
-                botDiscord.getLogger().log(Level.INFO, "no role or no emote");
+                bot.getLogger().log(Level.INFO, "no role or no emote");
                 textChannel.sendMessage(em.build()).queue();
             } else {
-                botDiscord.getLogger().log(Level.INFO, "there is role and emote");
+                bot.getLogger().log(Level.INFO, "there is role and emote");
                 StringBuilder str = new StringBuilder();
 
                 for (String arg : args) {
@@ -46,24 +46,24 @@ public class RoleCommand {
 
                 String[] argsReal = str.toString().split(" ²² ");
                 if (argsReal.length == 1) {
-                    botDiscord.getLogger().log(Level.INFO, "arg1");
+                    bot.getLogger().log(Level.INFO, "arg1");
                     textChannel.sendMessage(em.build()).queue();
                 } else if (argsReal.length == 2) {
-                    botDiscord.getLogger().log(Level.INFO, "arg2");
+                    bot.getLogger().log(Level.INFO, "arg2");
                     textChannel.sendMessage(em.build()).queue();
                 } else if (argsReal.length == 3) {
-                    botDiscord.getLogger().log(Level.INFO, "arg3");
+                    bot.getLogger().log(Level.INFO, "arg3");
                     textChannel.sendMessage(em.build()).queue();
                 } else {
-                    botDiscord.getLogger().log(Level.INFO, "else");
+                    bot.getLogger().log(Level.INFO, "else");
                     String name = argsReal[0];
                     String description = argsReal[1];
                     Emote emote = message.getEmotes().get(0);
                     Role role = message.getMentionedRoles().get(0);
                     Grade grade = new Grade(role, name, description, emote.getIdLong());
-                    botDiscord.getRolesManager().registerGrade(grade);
+                    bot.getRolesManager().registerGrade(grade);
                     textChannel.sendMessage("Rôle ajouté !\nNom: " + grade.getDisplayName() + "\nDescription: " + grade.getDescription() + "\nRôle: " + grade.getRole().getAsMention() + "\nRéaction: " + emote.getAsMention()).queue();
-                    botDiscord.getRolesManager().reloadRoles();
+                    bot.getRolesManager().reloadRoles();
                 }
             }
         }
@@ -79,11 +79,11 @@ public class RoleCommand {
                 textChannel.sendMessage(em.build()).queue();
             }else{
                 Role role = message.getMentionedRoles().get(0);
-                Optional<Grade> grade = botDiscord.getRolesManager().getGrades().stream().filter(grade1 -> grade1.getRole() == role).findFirst();
+                Optional<Grade> grade = bot.getRolesManager().getGrades().stream().filter(grade1 -> grade1.getRole() == role).findFirst();
                 if(grade.isPresent()){
-                    botDiscord.getRolesManager().getGrades().remove(grade.get());
+                    bot.getRolesManager().getGrades().remove(grade.get());
                     textChannel.sendMessage("» Le gradochat "+role.getAsMention()+" a bien été suprimé !").queue();
-                    botDiscord.getRolesManager().reloadRoles();
+                    bot.getRolesManager().reloadRoles();
                 }else{
                     textChannel.sendMessage("» Aucun gradochat avec le nom "+role.getAsMention()).queue();
                 }

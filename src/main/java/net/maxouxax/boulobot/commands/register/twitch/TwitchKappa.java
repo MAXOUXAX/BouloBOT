@@ -21,11 +21,11 @@ import java.util.List;
 public class TwitchKappa {
 
     private final CommandMap commandMap;
-    private final BOT botDiscord;
+    private final BOT bot;
     private final String kappaSongURL = "https://www.youtube.com/watch?v=33E5P5gd9CY";
 
-    public TwitchKappa(BOT botDiscord, CommandMap commandMap) {
-        this.botDiscord = botDiscord;
+    public TwitchKappa(BOT bot, CommandMap commandMap) {
+        this.bot = bot;
         this.commandMap = commandMap;
     }
 
@@ -33,7 +33,7 @@ public class TwitchKappa {
     private void kappa(String broadcaster, Long broadcasterId) throws IOException {
         System.out.println(broadcaster);
         System.out.println(broadcasterId);
-        botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "Attention, le tchat va devenir indisponible pendant la Kappa Song, gardez votre calme et BALANCEZ VOS KAPPAS.");
+        bot.getTwitchClient().getChat().sendMessage(broadcaster, "Attention, le tchat va devenir indisponible pendant la Kappa Song, gardez votre calme et BALANCEZ VOS KAPPAS.");
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpPost httppost = new HttpPost("https://api.streamelements.com/kappa/v2/songrequest/"+broadcasterId+"/queue");
 
@@ -43,7 +43,7 @@ public class TwitchKappa {
         httppost.setParams(new BasicHttpParams().setParameter("video", kappaSongURL));
         httppost.addHeader("accept", "application/json");
         httppost.addHeader("content-type", "application/json");
-        httppost.addHeader("Authorization", "Bearer "+botDiscord.getConfigurationManager().getStringValue("streamelementsApiKey"));
+        httppost.addHeader("Authorization", "Bearer "+bot.getConfigurationManager().getStringValue("streamelementsApiKey"));
 
         HttpResponse response = httpclient.execute(httppost);
         HttpEntity entity = response.getEntity();

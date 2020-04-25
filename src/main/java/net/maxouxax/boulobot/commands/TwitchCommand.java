@@ -17,17 +17,18 @@ public @interface TwitchCommand {
 
     enum ExecutorRank{
         EVERYONE("EVERYONE", 0),
-        VIP("VIP", 1),
-        MOD("MOD", 2),
-        OWNER("OWNER", 3);
+        SUBSCRIBER("SUBSCRIBER", 1),
+        VIP("VIP", 2),
+        MOD("MOD", 3),
+        OWNER("OWNER", 4);
 
         ExecutorRank(String name, Integer power) {
             this.name = name;
             this.power = power;
         }
 
-        private String name;
-        private Integer power;
+        private final String name;
+        private final Integer power;
 
         public String getName() {
             return name;

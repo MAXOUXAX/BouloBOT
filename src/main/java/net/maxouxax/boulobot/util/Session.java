@@ -16,7 +16,7 @@ import java.util.logging.Level;
 
 public class Session {
 
-    private BOT botDiscord;
+    private final BOT bot;
     private UUID uuid;
     private String channelId;
     private long startDate;
@@ -35,8 +35,8 @@ public class Session {
     private String currentGameId;
     private ArrayList<String> gameIds = new ArrayList<>();
 
-    public Session(long currentTimeMillis, String channelId, BOT botDiscord) {
-        this.botDiscord = botDiscord;
+    public Session(long currentTimeMillis, String channelId, BOT bot) {
+        this.bot = bot;
         this.channelId = channelId;
         this.startDate = currentTimeMillis;
         this.uuid = UUID.randomUUID();
@@ -49,8 +49,8 @@ public class Session {
         this.bansAndTimeouts = 0;
     }
 
-    public Session(long currentTimeMillis, UUID uuid, String channelId, BOT botDiscord) {
-        this.botDiscord = botDiscord;
+    public Session(long currentTimeMillis, UUID uuid, String channelId, BOT bot) {
+        this.bot = bot;
         this.channelId = channelId;
         this.startDate = currentTimeMillis;
         this.uuid = uuid;
@@ -224,18 +224,18 @@ public class Session {
     }
 
     public void updateMessage() {
-        Guild discord = botDiscord.getJda().getGuildById(Reference.GuildID.getString());
+        Guild discord = bot.getJda().getGuildById(Reference.GuildID.getString());
         Member lyorine = discord.getMemberById(Reference.LyorineClientID.getString());
         Role notif = discord.getRoleById(Reference.NotifRoleID.getString());
-        String channelName = botDiscord.getChannelName();
-        botDiscord.getLogger().log(Level.INFO, "> Updating session message!");
+        String channelName = bot.getChannelName();
+        bot.getLogger().log(Level.INFO, "> Updating session message!");
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());
         embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
         embedBuilder.setColor(3066993);
         embedBuilder.setDescription("Coucou les "+notif.getAsMention()+" !\n**"+lyorine.getAsMention()+"** vient de démarrer son live, v'nez voir !\n» https://twitch.tv/"+channelName.toUpperCase());
         embedBuilder.addField(new MessageEmbed.Field("Titre", title, true));
-        GameList resultList = botDiscord.getTwitchClient().getHelix().getGames(Collections.singletonList(currentGameId), null).execute();
+        GameList resultList = bot.getTwitchClient().getHelix().getGames(Collections.singletonList(currentGameId), null).execute();
         final String[] gameName = {"Aucun jeu"};
         resultList.getGames().forEach(game -> {
             gameName[0] = game.getName();
@@ -246,7 +246,7 @@ public class Session {
         });
         embedBuilder.addField(new MessageEmbed.Field("Jeu", gameName[0], true));
 
-        StreamList streamResultList = botDiscord.getTwitchClient().getHelix().getStreams(botDiscord.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, null, Collections.singletonList(channelId), null).execute();
+        StreamList streamResultList = bot.getTwitchClient().getHelix().getStreams(bot.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, null, Collections.singletonList(channelId), null).execute();
         final Stream[] currentStream = new Stream[1];
         streamResultList.getStreams().forEach(stream -> {
             currentStream[0] = stream;
@@ -255,7 +255,7 @@ public class Session {
         embedBuilder.setImage(currentStream[0].getThumbnailUrl(1280, 720));
         Message newMessage = new MessageBuilder(notif.getAsMention()).setEmbed(embedBuilder.build()).build();
         this.sessionMessage.editMessage(newMessage).queue();
-        botDiscord.getLogger().log(Level.INFO, "> Updated!");
-        botDiscord.getJda().getPresence().setActivity(Activity.streaming("avec sa reine à "+gameName[0], "https://twitch.tv/"+channelName.toUpperCase()));
+        bot.getLogger().log(Level.INFO, "> Updated!");
+        bot.getJda().getPresence().setActivity(Activity.streaming("avec sa reine à "+gameName[0], "https://twitch.tv/"+channelName.toUpperCase()));
     }
 }

@@ -17,12 +17,12 @@ import java.util.Optional;
 
 public class CommandChangelog {
 
-    private final BOT botDiscord;
+    private final BOT bot;
     private final CommandMap commandMap;
     private Changelog toPost;
 
-    public CommandChangelog(BOT botDiscord, CommandMap commandMap){
-        this.botDiscord = botDiscord;
+    public CommandChangelog(BOT bot, CommandMap commandMap){
+        this.bot = bot;
         this.commandMap = commandMap;
         this.toPost = null;
     }
@@ -67,7 +67,7 @@ public class CommandChangelog {
                         } else if (argsReal.length == 2) {
                             String name = argsReal[0];
                             String oldver = argsReal[1];
-                            toPost = new Changelog(botDiscord, name, oldver);
+                            toPost = new Changelog(bot, name, oldver);
                             textChannel.sendMessage("Changelog crée !").queue();
                         }
                     }else{
@@ -86,7 +86,7 @@ public class CommandChangelog {
                         } else if (argsReal.length == 2) {
                             String name = argsReal[0];
                             String oldver = argsReal[1];
-                            toPost = new Changelog(botDiscord, name, oldver);
+                            toPost = new Changelog(bot, name, oldver);
                             textChannel.sendMessage("Changelog crée !").queue();
                         }
                     }
@@ -229,7 +229,7 @@ public class CommandChangelog {
                 if(toPost == null){
                     textChannel.sendMessage("Pour créer un changelog, utilisez la commande .changelog").queue();
                 }else{
-                    Role changelog = botDiscord.getJda().getGuildById(Reference.GuildID.getString()).getRoleById(Reference.ChangelogRoleID.getString());
+                    Role changelog = bot.getJda().getGuildById(Reference.GuildID.getString()).getRoleById(Reference.ChangelogRoleID.getString());
 
                     Integer nbOfModif = 0;
                     for (Platform platform : Platform.values()) {

@@ -11,18 +11,18 @@ import org.jsoup.select.Elements;
 
 public class TwitchSCP {
 
-    private final BOT botDiscord;
+    private final BOT bot;
     private final CommandMap commandMap;
 
-    public TwitchSCP(BOT botDiscord, CommandMap commandMap){
-        this.botDiscord = botDiscord;
+    public TwitchSCP(BOT bot, CommandMap commandMap){
+        this.bot = bot;
         this.commandMap = commandMap;
     }
 
     @TwitchCommand(name = "scp", example = "&scp", help = "&scp", description = "Récupérer les informations d'un SPC", rank = TwitchCommand.ExecutorRank.EVERYONE)
     private void scp(User user, String broadcaster, String[] args){
         if(args.length == 0){
-            botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "Pour récupérer la description d'un SCP: &scp <numéro>");
+            bot.getTwitchClient().getChat().sendMessage(broadcaster, "Pour récupérer la description d'un SCP: &scp <numéro>");
         }else if(args.length == 1){
             String scp = args[0];
 
@@ -37,21 +37,21 @@ public class TwitchSCP {
                 int msgLength = description.length()+70;
                 if(msgLength >= 500){
                     description = description.substring(0, 420)+"...";
-                    botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, description + " | Pour en savoir plus: http://fondationscp.wikidot.com/scp-" + scp);
+                    bot.getTwitchClient().getChat().sendMessage(broadcaster, description + " | Pour en savoir plus: http://fondationscp.wikidot.com/scp-" + scp);
                 }else {
                     if (description.equalsIgnoreCase("Introuvable")) {
-                        botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "Description: " + description);
+                        bot.getTwitchClient().getChat().sendMessage(broadcaster, "Description: " + description);
                     } else {
-                        botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, description + " | Pour en savoir plus: http://fondationscp.wikidot.com/scp-" + scp);
+                        bot.getTwitchClient().getChat().sendMessage(broadcaster, description + " | Pour en savoir plus: http://fondationscp.wikidot.com/scp-" + scp);
                     }
                 }
             }catch (Exception e){
-                botDiscord.getErrorHandler().handleException(e);
-                botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "Une erreur est survenue: le SCP n'existe peut-être pas. Erreur » "+e.getMessage());
+                bot.getErrorHandler().handleException(e);
+                bot.getTwitchClient().getChat().sendMessage(broadcaster, "Une erreur est survenue: le SCP n'existe peut-être pas. Erreur » "+e.getMessage());
             }
 
         }else{
-            botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, "Trop d'arguments ! Pour récupérer la description d'un SCP: &scp <numéro>");
+            bot.getTwitchClient().getChat().sendMessage(broadcaster, "Trop d'arguments ! Pour récupérer la description d'un SCP: &scp <numéro>");
         }
     }
 

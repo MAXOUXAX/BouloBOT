@@ -9,11 +9,11 @@ import net.maxouxax.boulobot.commands.CommandMap;
 
 public class CommandSession {
 
-    private final BOT botDiscord;
+    private final BOT bot;
     private final CommandMap commandMap;
 
-    public CommandSession(BOT botDiscord, CommandMap commandMap){
-        this.botDiscord = botDiscord;
+    public CommandSession(BOT bot, CommandMap commandMap){
+        this.bot = bot;
         this.commandMap = commandMap;
     }
 
@@ -21,10 +21,10 @@ public class CommandSession {
     public void session(User user, TextChannel textChannel, Message message, String[] args){
         textChannel.sendTyping().queue();
         StringBuilder strB = new StringBuilder();
-        if(botDiscord.getSessionManager().getSessions().isEmpty()){
+        if(bot.getSessionManager().getSessions().isEmpty()){
             textChannel.sendMessage("Aucune session n'a été trouvée !").queue();
         }else {
-            botDiscord.getSessionManager().getSessions().forEach(session -> {
+            bot.getSessionManager().getSessions().forEach(session -> {
                 strB.append("\nsession.getUuid() = ").append(session.getUuid());
                 strB.append("\nsession.getAvgViewers() = ").append(session.getAvgViewers());
                 strB.append("\nsession.getBansAndTimeouts() = ").append(session.getBansAndTimeouts());

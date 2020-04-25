@@ -13,11 +13,11 @@ import java.util.concurrent.TimeUnit;
 
 public class SessionManager {
 
-    private BOT bot;
+    private final BOT bot;
     private Session currentSession;
-    private File SESSIONS_FOLDER;
-    private ArrayList<Session> sessions = new ArrayList<>();
-    private ArrayList<Integer> viewerCountList = new ArrayList<>();
+    private final File SESSIONS_FOLDER;
+    private final ArrayList<Session> sessions = new ArrayList<>();
+    private final ArrayList<Integer> viewerCountList = new ArrayList<>();
     private ScheduledFuture scheduleViewerCheck;
 
     public SessionManager(BOT bot) {
@@ -149,8 +149,8 @@ public class SessionManager {
                 writter.write(array);
                 writter.flush();
 
-            }catch(IOException ioe){
-                ioe.printStackTrace();
+            }catch(IOException e){
+                bot.getErrorHandler().handleException(e);
             }
         }
     }

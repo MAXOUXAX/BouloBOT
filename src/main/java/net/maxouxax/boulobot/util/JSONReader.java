@@ -14,27 +14,27 @@ import java.util.Map;
 public final class JSONReader{
 
     private final String json;
-    private final BOT botDiscord;
+    private final BOT bot;
 
-    public JSONReader(String path, BOT botDiscord) throws IOException
+    public JSONReader(String path, BOT bot) throws IOException
     {
-        this(new File(path), botDiscord);
+        this(new File(path), bot);
     }
 
-    public JSONReader(File file, BOT botDiscord) throws IOException
+    public JSONReader(File file, BOT bot) throws IOException
     {
-        this(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), botDiscord);
+        this(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), bot);
     }
 
-    public JSONReader(Reader reader, BOT botDiscord) throws IOException
+    public JSONReader(Reader reader, BOT bot) throws IOException
     {
-        this(new BufferedReader(reader), botDiscord);
+        this(new BufferedReader(reader), bot);
     }
 
-    public JSONReader(BufferedReader reader, BOT botDiscord) throws IOException
+    public JSONReader(BufferedReader reader, BOT bot) throws IOException
     {
         json = load(reader);
-        this.botDiscord = botDiscord;
+        this.bot = bot;
     }
 
     private String load(BufferedReader reader) throws IOException
@@ -48,83 +48,85 @@ public final class JSONReader{
         return builder.length() == 0 ? "[]" : builder.toString();
     }
 
-    public static <E> List<E> toList(String path, BOT botDiscord)
+    public static <E> List<E> toList(String path, BOT bot)
     {
-        return toList(new File(path), botDiscord);
+        return toList(new File(path), bot);
     }
 
-    public static <E> List<E> toList(File file, BOT botDiscord)
+    public static <E> List<E> toList(File file, BOT bot)
     {
         try
         {
-            return toList(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), botDiscord);
+            return toList(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), bot);
         }
         catch(IOException e)
         {
-
+            bot.getErrorHandler().handleException(e);
         }
         return new ArrayList<>();
     }
 
-    public static <E> List<E> toList(Reader reader, BOT botDiscord)
+    public static <E> List<E> toList(Reader reader, BOT bot)
     {
-        return toList(new BufferedReader(reader), botDiscord);
+        return toList(new BufferedReader(reader), bot);
     }
 
-    public static <E> List<E> toList(BufferedReader bufferedReader, BOT botDiscord)
+    public static <E> List<E> toList(BufferedReader bufferedReader, BOT bot)
     {
         List<E> list= new ArrayList<>();
 
         try
         {
-            JSONReader reader = new JSONReader(bufferedReader, botDiscord);
+            JSONReader reader = new JSONReader(bufferedReader, bot);
             JSONArray array = reader.toJSONArray();
             for(int i = 0; i < array.length(); i++)
             {
                 try
                 {
                     list.add((E) array.get(i));
-                }catch(ClassCastException e){}
+                }catch(ClassCastException e){
+                    bot.getErrorHandler().handleException(e);
+                }
             }
         }
         catch(IOException e)
         {
-            botDiscord.getErrorHandler().handleException(e);
+            bot.getErrorHandler().handleException(e);
         }
 
         return list;
     }
 
-    public static <V> Map<String, V> toMap(String path, BOT botDiscord)
+    public static <V> Map<String, V> toMap(String path, BOT bot)
     {
-        return toMap(new File(path), botDiscord);
+        return toMap(new File(path), bot);
     }
 
-    public static <V> Map<String, V> toMap(File file, BOT botDiscord)
+    public static <V> Map<String, V> toMap(File file, BOT bot)
     {
         try
         {
-            return toMap(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), botDiscord);
+            return toMap(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), bot);
         }
         catch(IOException e)
         {
-            e.printStackTrace();
+            bot.getErrorHandler().handleException(e);
         }
         return new HashMap<>();
     }
 
-    public static <V> Map<String, V> toMap(Reader reader, BOT botDiscord)
+    public static <V> Map<String, V> toMap(Reader reader, BOT bot)
     {
-        return toMap(new BufferedReader(reader), botDiscord);
+        return toMap(new BufferedReader(reader), bot);
     }
 
-    public static <V> Map<String, V> toMap(BufferedReader bufferedReader, BOT botDiscord)
+    public static <V> Map<String, V> toMap(BufferedReader bufferedReader, BOT bot)
     {
         Map<String, V> map = new HashMap<>();
 
         try
         {
-            JSONReader reader = new JSONReader(bufferedReader, botDiscord);
+            JSONReader reader = new JSONReader(bufferedReader, bot);
             JSONObject object = reader.toJSONObject();
             for(String key : object.keySet())
             {
@@ -133,12 +135,14 @@ public final class JSONReader{
                 {
                     map.put(key, (V) object.get(key));
                 }
-                catch(ClassCastException e) {}
+                catch(ClassCastException e) {
+                    bot.getErrorHandler().handleException(e);
+                }
             }
         }
         catch(IOException e)
         {
-            botDiscord.getErrorHandler().handleException(e);
+            bot.getErrorHandler().handleException(e);
         }
 
         return map;

@@ -20,21 +20,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-public class BotListener implements EventListener {
+public class DiscordListener implements EventListener {
 
     private final CommandMap commandMap;
-    private final BOT botDiscord;
+    private final BOT bot;
 
     private int isSpamming;
 
-    public BotListener(CommandMap commandMap, BOT botDiscord){
+    public DiscordListener(CommandMap commandMap, BOT bot){
         this.commandMap = commandMap;
-        this.botDiscord = botDiscord;
+        this.bot = bot;
     }
 
     @Override
     public void onEvent(GenericEvent event) {
-        botDiscord.getLogger().log(Level.INFO, "Event > "+event.getClass().getSimpleName());
+        bot.getLogger().log(Level.INFO, "Event > "+event.getClass().getSimpleName());
         if(event instanceof MessageDeleteEvent) onMessageDelete((MessageDeleteEvent) event);
         if(event instanceof MessageReceivedEvent) onMessage((MessageReceivedEvent)event);
         if(event instanceof PrivateMessageReceivedEvent) onDM((PrivateMessageReceivedEvent)event);
@@ -59,9 +59,9 @@ public class BotListener implements EventListener {
         }else if(event.getTextChannel().getId().equalsIgnoreCase(Reference.RankTextChannelID.getString())){
             Emote emote = event.getReactionEmote().getEmote();
             Member member = event.getMember();
-            if(botDiscord.getRolesManager().getGrades().stream().anyMatch(grade -> grade.getEmoteId() == emote.getIdLong())){
+            if(bot.getRolesManager().getGrades().stream().anyMatch(grade -> grade.getEmoteId() == emote.getIdLong())){
                 List<Grade> grades = new ArrayList<>();
-                botDiscord.getRolesManager().getGrades().stream().filter(grade -> grade.getEmoteId() == emote.getIdLong()).forEach(grades::add);
+                bot.getRolesManager().getGrades().stream().filter(grade -> grade.getEmoteId() == emote.getIdLong()).forEach(grades::add);
                 grades.forEach(grade -> {
                     event.getGuild().addRoleToMember(member, grade.getRole()).queue();
                 });
@@ -80,9 +80,9 @@ public class BotListener implements EventListener {
         }else if(event.getTextChannel().getId().equalsIgnoreCase(Reference.RankTextChannelID.getString())){
             Emote emote = event.getReactionEmote().getEmote();
             Member member = event.getMember();
-            if(botDiscord.getRolesManager().getGrades().stream().anyMatch(grade -> grade.getEmoteId() == emote.getIdLong())){
+            if(bot.getRolesManager().getGrades().stream().anyMatch(grade -> grade.getEmoteId() == emote.getIdLong())){
                 List<Grade> grades = new ArrayList<>();
-                botDiscord.getRolesManager().getGrades().stream().filter(grade -> grade.getEmoteId() == emote.getIdLong()).forEach(grades::add);
+                bot.getRolesManager().getGrades().stream().filter(grade -> grade.getEmoteId() == emote.getIdLong()).forEach(grades::add);
                 grades.forEach(grade -> {
                     event.getGuild().removeRoleFromMember(member, grade.getRole()).queue();
                 });

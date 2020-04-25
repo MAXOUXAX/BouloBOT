@@ -24,22 +24,23 @@ import java.util.logging.Level;
 
 public final class CommandMap {
 
-    private final BOT botDiscord;
+    private final BOT bot;
 
     private final Map<Long, Integer> powers = new HashMap<>();
 
-    private List<String> userIds = new ArrayList<>();
+    private final List<String> userIds = new ArrayList<>();
+    private final List<String> giveawayUsersIds = new ArrayList<>();
 
     private final Map<String, SimpleCommand> discordCommands = new HashMap<>();
     private final Map<String, SimpleTwitchCommand> twitchCommands = new HashMap<>();
     private final String discordTag = ".";
     private final String twitchTag = "&";
 
-    public CommandMap(BOT botDiscord) {
-        this.botDiscord = botDiscord;
+    public CommandMap(BOT bot) {
+        this.bot = bot;
 
-        registerCommands(new CommandDefault(botDiscord, this), new RoleCommand(botDiscord, this), new HelpCommand(this), new MusicCommand(botDiscord, this), new CommandWeather(botDiscord, this), new CommandNotif(botDiscord, this), new CommandChangelog(botDiscord, this), new CommandVersion(botDiscord, this), new CommandSession(botDiscord, this), new CommandOctogone(botDiscord, this), new CommandSay(botDiscord, this), new CommandEmbed(botDiscord, this), new CommandPwned(this));
-        registerTwitchCommands(new TwitchWeather(botDiscord, this), new TwitchHelp(botDiscord, this), new TwitchKappa(botDiscord, this), new TwitchNotif(botDiscord, this), new TwitchPwned(botDiscord, this), new TwitchVersion(botDiscord, this), new TwitchAquoijouer(botDiscord, this), new TwitchClipThat(botDiscord, this), new TwitchSCP(botDiscord, this));
+        registerCommands(new CommandDefault(bot, this), new RoleCommand(bot, this), new HelpCommand(this), new MusicCommand(bot, this), new CommandWeather(bot, this), new CommandNotif(bot, this), new CommandChangelog(bot, this), new CommandVersion(bot, this), new CommandSession(bot, this), new CommandOctogone(bot, this), new CommandSay(bot, this), new CommandEmbed(bot, this));
+        registerTwitchCommands(new TwitchWeather(bot, this), new TwitchHelp(bot, this), new TwitchKappa(bot, this), new TwitchNotif(bot, this), new TwitchVersion(bot, this), new TwitchAquoijouer(bot, this), new TwitchClipThat(bot, this), new TwitchSCP(bot, this), new TwitchJeparticipe(bot, this));
 
         load();
     }
@@ -53,7 +54,7 @@ public final class CommandMap {
         if(!file.exists()) return;
 
         try{
-            JSONReader reader = new JSONReader(file, this.botDiscord);
+            JSONReader reader = new JSONReader(file, this.bot);
             JSONArray array = reader.toJSONArray();
 
             for(int i = 0; i < array.length(); i++)
@@ -63,7 +64,7 @@ public final class CommandMap {
             }
 
         }catch(IOException e){
-            botDiscord.getErrorHandler().handleException(e);
+            bot.getErrorHandler().handleException(e);
         }
 
         //Loading users ids
@@ -72,7 +73,7 @@ public final class CommandMap {
         if(!file3.exists()) return;
 
         try{
-            JSONReader reader = new JSONReader(file3, this.botDiscord);
+            JSONReader reader = new JSONReader(file3, this.bot);
             JSONArray array = reader.toJSONArray();
 
             for(int i = 0; i < array.length(); i++)
@@ -83,7 +84,27 @@ public final class CommandMap {
             }
 
         }catch(IOException e){
-            botDiscord.getErrorHandler().handleException(e);
+            bot.getErrorHandler().handleException(e);
+        }
+
+        //Loading giveaway ids
+
+        File file4 = new File("giveaway.json");
+        if(!file4.exists()) return;
+
+        try{
+            JSONReader reader = new JSONReader(file4, this.bot);
+            JSONArray array = reader.toJSONArray();
+
+            for(int i = 0; i < array.length(); i++)
+            {
+                JSONObject object = array.getJSONObject(i);
+                String id = object.getString("id");
+                giveawayUsersIds.add(id);
+            }
+
+        }catch(IOException e){
+            bot.getErrorHandler().handleException(e);
         }
     }
 
@@ -107,8 +128,8 @@ public final class CommandMap {
             writter.write(array);
             writter.flush();
 
-        }catch(IOException ioe){
-            ioe.printStackTrace();
+        }catch(IOException e){
+            bot.getErrorHandler().handleException(e);
         }
 
         //FILE IDS
@@ -127,8 +148,28 @@ public final class CommandMap {
             writter.write(array3);
             writter.flush();
 
-        }catch(IOException ioe){
-            ioe.printStackTrace();
+        }catch(IOException e){
+            bot.getErrorHandler().handleException(e);
+        }
+
+        //GIVEAWAY
+
+        JSONArray array4 = new JSONArray();
+
+        for(String userId : giveawayUsersIds)
+        {
+            JSONObject object = new JSONObject();
+            object.accumulate("id", userId);
+            array4.put(object);
+        }
+
+        try(JSONWriter writter = new JSONWriter("giveaway.json")){
+
+            writter.write(array4);
+            writter.flush();
+
+        }catch(IOException e){
+            bot.getErrorHandler().handleException(e);
         }
     }
 
@@ -136,13 +177,13 @@ public final class CommandMap {
         try {
             SimpleCommand command1 = discordCommands.get(command);
             EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.setTitle("Aide » ." + command);
+            embedBuilder.setTitle("Aide » "+discordTag + command);
             embedBuilder.setDescription(command1.getDescription());
-            embedBuilder.addField("Utilisation:", command1.getHelp(), true);
-            embedBuilder.addField("Exemple:", command1.getExemple(), true);
+            embedBuilder.addField("Utilisation:", discordTag+command1.getHelp(), true);
+            embedBuilder.addField("Exemple:", discordTag+command1.getExemple(), true);
             return embedBuilder;
         }catch (Exception e){
-            botDiscord.getErrorHandler().handleException(e);
+            bot.getErrorHandler().handleException(e);
         }
         return null;
     }
@@ -150,9 +191,9 @@ public final class CommandMap {
     public String getTwitchHelpString(String command){
         try {
             SimpleTwitchCommand command1 = twitchCommands.get(command);
-            return "Aide » &" + command+" | "+command1.getDescription()+ " | Utilisation:"+command1.getHelp()+ " | Exemple: "+command1.getExemple();
-        }catch (Exception ex){
-            ex.printStackTrace();
+            return "Aide » "+ twitchTag + command+" | "+command1.getDescription()+ " | Utilisation:"+twitchTag+command1.getHelp()+ " | Exemple: "+twitchTag+command1.getExemple();
+        }catch (Exception e){
+            bot.getErrorHandler().handleException(e);
         }
         return null;
     }
@@ -163,6 +204,14 @@ public final class CommandMap {
 
     public boolean isKnown(String id){
         return userIds.contains(id);
+    }
+
+    public void addGiveawayUser(String id){
+        if(!giveawayUsersIds.contains(id)) giveawayUsersIds.add(id);
+    }
+
+    public boolean isGiveawayKnown(String id){
+        return giveawayUsersIds.contains(id);
     }
 
     public void addUserPower(User user, int power)
@@ -218,14 +267,14 @@ public final class CommandMap {
     public void discordCommandConsole(String command){
         Object[] object = getDiscordCommand(command);
         if(object[0] == null || ((SimpleCommand)object[0]).getExecutorType() == Command.ExecutorType.USER){
-            botDiscord.getLogger().log(Level.WARNING,"Commande inconnue.");
+            bot.getLogger().log(Level.WARNING,"Commande inconnue.");
             return;
         }
         try{
             executeDiscordCommand(((SimpleCommand)object[0]), command, (String[])object[1], null);
         }catch(Exception e){
-            botDiscord.getLogger().log(Level.SEVERE,"La methode "+((SimpleCommand)object[0]).getMethod().getName()+" n'est pas correctement initialisé.");
-            botDiscord.getErrorHandler().handleException(e);
+            bot.getLogger().log(Level.SEVERE,"La methode "+((SimpleCommand)object[0]).getMethod().getName()+" n'est pas correctement initialisé.");
+            bot.getErrorHandler().handleException(e);
         }
     }
 
@@ -237,9 +286,9 @@ public final class CommandMap {
 
         try{
             executeDiscordCommand(((SimpleCommand)object[0]), command,(String[])object[1], message);
-        }catch(Exception exception){
-            botDiscord.getLogger().log(Level.SEVERE,"La methode "+((SimpleCommand)object[0]).getMethod().getName()+" n'est pas correctement initialisé.");
-            exception.printStackTrace();
+        }catch(Exception e){
+            bot.getLogger().log(Level.SEVERE,"La methode "+((SimpleCommand)object[0]).getMethod().getName()+" n'est pas correctement initialisé. ("+e.getMessage()+")");
+            e.printStackTrace();
         }
         return true;
     }
@@ -267,7 +316,7 @@ public final class CommandMap {
             else if(parameters[i].getType() == Guild.class) objects[i] = message == null ? null : message.getGuild();
             else if(parameters[i].getType() == String.class) objects[i] = command;
             else if(parameters[i].getType() == Message.class) objects[i] = message;
-            else if(parameters[i].getType() == JDA.class) objects[i] = botDiscord.getJda();
+            else if(parameters[i].getType() == JDA.class) objects[i] = bot.getJda();
             else if(parameters[i].getType() == MessageChannel.class) objects[i] = message == null ? null : message.getChannel();
             else if(parameters[i].getType() == SimpleCommand.class) objects[i] = simpleCommand;
         }
@@ -299,8 +348,8 @@ public final class CommandMap {
         try{
             executeTwitchCommand(((SimpleTwitchCommand)object[0]), broadcaster, broadcasterId, user, (String[])object[1], commandPermissions);
         }catch(Exception e){
-            botDiscord.getLogger().log(Level.SEVERE,"La methode "+((SimpleTwitchCommand)object[0]).getMethod().getName()+" n'est pas correctement initialisé.");
-            botDiscord.getErrorHandler().handleException(e);
+            bot.getLogger().log(Level.SEVERE,"La methode "+((SimpleTwitchCommand)object[0]).getMethod().getName()+" n'est pas correctement initialisé.");
+            bot.getErrorHandler().handleException(e);
         }
         return true;
     }
@@ -335,10 +384,19 @@ public final class CommandMap {
         return userIds;
     }
 
+    public List<String> getGiveawayUsersIds() {
+        return giveawayUsersIds;
+    }
+
+    public void clearGiveaway(){
+        giveawayUsersIds.clear();
+    }
+
     public TwitchCommand.ExecutorRank getRank(Set<CommandPermission> permissions) {
         if(permissions.contains(CommandPermission.BROADCASTER))return TwitchCommand.ExecutorRank.OWNER;
         if(permissions.contains(CommandPermission.MODERATOR))return TwitchCommand.ExecutorRank.MOD;
         if(permissions.contains(CommandPermission.VIP))return TwitchCommand.ExecutorRank.VIP;
+        if(permissions.contains(CommandPermission.SUBSCRIBER))return TwitchCommand.ExecutorRank.SUBSCRIBER;
         return TwitchCommand.ExecutorRank.EVERYONE;
     }
 }

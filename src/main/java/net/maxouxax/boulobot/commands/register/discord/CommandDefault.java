@@ -24,17 +24,17 @@ import java.util.TimerTask;
 
 public class CommandDefault {
 
-    private final BOT botDiscord;
+    private final BOT bot;
     private final CommandMap commandMap;
 
-    public CommandDefault(BOT botDiscord, CommandMap commandMap){
-        this.botDiscord = botDiscord;
+    public CommandDefault(BOT bot, CommandMap commandMap){
+        this.bot = bot;
         this.commandMap = commandMap;
     }
 
     @Command(name="stop",type=ExecutorType.CONSOLE)
     private void stop(){
-        botDiscord.setRunning(false);
+        bot.setRunning(false);
     }
 
     @Command(name="power",power=150, description = "Permet de définir le power d'un utilisateur", example = ".power 150 @Maxx_#2233", help = ".power <power> <@user>")

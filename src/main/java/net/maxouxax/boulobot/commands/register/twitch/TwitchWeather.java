@@ -9,12 +9,12 @@ import net.maxouxax.boulobot.commands.TwitchCommand;
 
 public class TwitchWeather {
 
-    private CommandMap commandMap;
-    private BOT botDiscord;
+    private final CommandMap commandMap;
+    private final BOT bot;
 
-    public TwitchWeather(BOT botDiscord, CommandMap commandMap) {
+    public TwitchWeather(BOT bot, CommandMap commandMap) {
         this.commandMap = commandMap;
-        this.botDiscord = botDiscord;
+        this.bot = bot;
     }
 
     @TwitchCommand(name = "météo", rank = TwitchCommand.ExecutorRank.EVERYONE, description = "Permet de récupérer la météo actuelle dans une ville donnée", example = "&météo Paris", help = "&météo")
@@ -22,7 +22,7 @@ public class TwitchWeather {
         try {
             String em = commandMap.getTwitchHelpString("météo");
             if (args.length == 0) {
-                botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, em);
+                bot.getTwitchClient().getChat().sendMessage(broadcaster, em);
             } else {
                 StringBuilder str = new StringBuilder();
 
@@ -31,7 +31,7 @@ public class TwitchWeather {
                 }
 
                 String city = str.toString();
-                OWM owm = new OWM(botDiscord.getConfigurationManager().getStringValue("owmApiKey"));
+                OWM owm = new OWM(bot.getConfigurationManager().getStringValue("owmApiKey"));
                 owm.setLanguage(OWM.Language.FRENCH);
                 owm.setUnit(OWM.Unit.METRIC);
                 CurrentWeather cwd = owm.currentWeatherByCityName(city);
@@ -60,12 +60,12 @@ public class TwitchWeather {
                 } else {
                     weatherString.append(" | Vent » Aucune donnée");
                 }
-                botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, weatherString.toString());
+                bot.getTwitchClient().getChat().sendMessage(broadcaster, weatherString.toString());
             }
         } catch (Exception e) {
             String errorString = "Une erreur est survenue | Message d'erreur » "+ e.getMessage();
-            botDiscord.getTwitchClient().getChat().sendMessage(broadcaster, errorString);
-            botDiscord.getErrorHandler().handleException(e);
+            bot.getTwitchClient().getChat().sendMessage(broadcaster, errorString);
+            bot.getErrorHandler().handleException(e);
         }
     }
 

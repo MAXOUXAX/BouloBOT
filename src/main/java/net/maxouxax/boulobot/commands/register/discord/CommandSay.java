@@ -9,11 +9,11 @@ import net.maxouxax.boulobot.commands.CommandMap;
 
 public class CommandSay {
 
-    private final BOT botDiscord;
+    private final BOT bot;
     private final CommandMap commandMap;
 
-    public CommandSay(BOT botDiscord, CommandMap commandMap){
-        this.botDiscord = botDiscord;
+    public CommandSay(BOT bot, CommandMap commandMap){
+        this.bot = bot;
         this.commandMap = commandMap;
     }
 
@@ -23,7 +23,7 @@ public class CommandSay {
         for (int i = 0; i < args.length; i++) {
             messageStr.append(args[i]).append(" ");
         }
-        botDiscord.getTwitchClient().getChat().sendMessage(botDiscord.getChannelName().toLowerCase(), messageStr.toString());
+        bot.getTwitchClient().getChat().sendMessage(bot.getChannelName().toLowerCase(), messageStr.toString());
     }
 
 }

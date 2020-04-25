@@ -149,81 +149,89 @@ public class BOT implements Runnable{
     }
 
     public void sendGoLiveNotif(String title, String gameId, String channelId){
-        if(sessionManager.getCurrentSession() != null){
-            logger.log(Level.SEVERE, "Gosh! We're in trouble... Session wasn't null, it means that a session was already started! We need to fix that!");
-            return;
+        try {
+            if (sessionManager.getCurrentSession() != null) {
+                logger.log(Level.SEVERE, "Gosh! We're in trouble... Session wasn't null, it means that a session was already started! We need to fix that!");
+                return;
+            }
+            StreamList streamResultList = twitchClient.getHelix().getStreams(configurationManager.getStringValue("oauth2Token"), "", "", null, null, null, null, Collections.singletonList(channelId), null).execute();
+            final Stream[] currentStream = new Stream[1];
+            streamResultList.getStreams().forEach(stream -> {
+                currentStream[0] = stream;
+            });
+
+            Session session = sessionManager.startNewSession(channelId);
+            session.newGame(gameId);
+            session.setTitle(title);
+
+            Guild discord = jda.getGuildById(Reference.GuildID.getString());
+            Member lyorine = discord.getMemberById(Reference.LyorineClientID.getString());
+            Role notif = discord.getRoleById(Reference.NotifRoleID.getString());
+            logger.log(Level.INFO, "> Le stream est ONLINE!");
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/" + channelName.toUpperCase());
+            embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
+            embedBuilder.setColor(3066993);
+            embedBuilder.setDescription("Coucou les " + notif.getAsMention() + " !\n**" + lyorine.getAsMention() + "** vient de démarrer son live, v'nez voir !\n» https://twitch.tv/" + channelName.toUpperCase());
+            embedBuilder.addField(new MessageEmbed.Field("Titre", title, true));
+            GameList resultList = twitchClient.getHelix().getGames(Collections.singletonList(gameId), null).execute();
+            final String[] gameName = {"Aucun jeu"};
+            resultList.getGames().forEach(game -> {
+                gameName[0] = game.getName();
+                String boxUrl = game.getBoxArtUrl();
+                boxUrl = boxUrl.replace("{width}", "600");
+                boxUrl = boxUrl.replace("{height}", "800");
+                embedBuilder.setThumbnail(boxUrl);
+            });
+            embedBuilder.addField(new MessageEmbed.Field("Jeu", gameName[0], true));
+
+            embedBuilder.setImage(currentStream[0].getThumbnailUrl(1280, 720));
+            TextChannel toSend = discord.getTextChannelById(Reference.NotifTextChannelID.getString());
+            Message message = new MessageBuilder(notif.getAsMention()).setEmbed(embedBuilder.build()).build();
+            toSend.sendMessage(message).queue(session::setSessionMessage);
+            twitchClient.getChat().sendMessage(channelName, "Coucou imGlitch ! \n» Je viens d'envoyer la notification à tous les chats ! Bon live ! LUL");
+            jda.getPresence().setActivity(Activity.streaming("avec sa reine à " + gameName[0], "https://twitch.tv/" + channelName.toUpperCase()));
+        }catch (Exception e){
+            getErrorHandler().handleException(e);
         }
-        StreamList streamResultList = twitchClient.getHelix().getStreams(configurationManager.getStringValue("oauth2Token"), "", "", null, null, null, null, Collections.singletonList(channelId), null).execute();
-        final Stream[] currentStream = new Stream[1];
-        streamResultList.getStreams().forEach(stream -> {
-            currentStream[0] = stream;
-        });
-
-        Session session = sessionManager.startNewSession(channelId);
-        session.newGame(gameId);
-        session.setTitle(title);
-
-        Guild discord = jda.getGuildById(Reference.GuildID.getString());
-        Member lyorine = discord.getMemberById(Reference.LyorineClientID.getString());
-        Role notif = discord.getRoleById(Reference.NotifRoleID.getString());
-        logger.log(Level.INFO, "> Le stream est ONLINE!");
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());
-        embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
-        embedBuilder.setColor(3066993);
-        embedBuilder.setDescription("Coucou les "+notif.getAsMention()+" !\n**"+lyorine.getAsMention()+"** vient de démarrer son live, v'nez voir !\n» https://twitch.tv/"+channelName.toUpperCase());
-        embedBuilder.addField(new MessageEmbed.Field("Titre", title, true));
-        GameList resultList = twitchClient.getHelix().getGames(Collections.singletonList(gameId), null).execute();
-        final String[] gameName = {"Aucun jeu"};
-        resultList.getGames().forEach(game -> {
-            gameName[0] = game.getName();
-            String boxUrl = game.getBoxArtUrl();
-            boxUrl = boxUrl.replace("{width}", "600");
-            boxUrl = boxUrl.replace("{height}", "800");
-            embedBuilder.setThumbnail(boxUrl);
-        });
-        embedBuilder.addField(new MessageEmbed.Field("Jeu", gameName[0], true));
-
-        embedBuilder.setImage(currentStream[0].getThumbnailUrl(1280, 720));
-        TextChannel toSend = discord.getTextChannelById(Reference.NotifTextChannelID.getString());
-        Message message = new MessageBuilder(notif.getAsMention()).setEmbed(embedBuilder.build()).build();
-        toSend.sendMessage(message).queue(session::setSessionMessage);
-        twitchClient.getChat().sendMessage(channelName, "Coucou imGlitch ! \n» Je viens d'envoyer la notification à tous les chats ! Bon live ! LUL");
-        jda.getPresence().setActivity(Activity.streaming("avec sa reine à "+gameName[0], "https://twitch.tv/"+channelName.toUpperCase()));
     }
 
-    public void sendGoOfflineNotif(){
-        if(sessionManager.getCurrentSession() == null){
-            logger.log(Level.SEVERE, "Hmmm... There's a problem, a GoOffline has been sended, but no session was running... Erhm.");
+    public void sendGoOfflineNotif() {
+        try {
+            if (sessionManager.getCurrentSession() == null) {
+                logger.log(Level.SEVERE, "Hmmm... There's a problem, a GoOffline has been sended, but no session was running... Erhm.");
+            }
+
+            Session session = sessionManager.getCurrentSession();
+            sessionManager.endSession();
+            logger.log(Level.INFO, "> Le stream est OFFLINE!");
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            embedBuilder.setTitle("Live terminé \uD83D\uDD14", "https://twitch.tv/" + channelName.toUpperCase());
+            embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
+            embedBuilder.setColor(15158332);
+            embedBuilder.setDescription("Oh dommage...\nLe live est désormais terminé !\nVous pourrez retrouver " + channelName.toUpperCase() + " une prochaine fois, à l'adresse suivante !\n» https://twitch.tv/" + channelName.toUpperCase());
+            embedBuilder.addField("Nombre de viewer maximum", session.getMaxViewers() + "", true);
+            embedBuilder.addField("Nombre de viewer moyen", session.getAvgViewers() + "", true);
+            embedBuilder.addField("Titre", session.getTitle() + "", true);
+            embedBuilder.addField("Nombre de ban & timeout", session.getBansAndTimeouts() + "", true);
+            embedBuilder.addField("Nombre de commandes utilisées", session.getCommandUsed() + "", true);
+            embedBuilder.addField("Nombre de messages envoyés", session.getMessageSended() + "", true);
+            embedBuilder.addField("Nombre de followers", session.getNewFollowers() + "", true);
+            embedBuilder.addField("Nombre de nouveaux viewers", session.getNewViewers() + "", true);
+            LocalDateTime start = new Date(session.getStartDate()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            LocalDateTime end = new Date(session.getEndDate()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            int minutesC = Math.toIntExact(Duration.between(start, end).toMinutes());
+            int hours = minutesC / 60;
+            int minutes = minutesC % 60;
+
+            embedBuilder.addField("Durée", hours + "h" + (minutes < 10 ? "0" : "") + minutes, true);
+            jda.getPresence().setActivity(Activity.playing("Amazingly powerful"));
+            session.getSessionMessage().editMessage(" ").embed(embedBuilder.build()).queue();
+            logger.log(Level.INFO, "> Updated!");
+            sessionManager.deleteCurrentSession();
+        } catch (Exception e) {
+            getErrorHandler().handleException(e);
         }
-
-        Session session = sessionManager.getCurrentSession();
-        sessionManager.endSession();
-        logger.log(Level.INFO, "> Le stream est OFFLINE!");
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Live terminé \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());
-        embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
-        embedBuilder.setColor(15158332);
-        embedBuilder.setDescription("Oh dommage...\nLe live est désormais terminé !\nVous pourrez retrouver "+channelName.toUpperCase()+" une prochaine fois, à l'adresse suivante !\n» https://twitch.tv/"+channelName.toUpperCase());
-        embedBuilder.addField("Nombre de viewer maximum", session.getMaxViewers()+"", true);
-        embedBuilder.addField("Nombre de viewer moyen", session.getAvgViewers()+"", true);
-        embedBuilder.addField("Titre", session.getTitle()+"", true);
-        embedBuilder.addField("Nombre de ban & timeout", session.getBansAndTimeouts()+"", true);
-        embedBuilder.addField("Nombre de commandes utilisées", session.getCommandUsed()+"", true);
-        embedBuilder.addField("Nombre de messages envoyés", session.getMessageSended()+"", true);
-        embedBuilder.addField("Nombre de followers", session.getNewFollowers()+"", true);
-        embedBuilder.addField("Nombre de nouveaux viewers", session.getNewViewers()+"", true);
-        LocalDateTime start = new Date(session.getStartDate()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-        LocalDateTime end = new Date(session.getEndDate()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-        int minutesC = Math.toIntExact(Duration.between(start, end).toMinutes());
-        int hours = minutesC / 60;
-        int minutes = minutesC % 60;
-
-        embedBuilder.addField("Durée", hours+"h"+(minutes < 10 ? "0" : "")+minutes, true);
-        jda.getPresence().setActivity(Activity.playing("Amazingly powerful"));
-        session.getSessionMessage().editMessage(" ").embed(embedBuilder.build()).queue();
-        logger.log(Level.INFO, "> Updated!");
-        sessionManager.deleteCurrentSession();
     }
 
     private void loadDiscord() throws LoginException, InterruptedException {

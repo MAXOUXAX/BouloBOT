@@ -25,13 +25,13 @@ import java.util.logging.Level;
 public class RolesManager {
 
     private Message messageForRoles;
-    private TextChannel textChannelRoles;
-    private ArrayList<Grade> grades = new ArrayList<>();
-    private BOT botDiscord;
+    private final TextChannel textChannelRoles;
+    private final ArrayList<Grade> grades = new ArrayList<>();
+    private final BOT bot;
 
-    public RolesManager(TextChannel textChannelRoles, BOT botDiscord) {
+    public RolesManager(TextChannel textChannelRoles, BOT bot) {
         this.textChannelRoles = textChannelRoles;
-        this.botDiscord = botDiscord;
+        this.bot = bot;
     }
 
     public void reloadRoles(){
@@ -41,36 +41,36 @@ public class RolesManager {
     }
 
     public void loadRoles(){
-        botDiscord.getLogger().log(Level.INFO, "> LoadRoles");
+        bot.getLogger().log(Level.INFO, "> LoadRoles");
         File file = new File("roles.json");
-        botDiscord.getLogger().log(Level.INFO,"> file roles.json");
+        bot.getLogger().log(Level.INFO,"> file roles.json");
         if(!file.exists()) return;
 
         try{
-            JSONReader reader = new JSONReader(file, this.botDiscord);
+            JSONReader reader = new JSONReader(file, this.bot);
             JSONArray array = reader.toJSONArray();
 
             for(int i = 0; i < array.length(); i++)
             {
                 JSONObject object = array.getJSONObject(i);
                 Grade gradeToAdd = new Grade(textChannelRoles.getGuild().getRoleById(object.getLong("id")), object.getString("displayname"), object.getString("description"), object.getLong("emoteId"));
-                botDiscord.getLogger().log(Level.INFO,"> Created grade");
-                botDiscord.getLogger().log(Level.INFO,"> "+gradeToAdd.toString());
+                bot.getLogger().log(Level.INFO,"> Created grade");
+                bot.getLogger().log(Level.INFO,"> "+gradeToAdd.toString());
                 grades.add(gradeToAdd);
-                botDiscord.getLogger().log(Level.INFO,"> Grade added to list");
+                bot.getLogger().log(Level.INFO,"> Grade added to list");
             }
 
         }catch(IOException e){
-            botDiscord.getErrorHandler().handleException(e);
+            bot.getErrorHandler().handleException(e);
         }
         loadMessage();
     }
 
     private void loadMessage() {
-        botDiscord.getLogger().log(Level.INFO,"> LoadMessage");
-        long messageId = botDiscord.getConfigurationManager().getLongValue("messageRolesID");
+        bot.getLogger().log(Level.INFO,"> LoadMessage");
+        long messageId = bot.getConfigurationManager().getLongValue("messageRolesID");
         this.messageForRoles = textChannelRoles.retrieveMessageById(messageId).complete();
-        botDiscord.getLogger().log(Level.INFO,"> TextChannel getted!");
+        bot.getLogger().log(Level.INFO,"> TextChannel getted!");
 
         new Timer().schedule(new TimerTask() {
             @Override
@@ -81,9 +81,9 @@ public class RolesManager {
     }
 
     private void sendMessage() {
-        botDiscord.getLogger().log(Level.INFO,"> SendMessage");
+        bot.getLogger().log(Level.INFO,"> SendMessage");
         if(messageForRoles == null){
-            botDiscord.getLogger().log(Level.INFO,"> Message do not exist, let's send it!");
+            bot.getLogger().log(Level.INFO,"> Message do not exist, let's send it!");
             TemmieWebhook temmieWebhook = new TemmieWebhook(Reference.GradesWebhookURL.getString());
             DiscordEmbed discordEmbed = DiscordEmbed.builder()
                     .title("Grades")
@@ -93,7 +93,7 @@ public class RolesManager {
                     .build();
             DiscordMessage discordMessage = DiscordMessage.builder().embed(discordEmbed).build();
             temmieWebhook.sendMessage(discordMessage);
-            botDiscord.getLogger().log(Level.INFO,"> Webhook message sended!");
+            bot.getLogger().log(Level.INFO,"> Webhook message sended!");
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.setTitle("Liste des grades", "https://lyorine.com")
                     .setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString())
@@ -107,14 +107,14 @@ public class RolesManager {
                 @Override
                 public void run() {
                     textChannelRoles.sendMessage(embedBuilder.build()).queue();
-                    botDiscord.getLogger().log(Level.INFO,"> EmbedRoles sended!");
+                    bot.getLogger().log(Level.INFO,"> EmbedRoles sended!");
                 }
             }, 5000);
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
                     messageForRoles = textChannelRoles.getHistory().getMessageById(textChannelRoles.getLatestMessageId());
-                    botDiscord.getLogger().log(Level.INFO,"> MessageForRoles correctly setted to "+messageForRoles.getId()+" !");
+                    bot.getLogger().log(Level.INFO,"> MessageForRoles correctly setted to "+messageForRoles.getId()+" !");
                 }
             }, 15000);
             new Timer().schedule(new TimerTask() {
@@ -127,7 +127,7 @@ public class RolesManager {
                 }
             }, 20000);
         }else{
-            botDiscord.getLogger().log(Level.INFO,"> Message already existing, refreshing it!");
+            bot.getLogger().log(Level.INFO,"> Message already existing, refreshing it!");
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.setTitle("Liste des grades", "https://lyorine.com")
                     .setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString())
@@ -135,23 +135,28 @@ public class RolesManager {
                     .setColor(3066993);
             grades.forEach(grade -> {
                 Emote emote = textChannelRoles.getGuild().getEmoteById(grade.getEmoteId());
-                embedBuilder.addField("Grade: "+grade.getDisplayName(), grade.getDescription()+"\nRéaction a ajouter » "+emote.getAsMention(), true);
+                if(emote != null) {
+                    embedBuilder.addField("Grade: " + grade.getDisplayName(), grade.getDescription() + "\nRéaction a ajouter » " + emote.getAsMention(), true);
+                }else{
+                    embedBuilder.addField("Grade: " + grade.getDisplayName(), grade.getDescription() + "\nRéaction a ajouter » Inconnue (contacter un administrateur !)", true);
+                    bot.getErrorHandler().handleException(new Exception("Unknown emote"));
+                }
             });
             messageForRoles.editMessage(embedBuilder.build()).queue();
             grades.forEach(grade -> {
                 Emote emote = textChannelRoles.getGuild().getEmoteById(grade.getEmoteId());
                 messageForRoles.addReaction(emote).queue();
             });
-            botDiscord.getLogger().log(Level.INFO,"> Message refreshed!");
+            bot.getLogger().log(Level.INFO,"> Message refreshed!");
         }
     }
 
     public void saveRoles(){
-        botDiscord.getLogger().log(Level.INFO,"> saveRoles");
+        bot.getLogger().log(Level.INFO,"> saveRoles");
         JSONArray array = new JSONArray();
         for(Grade grade : grades)
         {
-            botDiscord.getLogger().log(Level.INFO,"> Saving grade: "+grade.getDisplayName());
+            bot.getLogger().log(Level.INFO,"> Saving grade: "+grade.getDisplayName());
             JSONObject object = new JSONObject();
             object.accumulate("id", grade.getRole().getIdLong());
             object.accumulate("displayname", grade.getDisplayName());
@@ -163,7 +168,7 @@ public class RolesManager {
             writter.write(array);
             writter.flush();
         }catch(IOException e){
-            botDiscord.getErrorHandler().handleException(e);
+            bot.getErrorHandler().handleException(e);
         }
 
 
@@ -193,6 +198,6 @@ public class RolesManager {
 
     public void registerGrade(Grade grade) {
         this.grades.add(grade);
-        botDiscord.getLogger().log(Level.INFO,"> Grades size: "+grades.size());
+        bot.getLogger().log(Level.INFO,"> Grades size: "+grades.size());
     }
 }

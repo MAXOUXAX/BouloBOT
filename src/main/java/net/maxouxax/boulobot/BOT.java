@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -159,6 +160,13 @@ public class BOT implements Runnable{
             streamResultList.getStreams().forEach(stream -> {
                 currentStream[0] = stream;
             });
+            if(currentStream[0] == null){
+                getErrorHandler().handleException(new Exception("currentStream[0] == null"));
+                return;
+            }else if(currentStream[0].getThumbnailUrl(1280, 720) == null){
+                getErrorHandler().handleException(new Exception("currentStream[0].getThumbnailUrl(1280, 720) == null"));
+                return;
+            }
 
             Session session = sessionManager.startNewSession(channelId);
             session.newGame(gameId);
@@ -200,6 +208,7 @@ public class BOT implements Runnable{
         try {
             if (sessionManager.getCurrentSession() == null) {
                 logger.log(Level.SEVERE, "Hmmm... There's a problem, a GoOffline has been sended, but no session was running... Erhm.");
+                return;
             }
 
             Session session = sessionManager.getCurrentSession();
@@ -212,7 +221,7 @@ public class BOT implements Runnable{
             embedBuilder.setDescription("Oh dommage...\nLe live est désormais terminé !\nVous pourrez retrouver " + channelName.toUpperCase() + " une prochaine fois, à l'adresse suivante !\n» https://twitch.tv/" + channelName.toUpperCase());
             embedBuilder.addField("Nombre de viewer maximum", session.getMaxViewers() + "", true);
             embedBuilder.addField("Nombre de viewer moyen", session.getAvgViewers() + "", true);
-            embedBuilder.addField("Titre", session.getTitle() + "", true);
+            embedBuilder.addField("Titre", session.getTitle(), true);
             embedBuilder.addField("Nombre de ban & timeout", session.getBansAndTimeouts() + "", true);
             embedBuilder.addField("Nombre de commandes utilisées", session.getCommandUsed() + "", true);
             embedBuilder.addField("Nombre de messages envoyés", session.getMessageSended() + "", true);
@@ -236,7 +245,8 @@ public class BOT implements Runnable{
 
     private void loadDiscord() throws LoginException, InterruptedException {
         //Creating the credentials, adding the listeners, and load the roles
-        jda = new JDABuilder(AccountType.BOT).setToken(configurationManager.getStringValue("botToken")).build();
+        jda = new JDABuilder(AccountType.BOT)
+                .setToken(configurationManager.getStringValue("botToken")).build();
         jda.addEventListener(new DiscordListener(commandMap, this));
         jda.getPresence().setActivity(Activity.playing("Amazingly powerful"));
         jda.awaitReady();
@@ -245,7 +255,7 @@ public class BOT implements Runnable{
 
     private void loadRolesManager() {
         //Loading the RoleManager system
-        TextChannel textChannel = jda.getGuildById(Reference.GuildID.getString()).getTextChannelById(Reference.RankTextChannelID.getString());
+        TextChannel textChannel = Objects.requireNonNull(jda.getGuildById(Reference.GuildID.getString())).getTextChannelById(Reference.RankTextChannelID.getString());
         rolesManager = new RolesManager(textChannel, this);
         rolesManager.loadRoles();
     }

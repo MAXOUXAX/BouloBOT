@@ -10,8 +10,8 @@ public class ErrorHandler {
 
     private final BOT bot;
 
-    public ErrorHandler(BOT bot) {
-        this.bot = bot;
+    public ErrorHandler() {
+        this.bot = BOT.getInstance();
     }
 
     public void handleException(Throwable exception){

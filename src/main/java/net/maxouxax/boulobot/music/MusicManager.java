@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.maxouxax.boulobot.util.Reference;
+import net.maxouxax.boulobot.BOT;
 
 import java.awt.*;
 import java.time.Duration;
@@ -24,7 +24,10 @@ public class MusicManager {
     private final AudioPlayerManager manager = new DefaultAudioPlayerManager();
     private final Map<String, MusicPlayer> players = new HashMap<>();
 
+    private final BOT bot;
+
     public MusicManager(){
+        this.bot = BOT.getInstance();
         AudioSourceManagers.registerRemoteSources(manager);
         AudioSourceManagers.registerLocalSource(manager);
     }
@@ -58,7 +61,7 @@ public class MusicManager {
                 builder.setTitle("Play command requested by "+user.getName());
                 builder.setThumbnail(user.getAvatarUrl()+"?size=256");
                 builder.setDescription("Titre: **"+info.title+"**\nAuteur: **"+info.author+"**\nDurée: **"+durationfinal+"**\nURL: **"+info.uri+"**");
-                builder.setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString());
+                builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
 
                 channel.sendMessage(builder.build()).queue();
             }
@@ -74,7 +77,7 @@ public class MusicManager {
                 builder.setColor(Color.GREEN);
                 builder.setTitle("Play(list) command requested by "+user.getName());
                 builder.setThumbnail(user.getAvatarUrl()+"?size=256");
-                builder.setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString());
+                builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
 
                 for(int i = 0; i < playlist.getTracks().size(); i++) {
                     AudioTrack track = playlist.getTracks().get(i);
@@ -108,7 +111,7 @@ public class MusicManager {
                 builder.setTitle("Play command requested by "+user.getName());
                 builder.setDescription("La piste " + source + " n'a pas été trouvé.");
                 builder.setThumbnail(user.getAvatarUrl()+"?size=256");
-                builder.setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString());
+                builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
                 channel.sendMessage(builder.build()).queue();
             }
 
@@ -119,7 +122,7 @@ public class MusicManager {
                 builder.setTitle("Play command requested by "+user.getName());
                 builder.setDescription("Impossible de jouer la piste (raison:" + exception.getMessage()+")");
                 builder.setThumbnail(user.getAvatarUrl()+"?size=256");
-                builder.setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString());
+                builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
                 channel.sendMessage(builder.build()).queue();
             }
         });

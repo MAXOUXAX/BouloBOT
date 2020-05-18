@@ -15,14 +15,14 @@ public class TwitchClipThat {
     private final BOT bot;
     private final CommandMap commandMap;
 
-    public TwitchClipThat(BOT bot, CommandMap commandMap){
-        this.bot = bot;
+    public TwitchClipThat(CommandMap commandMap){
         this.commandMap = commandMap;
+        this.bot = BOT.getInstance();
     }
 
     @TwitchCommand(name = "clipthat", example = "&clipthat", help = "&clipthat", description = "Créer un clip automatiquement", rank = TwitchCommand.ExecutorRank.EVERYONE)
     private void clipThat(User user, String broadcaster, String[] args){
-        UserList resultList = bot.getTwitchClient().getHelix().getUsers(null, null, Arrays.asList(broadcaster)).execute();
+        UserList resultList = bot.getTwitchClient().getHelix().getUsers(bot.getConfigurationManager().getStringValue("oauth2Token"), null, Arrays.asList(broadcaster)).execute();
         final User[] broadcasterUser = new User[1];
         resultList.getUsers().forEach(user1 -> {
             broadcasterUser[0] = user1;

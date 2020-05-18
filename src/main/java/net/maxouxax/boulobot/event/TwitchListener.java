@@ -1,10 +1,7 @@
 package net.maxouxax.boulobot.event;
 
 import com.github.philippheuer.events4j.simple.SimpleEventHandler;
-import com.github.twitch4j.chat.events.channel.ChannelMessageEvent;
-import com.github.twitch4j.chat.events.channel.IRCMessageEvent;
-import com.github.twitch4j.chat.events.channel.UserBanEvent;
-import com.github.twitch4j.chat.events.channel.UserTimeoutEvent;
+import com.github.twitch4j.chat.events.channel.*;
 import com.github.twitch4j.common.events.channel.ChannelChangeGameEvent;
 import com.github.twitch4j.common.events.domain.EventUser;
 import com.github.twitch4j.helix.domain.User;
@@ -29,15 +26,15 @@ public class TwitchListener {
         bot.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(UserTimeoutEvent.class, this::onTimeOut);
         bot.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(UserBanEvent.class, this::onBan);
         bot.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(IRCMessageEvent.class, this::ircMessage);
-        //bot.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(FollowEvent.class, this::followEvent);
+        bot.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(FollowEvent.class, this::followEvent);
     }
 
-    /*private void followEvent(FollowEvent followEvent) {
+    private void followEvent(FollowEvent followEvent) {
         if(bot.getSessionManager().isSessionStarted()){
             bot.getSessionManager().getCurrentSession().addFollower();
         }
         bot.getLogger().log(Level.INFO, followEvent.getUser().getName()+" vient de follow !");
-    }*/
+    }
 
     private void ircMessage(IRCMessageEvent event) {
         if(event.getMessage().isPresent()) {
@@ -85,7 +82,7 @@ public class TwitchListener {
         }
         if (message.startsWith(commandMap.getTwitchTag())) {
             EventUser user = channelMessageEvent.getUser();
-            User userUser = bot.getTwitchClient().getHelix().getUsers(null, Collections.singletonList(user.getId()), null).execute().getUsers().get(0);
+            User userUser = bot.getTwitchClient().getHelix().getUsers(bot.getConfigurationManager().getStringValue("oauth2Token"), Collections.singletonList(user.getId()), null).execute().getUsers().get(0);
             String broadcaster = channelMessageEvent.getChannel().getName();
             String broadcasterId = channelMessageEvent.getChannel().getId();
             TwitchCommand.ExecutorRank executorRank = commandMap.getRank(channelMessageEvent.getPermissions());

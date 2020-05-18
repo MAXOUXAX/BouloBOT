@@ -9,9 +9,9 @@ public class TwitchVersion {
     private final CommandMap commandMap;
     private final BOT bot;
 
-    public TwitchVersion(BOT bot, CommandMap commandMap) {
-        this.bot = bot;
+    public TwitchVersion(CommandMap commandMap) {
         this.commandMap = commandMap;
+        this.bot = BOT.getInstance();
     }
 
     @TwitchCommand(name="version",description="Affiche les informations sur la version du BOT", help = "&version", example = "&version")

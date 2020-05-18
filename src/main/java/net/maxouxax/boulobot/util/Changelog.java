@@ -15,16 +15,12 @@ public class Changelog {
     private final BOT bot;
     private final HashMap<Platform, ArrayList<Modifications>> hashMap = new HashMap<>();
 
-    public Changelog(BOT bot, String name, String oldVersion) {
-        this.bot = bot;
-        this.name = name;
-        this.oldVersion = oldVersion;
-        this.version = bot.getVersion();
-        this.uuid = UUID.randomUUID();
+    public Changelog(String name, String oldVersion) {
+        this(name, oldVersion, BOT.getInstance().getVersion());
     }
 
-    public Changelog(BOT bot, String name, String oldVersion, String version) {
-        this.bot = bot;
+    public Changelog(String name, String oldVersion, String version) {
+        this.bot = BOT.getInstance();
         this.name = name;
         this.oldVersion = oldVersion;
         this.version = version;

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
     <!-- Event Manager -->
-    <logger name="com.github.philippheuer.events4j" level="WARN" />
+    <logger name="com.github.philippheuer.events4j" level="ERROR" />
 
     <!-- Configure Twitch4J logger level -->
-    <logger name="twitch4j" level="WARN"/>
+    <logger name="twitch4j" level="ERROR"/>
 
     <!-- Appender Configuration [Console] -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -14,7 +14,7 @@
     </appender>
 
     <!-- Appender Output Configuration -->
-    <root level="INFO">
+    <root level="ERROR">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>

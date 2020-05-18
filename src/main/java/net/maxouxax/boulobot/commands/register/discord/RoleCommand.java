@@ -15,9 +15,9 @@ public class RoleCommand {
     private final BOT bot;
     private final CommandMap commandMap;
 
-    public RoleCommand(BOT bot, CommandMap commandMap){
-        this.bot = bot;
+    public RoleCommand(CommandMap commandMap){
         this.commandMap = commandMap;
+        this.bot = BOT.getInstance();
     }
 
     @Command(name = "addrole", description = "Permet d'ajouter un rôle dans la liste des gradochats", help = ".addrole Nom du rôle ²² Description du rôle ²² @Role ²² réaction à ajouter", example = ".addrole Mangeur de pâtes ²² Pour tout les mangeur de pâtes ²² @Mangeur de pâtes ²² :clap: ", power = 100, type = Command.ExecutorType.USER)

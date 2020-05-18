@@ -1,11 +1,5 @@
 package net.maxouxax.boulobot.commands.register.discord;
 
-import com.mrpowergamerbr.temmiewebhook.DiscordEmbed;
-import com.mrpowergamerbr.temmiewebhook.DiscordMessage;
-import com.mrpowergamerbr.temmiewebhook.TemmieWebhook;
-import com.mrpowergamerbr.temmiewebhook.embed.FooterEmbed;
-import com.mrpowergamerbr.temmiewebhook.embed.ImageEmbed;
-import com.mrpowergamerbr.temmiewebhook.embed.ThumbnailEmbed;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
@@ -13,23 +7,20 @@ import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.Command;
 import net.maxouxax.boulobot.commands.Command.ExecutorType;
 import net.maxouxax.boulobot.commands.CommandMap;
-import net.maxouxax.boulobot.util.Reference;
 
 import java.awt.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.Objects;
 
 public class CommandDefault {
 
     private final BOT bot;
     private final CommandMap commandMap;
 
-    public CommandDefault(BOT bot, CommandMap commandMap){
-        this.bot = bot;
+    public CommandDefault(CommandMap commandMap){
         this.commandMap = commandMap;
+        this.bot = BOT.getInstance();
     }
 
     @Command(name="stop",type=ExecutorType.CONSOLE)
@@ -37,7 +28,7 @@ public class CommandDefault {
         bot.setRunning(false);
     }
 
-    @Command(name="power",power=150, description = "Permet de définir le power d'un utilisateur", example = ".power 150 @Maxx_#2233", help = ".power <power> <@user>")
+    @Command(name="power",power=150, description = "Permet de définir le power d'un utilisateur", example = ".power 150 @MAXOUXAX", help = ".power <power> <@user>")
     private void power(User user, MessageChannel channel, Message message, String[] args){
         EmbedBuilder helperEmbed = commandMap.getHelpEmbed("power");
         if(args.length == 0 || message.getMentionedUsers().size() == 0){
@@ -140,7 +131,7 @@ public class CommandDefault {
                 .addField("A rejoint le serveur le", guildJoinDate, true)
                 .addField("A rejoint discord le", discordJoinDate, true)
                 .addField("URL de l'avatar", avatar, true);
-        em.setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString());
+        em.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
         if (!avatar.equals("Pas d'avatar")) {
             em.setThumbnail(avatar);
         }
@@ -150,10 +141,14 @@ public class CommandDefault {
         ).queue();
     }
 
-    @Command(name = "ping", description = "Permet de récupérer le ping du bot :)", type = Command.ExecutorType.USER, example = ".ping", help = ".ping")
+    @Command(name = "ping", description = "Permet de récupérer le ping du bot", type = Command.ExecutorType.USER, example = ".ping", help = ".ping")
     private void ping(TextChannel textChannel, User user, Guild guild){
         long ping = guild.getJDA().getGatewayPing();
-        EmbedBuilder builder = new EmbedBuilder();
+        EmbedBuilder builder = new EmbedBuilder()
+                .setTitle("DiscordAPI ping", bot.getConfigurationManager().getStringValue("websiteUrl"))
+                .setThumbnail(user.getAvatarUrl()+"?size=256")
+                .addField(new MessageEmbed.Field("Ping", ping+"ms", true))
+                .setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
         if(ping > 300) {
             builder.setColor(Color.RED);
             builder.setDescription("Mauvais ping");
@@ -161,75 +156,45 @@ public class CommandDefault {
             builder.setColor(Color.GREEN);
             builder.setDescription("Bon ping");
         }
-        builder.setTitle("Ping command requested by "+user.getName());
-        builder.setThumbnail(user.getAvatarUrl()+"?size=256");
-        builder.addField(new MessageEmbed.Field("Ping", ping+"ms", true));
-        builder.setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString());
         textChannel.sendMessage(builder.build()).queue();
     }
 
     @Command(name = "sendrules", description = "Permet d'envoyer les règles dans le salon destiné.", type = ExecutorType.CONSOLE)
     private void sendRules(){
-        TemmieWebhook temmieWebhook = new TemmieWebhook(Reference.RulesWebhookURL.getString());
-        DiscordEmbed discordEmbed = DiscordEmbed.builder()
-                .image(ImageEmbed.builder()
-                        .url(Reference.DiscordBanner.getString())
-                        .width(1000)
-                        .build())
-                .color(2895667)
-                .build();
-
-        DiscordEmbed discordEmbed1 = DiscordEmbed.builder()
-                .title("Bienvenue !")
-                .color(3447003)
-                .description("Afin d'obtenir la meilleure expérience utilisateur possible, veuillez lire attentivement les règles qui suivent.")
-                .build();
-
-        DiscordEmbed discordEmbed2 = DiscordEmbed.builder()
-                .title("Règles")
-                .color(15105570)
-                .thumbnail(ThumbnailEmbed.builder().url(Reference.RulesEmbedThumbnail.getString()).height(256).build())
-                .description(":eight_pointed_black_star:️ 1 - Pas d'insulte (normal).\n:eight_pointed_black_star:️ 2 - Pas de MAJ Abusive ou de SPAM/FLOOD.\n:eight_pointed_black_star:️ 3 - Pas de propos raciste, sexiste, homophobe...\n:eight_pointed_black_star:️ 4 - Aucune image à caractère raciste, sexuelle ou dans un but de faire peur n'est toléré sur le Discord (profil ou en message).\n:eight_pointed_black_star:️ 5 - Pas d'appellation de jeux discord à caractère sexuel, violent, raciste...\n:eight_pointed_black_star:️ 6 - Pas de pseudos incorrects ou remplis d'émoticônes ou de caractères spéciaux empêchant de vous mentionner.")
-                .build();
-
-        DiscordEmbed discordEmbed3 = DiscordEmbed.builder()
-                .title("Fonctionnalités")
-                .thumbnail(ThumbnailEmbed.builder().url(Reference.RulesEmbedThumbnailF.getString()).height(256).build())
-                .color(3066993)
-                .description("Avant de pouvoir accèder à la totalité des fonctionnalités du Discord, vous devrez valider nos règles. Une fois celle-ci validées, vous aurez accès à un second channel, vous demandant une confirmation. Une fois que vous avez confirmer que vous acceptiez nos règles, notre équipe de modérateur peut vous sanctionner à tout moment si vous les enfreinez.\n\nSi vous souhaitez partager des clips, cela se passe dans le salon <#529321314574532628>\n\nPour discuter de toute chose, le channel <#529320863737315345> est fait pour ça ! (en plus des croquettes sont offertes !)")
-                .build();
-
-        DiscordMessage dm = DiscordMessage.builder()
-                .embeds(Arrays.asList(discordEmbed, discordEmbed1, discordEmbed2, discordEmbed3))
-                .build();
-
-        temmieWebhook.sendMessage(dm);
-
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                TemmieWebhook temmieWebhook1 = new TemmieWebhook(Reference.AttentionWebhookURL.getString());
-                DiscordEmbed discordEmbed4 = DiscordEmbed.builder()
-                        .title("Attention !")
-                        .color(15158332)
-                        .thumbnail(ThumbnailEmbed.builder()
-                                .url(Reference.AttentionWebhookIconURL.getString())
-                                .height(256)
-                                .build())
-                        .description("Avant de pouvoir accèder au Discord, nous souhaitons nous assurer que vous acceptiez nos règles.\n\nÊtes-vous sûr d'accepter notre règlement ?\n\nSi vous ne respectez pas une règle, vous recevrez un avertissement.\n\nAu bout de 3 avertissements, vous serez banni définitivement du serveur.\n\n**DE PLUS**, si vous commetez une sanction très grave, l'équipe de modération se réserve le droit de vous bannir directement, sans avertissement.")
-                        .footer(FooterEmbed.builder()
-                                .icon_url(Reference.AttentionWebhookFooterIconURL.getString()+"?size=256")
-                                .text("Ajoutez une réaction afin de rejoindre le serveur")
-                                .build())
-                        .build();
-
-                DiscordMessage dm1 = DiscordMessage.builder()
-                        .embed(discordEmbed4)
-                        .build();
-
-                temmieWebhook1.sendMessage(dm1);
-            }
-        }, 1000*2);
-
+        EmbedBuilder embedBuilder = new EmbedBuilder()
+                .setImage(bot.getConfigurationManager().getStringValue("rulesBanner")+"?size=1000")
+                .setColor(2895667);
+        EmbedBuilder embedBuilder1 = new EmbedBuilder()
+                .setTitle("Bienvenue !")
+                .setColor(3447003)
+                .setDescription("Afin d'obtenir la meilleure expérience utilisateur possible, veuillez lire attentivement les règles qui suivent.");
+        EmbedBuilder embedBuilder2 = new EmbedBuilder()
+                .setTitle("Règles")
+                .setColor(15105570)
+                .setThumbnail(bot.getConfigurationManager().getStringValue("rulesEmbedThumbnail"))
+                .setDescription(":eight_pointed_black_star:️ 1 - Pas d'insulte\n:eight_pointed_black_star:️ 2 - Pas de majuscules abusives ou de spam/flood\n:eight_pointed_black_star:️ 3 - Pas de propos racistes, sexistes ou homophobes\n:eight_pointed_black_star:️ 4 - Aucune image à caractère raciste ou de type sexuelle (que ce soit en photo de profil ou en message)\n:eight_pointed_black_star:️ 5 - Pas d'appellation de jeux à caractère sexuel, violent ou raciste\n:eight_pointed_black_star:️ 6 - Pas de pseudos incorrects ou remplis d'émoticônes ou de caractères spéciaux empêchant de vous mentionner");
+        EmbedBuilder embedBuilder3 = new EmbedBuilder()
+                .setTitle("Modération")
+                .setThumbnail(bot.getConfigurationManager().getStringValue("rulesEmbedThumbnailModeration"))
+                .setColor(3066993)
+                .setDescription("Avant de pouvoir accèder à la totalité des fonctionnalités du Discord, vous devrez valider nos règles. Une fois celle-ci validées, vous aurez accès à l'ensemble du serveur et acceptez que notre équipe de modération peut vous sanctionner à tout moment si vous les enfreinez.");
+        EmbedBuilder embedBuilder4 = new EmbedBuilder()
+                .setTitle("Attention !")
+                .setColor(15158332)
+                .setThumbnail(bot.getConfigurationManager().getStringValue("rulesAttentionThumbnailUrl"))
+                .setDescription("Avant de pouvoir accèder au Discord, nous souhaitons nous assurer que vous acceptiez nos règles.\n\nÊtes-vous sûr d'accepter notre règlement ?\n\nSi vous ne respectez pas une règle, vous recevrez un avertissement.\n\nAu bout de 3 avertissements, vous serez banni définitivement du serveur.\n\n**DE PLUS**, si vous commetez une sanction très grave, l'équipe de modération se réserve le droit de vous bannir directement, sans avertissement.")
+                .setFooter("Ajoutez une réaction afin de rejoindre le serveur", bot.getConfigurationManager().getStringValue("rulesAttentionFooterIconUrl")+"?size=256");
+        TextChannel textChannel = Objects.requireNonNull(bot.getJda()
+                .getGuildById(bot.getConfigurationManager().getStringValue("guildId")))
+                .getTextChannelById(bot.getConfigurationManager().getStringValue("rulesTextChannelId"));
+        if(textChannel == null){
+            bot.getErrorHandler().handleException(new Exception("textChannel == null (the textchannel id or the guildid (or both) may not have been set in the config file)"));
+        }else {
+            textChannel.sendMessage(embedBuilder1.build()).queue();
+            textChannel.sendMessage(embedBuilder2.build()).queue();
+            textChannel.sendMessage(embedBuilder3.build()).queue();
+            textChannel.sendMessage(embedBuilder4.build()).queue(message -> message
+                    .addReaction(bot.getConfigurationManager().getStringValue("rulesAcceptEmoteId")).queue());
+        }
     }
 }

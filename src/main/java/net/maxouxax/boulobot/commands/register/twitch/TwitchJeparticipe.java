@@ -9,6 +9,7 @@ import net.maxouxax.boulobot.commands.TwitchCommand;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class TwitchJeparticipe {
 
@@ -16,9 +17,9 @@ public class TwitchJeparticipe {
     private final CommandMap commandMap;
     private boolean started;
 
-    public TwitchJeparticipe(BOT bot, CommandMap commandMap){
-        this.bot = bot;
+    public TwitchJeparticipe(CommandMap commandMap){
         this.commandMap = commandMap;
+        this.bot = BOT.getInstance();
     }
 
     @TwitchCommand(name = "jeparticipe", example = "jeparticipe", help = "jeparticipe", description = "Permet de participer au giveaway", rank = TwitchCommand.ExecutorRank.EVERYONE)
@@ -65,12 +66,10 @@ public class TwitchJeparticipe {
                     } else {
                         bot.getTwitchClient().getChat().sendMessage(broadcaster, "Nous avons un gagnant !");
                         String winningId = giveawayIds.get(new Random().nextInt(giveawayIds.size()));
-                        UserList resultList = bot.getTwitchClient().getHelix().getUsers(null, Collections.singletonList(winningId), null).execute();
-                        final com.github.twitch4j.helix.domain.User[] winningUser = new com.github.twitch4j.helix.domain.User[1];
-                        resultList.getUsers().forEach(user1 -> {
-                            winningUser[0] = user1;
-                        });
-                        bot.getTwitchClient().getChat().sendMessage(broadcaster, "Il s'agit de... " + winningUser[0].getDisplayName() + " !!!");
+                        UserList resultList = bot.getTwitchClient().getHelix().getUsers(bot.getConfigurationManager().getStringValue("oauth2Token"), Collections.singletonList(winningId), null).execute();
+                        AtomicReference<User> winningUser = new AtomicReference<>();
+                        resultList.getUsers().stream().findFirst().ifPresent(winningUser::set);
+                        bot.getTwitchClient().getChat().sendMessage(broadcaster, "Il s'agit de... " + winningUser.get().getDisplayName() + " !!!");
                         bot.getTwitchClient().getChat().sendMessage(broadcaster, "Bien joué à lui ! LUL ");
                         commandMap.clearGiveaway();
                         started = false;

@@ -14,9 +14,9 @@ public class TwitchNotif {
     private final BOT bot;
     private final CommandMap commandMap;
 
-    public TwitchNotif(BOT bot, CommandMap commandMap){
-        this.bot = bot;
+    public TwitchNotif(CommandMap commandMap){
         this.commandMap = commandMap;
+        this.bot = BOT.getInstance();
     }
 
     @TwitchCommand(name = "notif", example = "&notif", help = "&notif", description = "Permet de manuellement déclencher l'envoi de la notif de début de live", rank = TwitchCommand.ExecutorRank.MOD)

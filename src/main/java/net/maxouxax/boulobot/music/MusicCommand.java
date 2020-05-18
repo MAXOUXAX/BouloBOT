@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.Command;
 import net.maxouxax.boulobot.commands.CommandMap;
-import net.maxouxax.boulobot.util.Reference;
 
 import java.awt.*;
 import java.time.Duration;
@@ -21,8 +20,8 @@ public class MusicCommand {
     private final BOT bot;
     private final CommandMap commandMap;
 
-    public MusicCommand(BOT bot, CommandMap commandMap) {
-        this.bot = bot;
+    public MusicCommand(CommandMap commandMap) {
+        this.bot = BOT.getInstance();
         this.commandMap = commandMap;
     }
 
@@ -84,9 +83,9 @@ public class MusicCommand {
             builder.setColor(Color.YELLOW);
             builder.setTitle("Queue command requested by "+user.getName());
             builder.setThumbnail(user.getAvatarUrl()+"?size=256");
-            builder.setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString());
+            builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
 
-            Integer position = 1;
+            int position = 1;
 
             if(player.getListener().getTracks().size() > 5) {
                 for (AudioTrack at : player.getListener().getTracks()) {
@@ -102,7 +101,7 @@ public class MusicCommand {
                     sb.append("-----------------\nPosition: **" + position + "**\n • Titre: **" + at.getInfo().title + "**\n • Chaîne: **" + at.getInfo().author + "**\n • Durée: **" + durationfinal + "**\n • URL: **" + at.getInfo().uri +"**\n");
                     position++;
                 }
-                sb.append("\n\net "+(player.getListener().getTracks().size()-5)+" autre(s) !");
+                sb.append("\n\net ").append(player.getListener().getTracks().size() - 5).append(" autre(s) !");
             }else{
                 for (AudioTrack at : player.getListener().getTracks()) {
                     Long totalMillis = at.getDuration();
@@ -157,7 +156,7 @@ public class MusicCommand {
         builder.setTitle("Track command requested by "+user.getName());
         builder.setThumbnail(user.getAvatarUrl()+"?size=256");
         builder.setDescription("Titre: **"+track.title+"**\nAuteur: **"+track.author+"**\nDurée: **"+durationfinal1+"** / **"+durationfinal+"**\nURL: "+track.uri);
-        builder.setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString());
+        builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
         textChannel.sendMessage(builder.build()).queue();
     }
 

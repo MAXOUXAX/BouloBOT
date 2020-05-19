@@ -21,34 +21,33 @@ public class CommandChangelog {
     private final CommandMap commandMap;
     private Changelog toPost;
 
-    public CommandChangelog(BOT bot, CommandMap commandMap){
-        this.bot = bot;
+    public CommandChangelog(CommandMap commandMap){
         this.commandMap = commandMap;
-        this.toPost = null;
+        this.bot = BOT.getInstance();
     }
 
     @Command(name = "changelog",help = ".changelog",example = ".changelog", description = "Permet d'avoir de l'aide sur les commandes de changelogs", type = Command.ExecutorType.ALL, power = 100)
     public void changelog(TextChannel textChannel, String[] args, SimpleCommand simpleCommand) {
         if(args.length == 0) {
             EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.setTitle(simpleCommand.getName().toUpperCase(), Reference.WebsiteURL.getString());
+            embedBuilder.setTitle(simpleCommand.getName().toUpperCase(), bot.getConfigurationManager().getStringValue("websiteUrl"));
             embedBuilder.addField(".changelog set", "Permet de définir les propriétés du changelog à poster", false);
             embedBuilder.addField(".changelog add", "Permet d'ajouter une modification au changelog à poster", false);
             embedBuilder.addField(".changelog remove", "Permet de supprimer une modification au changelog à poster", false);
             embedBuilder.addField(".changelog list", "Permet d'afficher la liste des modifications au changelog à poster", false);
             embedBuilder.addField(".changelog post", "Permet de poster le changelog", false);
             embedBuilder.setColor(3447003);
-            embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
+            embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
             textChannel.sendMessage(embedBuilder.build()).queue();
         }else{
             String arg1 = args[0];
             if(arg1.equalsIgnoreCase("set")){
                 if(args.length == 1){
                     EmbedBuilder embedBuilder = new EmbedBuilder();
-                    embedBuilder.setTitle("Changelog » SET", Reference.WebsiteURL.getString());
+                    embedBuilder.setTitle("Changelog » SET", bot.getConfigurationManager().getStringValue("websiteUrl"));
                     embedBuilder.addField(".changelog set <name> ²² <oldver>", "Permet de définir les propriétés du changelog à poster", false);
                     embedBuilder.setColor(3447003);
-                    embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
+                    embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
                     textChannel.sendMessage(embedBuilder.build()).queue();
                 }else{
                     if (toPost != null) {
@@ -66,8 +65,8 @@ public class CommandChangelog {
                             textChannel.sendMessage("Veuillez vous référer à l'aide disponible en faisant .changelog set").queue();
                         } else if (argsReal.length == 2) {
                             String name = argsReal[0];
-                            String oldver = argsReal[1];
-                            toPost = new Changelog(bot, name, oldver);
+                            String oldVersion = argsReal[1];
+                            toPost = new Changelog(name, oldVersion);
                             textChannel.sendMessage("Changelog crée !").queue();
                         }
                     }else{
@@ -85,8 +84,8 @@ public class CommandChangelog {
                             textChannel.sendMessage("Veuillez vous référer à l'aide disponible en faisant .changelog set").queue();
                         } else if (argsReal.length == 2) {
                             String name = argsReal[0];
-                            String oldver = argsReal[1];
-                            toPost = new Changelog(bot, name, oldver);
+                            String oldVersion = argsReal[1];
+                            toPost = new Changelog(name, oldVersion);
                             textChannel.sendMessage("Changelog crée !").queue();
                         }
                     }
@@ -94,12 +93,12 @@ public class CommandChangelog {
             }else if(arg1.equalsIgnoreCase("add")){
                 if(args.length == 1){
                     EmbedBuilder embedBuilder = new EmbedBuilder();
-                    embedBuilder.setTitle("Changelog » ADD", Reference.WebsiteURL.getString());
+                    embedBuilder.setTitle("Changelog » ADD", bot.getConfigurationManager().getStringValue("websiteUrl"));
                     embedBuilder.addField(".changelog add <name> ²² <description> ²² <type> ²² <platform>", "Permet d'ajouter une modification au changelog à poster", false);
                     embedBuilder.addField("Liste des types", Arrays.toString(State.values()), false);
                     embedBuilder.addField("Liste des platformes", Arrays.toString(Platform.values()), false);
                     embedBuilder.setColor(3447003);
-                    embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
+                    embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
                     textChannel.sendMessage(embedBuilder.build()).queue();
                 }else {
                     if (toPost != null) {
@@ -137,11 +136,11 @@ public class CommandChangelog {
             }else if(arg1.equalsIgnoreCase("remove")){
                 if(args.length == 1){
                     EmbedBuilder embedBuilder = new EmbedBuilder();
-                    embedBuilder.setTitle("Changelog » REMOVE", Reference.WebsiteURL.getString());
+                    embedBuilder.setTitle("Changelog » REMOVE", bot.getConfigurationManager().getStringValue("websiteUrl"));
                     embedBuilder.addField(".changelog remove <name> ²² <platform>", "Permet de supprimer une modification du changelog à poster", false);
                     embedBuilder.addField("Liste des platformes", Platform.values().toString(), false);
                     embedBuilder.setColor(3447003);
-                    embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
+                    embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
                     textChannel.sendMessage(embedBuilder.build()).queue();
                 }else {
                     if (toPost != null) {
@@ -181,9 +180,9 @@ public class CommandChangelog {
                 }else{
                     EmbedBuilder embedBuilder = new EmbedBuilder();
                     ArrayList<EmbedBuilder> embedBuilders = new ArrayList<>();
-                    embedBuilder.setTitle("Changelog » Liste des modifications", Reference.WebsiteURL.getString());
+                    embedBuilder.setTitle("Changelog » Liste des modifications", bot.getConfigurationManager().getStringValue("websiteUrl"));
                     embedBuilder.setColor(3447003);
-                    embedBuilder.setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString());
+                    embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
                     if(toPost.getHashMap().isEmpty()){
                         embedBuilder.addField("Aucune modification", "Aucune modification", true);
                         textChannel.sendMessage(embedBuilder.build()).queue();
@@ -199,11 +198,11 @@ public class CommandChangelog {
                                     textChannel.sendMessage("ArrayList isn't empty").queue();
                                     EmbedBuilder embed = new EmbedBuilder();
                                     textChannel.sendMessage("Created new Embed").queue();
-                                    embed.setTitle(platform.getName(), Reference.WebsiteURL.getString());
+                                    embed.setTitle(platform.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"));
                                     textChannel.sendMessage("setTitle").queue();
                                     embed.setColor(platform.getEmbedColor());
                                     textChannel.sendMessage("setColor").queue();
-                                    embedBuilder.setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString());
+                                    embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
                                     textChannel.sendMessage("setFooter").queue();
                                     arrayList.forEach(modifications -> {
                                         textChannel.sendMessage("forEach").queue();
@@ -229,7 +228,7 @@ public class CommandChangelog {
                 if(toPost == null){
                     textChannel.sendMessage("Pour créer un changelog, utilisez la commande .changelog").queue();
                 }else{
-                    Role changelog = bot.getJda().getGuildById(Reference.GuildID.getString()).getRoleById(Reference.ChangelogRoleID.getString());
+                    Role changelog = bot.getJda().getGuildById(bot.getConfigurationManager().getStringValue("guildId")).getRoleById(bot.getConfigurationManager().getStringValue("changelogRoleId"));
 
                     Integer nbOfModif = 0;
                     for (Platform platform : Platform.values()) {
@@ -239,10 +238,10 @@ public class CommandChangelog {
                     }
                     EmbedBuilder embedBuilder = new EmbedBuilder();
                     ArrayList<EmbedBuilder> embedBuilders = new ArrayList<>();
-                    embedBuilder.setTitle("Changelog » "+toPost.getName(), Reference.WebsiteURL.getString());
+                    embedBuilder.setTitle("Changelog » "+toPost.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"));
                     embedBuilder.setDescription(toPost.getOldVersion()+"» "+toPost.getVersion()+"\nCette nouvelle version ("+toPost.getVersion()+") comporte "+nbOfModif+" modifications !\nUUID: "+toPost.getUuid().toString());
                     embedBuilder.setColor(3447003);
-                    embedBuilder.setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString());
+                    embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
                     if(toPost.getHashMap().isEmpty()){
                         embedBuilder.addField("Aucune modification", "Aucune modification", true);
                         textChannel.sendMessage(embedBuilder.build()).queue();
@@ -252,9 +251,9 @@ public class CommandChangelog {
                                 ArrayList<Modifications> arrayList = toPost.getHashMap().get(platform);
                                 if (!arrayList.isEmpty()) {
                                     EmbedBuilder embed = new EmbedBuilder();
-                                    embed.setTitle(platform.getName(), Reference.WebsiteURL.getString());
+                                    embed.setTitle(platform.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"));
                                     embed.setColor(platform.getEmbedColor());
-                                    embedBuilder.setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString());
+                                    embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
                                     arrayList.forEach(modifications -> {
                                         embed.addField(modifications.getState().getName() + " | " + modifications.getName(), modifications.getDescription(), true);
                                     });

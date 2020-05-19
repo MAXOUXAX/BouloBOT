@@ -16,25 +16,24 @@ public final class JSONReader{
     private final String json;
     private final BOT bot;
 
-    public JSONReader(String path, BOT bot) throws IOException
-    {
-        this(new File(path), bot);
+    public JSONReader(String path) throws IOException {
+        this(new File(path));
     }
 
-    public JSONReader(File file, BOT bot) throws IOException
+    public JSONReader(File file) throws IOException
     {
-        this(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), bot);
+        this(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
     }
 
-    public JSONReader(Reader reader, BOT bot) throws IOException
+    public JSONReader(Reader reader) throws IOException
     {
-        this(new BufferedReader(reader), bot);
+        this(new BufferedReader(reader));
     }
 
-    public JSONReader(BufferedReader reader, BOT bot) throws IOException
+    public JSONReader(BufferedReader reader) throws IOException
     {
         json = load(reader);
-        this.bot = bot;
+        this.bot = BOT.getInstance();
     }
 
     private String load(BufferedReader reader) throws IOException
@@ -48,16 +47,16 @@ public final class JSONReader{
         return builder.length() == 0 ? "[]" : builder.toString();
     }
 
-    public static <E> List<E> toList(String path, BOT bot)
+    public <E> List<E> toList(String path)
     {
-        return toList(new File(path), bot);
+        return toList(new File(path));
     }
 
-    public static <E> List<E> toList(File file, BOT bot)
+    public <E> List<E> toList(File file)
     {
         try
         {
-            return toList(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), bot);
+            return toList(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
         }
         catch(IOException e)
         {
@@ -66,18 +65,18 @@ public final class JSONReader{
         return new ArrayList<>();
     }
 
-    public static <E> List<E> toList(Reader reader, BOT bot)
+    public <E> List<E> toList(Reader reader)
     {
-        return toList(new BufferedReader(reader), bot);
+        return toList(new BufferedReader(reader));
     }
 
-    public static <E> List<E> toList(BufferedReader bufferedReader, BOT bot)
+    public <E> List<E> toList(BufferedReader bufferedReader)
     {
         List<E> list= new ArrayList<>();
 
         try
         {
-            JSONReader reader = new JSONReader(bufferedReader, bot);
+            JSONReader reader = new JSONReader(bufferedReader);
             JSONArray array = reader.toJSONArray();
             for(int i = 0; i < array.length(); i++)
             {
@@ -97,16 +96,16 @@ public final class JSONReader{
         return list;
     }
 
-    public static <V> Map<String, V> toMap(String path, BOT bot)
+    public <V> Map<String, V> toMap(String path)
     {
-        return toMap(new File(path), bot);
+        return toMap(new File(path));
     }
 
-    public static <V> Map<String, V> toMap(File file, BOT bot)
+    public <V> Map<String, V> toMap(File file)
     {
         try
         {
-            return toMap(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), bot);
+            return toMap(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
         }
         catch(IOException e)
         {
@@ -115,18 +114,18 @@ public final class JSONReader{
         return new HashMap<>();
     }
 
-    public static <V> Map<String, V> toMap(Reader reader, BOT bot)
+    public <V> Map<String, V> toMap(Reader reader)
     {
-        return toMap(new BufferedReader(reader), bot);
+        return toMap(new BufferedReader(reader));
     }
 
-    public static <V> Map<String, V> toMap(BufferedReader bufferedReader, BOT bot)
+    public <V> Map<String, V> toMap(BufferedReader bufferedReader)
     {
         Map<String, V> map = new HashMap<>();
 
         try
         {
-            JSONReader reader = new JSONReader(bufferedReader, bot);
+            JSONReader reader = new JSONReader(bufferedReader);
             JSONObject object = reader.toJSONObject();
             for(String key : object.keySet())
             {

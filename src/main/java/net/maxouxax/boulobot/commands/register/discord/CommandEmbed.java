@@ -6,16 +6,16 @@ import net.dv8tion.jda.api.entities.User;
 import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.Command;
 import net.maxouxax.boulobot.commands.CommandMap;
-import net.maxouxax.boulobot.util.Reference;
+import net.maxouxax.boulobot.util.TextFormatter;
 
 public class CommandEmbed {
 
     private final BOT bot;
     private final CommandMap commandMap;
 
-    public CommandEmbed(BOT bot, CommandMap commandMap){
-        this.bot = bot;
+    public CommandEmbed(CommandMap commandMap){
         this.commandMap = commandMap;
+        this.bot = BOT.getInstance();
     }
 
     @Command(name="embed",type = Command.ExecutorType.ALL,power = 100,help = ".embed <titre>-²<description>-²<image (url)>",example = ".embed Ceci est une annonce-²Juste pour vous dire que les bananes c'est assez bon mais que la raclette reste au dessus.-²https://lien-de-l-image.fr/image32.png")
@@ -52,7 +52,7 @@ public class CommandEmbed {
 
                 EmbedBuilder embedBuilder = new EmbedBuilder();
                 embedBuilder.setTitle(title, "https://twitch.lyorine.com");
-                embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
+                embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
                 embedBuilder.setColor(15844367);
                 embedBuilder.setDescription(description);
                 if (imageURL != null) {

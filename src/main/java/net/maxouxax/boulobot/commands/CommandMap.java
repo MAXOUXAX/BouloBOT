@@ -36,11 +36,11 @@ public final class CommandMap {
     private final String discordTag = ".";
     private final String twitchTag = "&";
 
-    public CommandMap(BOT bot) {
-        this.bot = bot;
+    public CommandMap() {
+        this.bot = BOT.getInstance();
 
-        registerCommands(new CommandDefault(bot, this), new RoleCommand(bot, this), new HelpCommand(this), new MusicCommand(bot, this), new CommandWeather(bot, this), new CommandNotif(bot, this), new CommandChangelog(bot, this), new CommandVersion(bot, this), new CommandSession(bot, this), new CommandOctogone(bot, this), new CommandSay(bot, this), new CommandEmbed(bot, this));
-        registerTwitchCommands(new TwitchWeather(bot, this), new TwitchHelp(bot, this), new TwitchKappa(bot, this), new TwitchNotif(bot, this), new TwitchVersion(bot, this), new TwitchAquoijouer(bot, this), new TwitchClipThat(bot, this), new TwitchSCP(bot, this), new TwitchJeparticipe(bot, this));
+        registerCommands(new CommandDefault(this), new RoleCommand(this), new HelpCommand(this), new MusicCommand(this), new CommandWeather(this), new CommandNotif(this), new CommandChangelog(this), new CommandVersion(this), new CommandSession(this), new CommandOctogone(this), new CommandSay(this), new CommandEmbed(this));
+        registerTwitchCommands(new TwitchWeather(this), new TwitchHelp(this), new TwitchNotif(this), new TwitchVersion(this), new TwitchAquoijouer(this), new TwitchClipThat(this), new TwitchSCP(this), new TwitchJeparticipe(this));
 
         load();
     }
@@ -54,7 +54,7 @@ public final class CommandMap {
         if(!file.exists()) return;
 
         try{
-            JSONReader reader = new JSONReader(file, this.bot);
+            JSONReader reader = new JSONReader(file);
             JSONArray array = reader.toJSONArray();
 
             for(int i = 0; i < array.length(); i++)
@@ -73,7 +73,7 @@ public final class CommandMap {
         if(!file3.exists()) return;
 
         try{
-            JSONReader reader = new JSONReader(file3, this.bot);
+            JSONReader reader = new JSONReader(file3);
             JSONArray array = reader.toJSONArray();
 
             for(int i = 0; i < array.length(); i++)
@@ -93,7 +93,7 @@ public final class CommandMap {
         if(!file4.exists()) return;
 
         try{
-            JSONReader reader = new JSONReader(file4, this.bot);
+            JSONReader reader = new JSONReader(file4);
             JSONArray array = reader.toJSONArray();
 
             for(int i = 0; i < array.length(); i++)
@@ -185,7 +185,7 @@ public final class CommandMap {
         }catch (Exception e){
             bot.getErrorHandler().handleException(e);
         }
-        return null;
+        return new EmbedBuilder();
     }
 
     public String getTwitchHelpString(String command){
@@ -195,7 +195,7 @@ public final class CommandMap {
         }catch (Exception e){
             bot.getErrorHandler().handleException(e);
         }
-        return null;
+        return "";
     }
 
     public void addKnownUser(String id){
@@ -273,7 +273,7 @@ public final class CommandMap {
         try{
             executeDiscordCommand(((SimpleCommand)object[0]), command, (String[])object[1], null);
         }catch(Exception e){
-            bot.getLogger().log(Level.SEVERE,"La methode "+((SimpleCommand)object[0]).getMethod().getName()+" n'est pas correctement initialisé.");
+            bot.getLogger().log(Level.SEVERE,"La commande "+command+" ne s'est pas exécutée à cause d'un problème sur la méthode "+((SimpleCommand)object[0]).getMethod().getName()+" qui ne s'est pas correctement exécutée.");
             bot.getErrorHandler().handleException(e);
         }
     }
@@ -322,8 +322,6 @@ public final class CommandMap {
         }
         simpleCommand.getMethod().invoke(simpleCommand.getObject(), objects);
     }
-
-    //TODO: TWITCH
 
     public void registerTwitchCommands(Object... objects){
         for(Object object : objects){

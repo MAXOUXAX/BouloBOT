@@ -12,9 +12,9 @@ public class TwitchWeather {
     private final CommandMap commandMap;
     private final BOT bot;
 
-    public TwitchWeather(BOT bot, CommandMap commandMap) {
+    public TwitchWeather(CommandMap commandMap) {
         this.commandMap = commandMap;
-        this.bot = bot;
+        this.bot = BOT.getInstance();
     }
 
     @TwitchCommand(name = "météo", rank = TwitchCommand.ExecutorRank.EVERYONE, description = "Permet de récupérer la météo actuelle dans une ville donnée", example = "&météo Paris", help = "&météo")

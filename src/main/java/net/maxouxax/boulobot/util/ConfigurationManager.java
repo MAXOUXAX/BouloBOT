@@ -11,12 +11,12 @@ import java.util.Map;
 
 public class ConfigurationManager {
 
-    private File configFile;
-    private Map<String, String> configKeys = new HashMap<>();
-    private BOT bot;
+    private final File configFile;
+    private final Map<String, String> configKeys = new HashMap<>();
+    private final BOT bot;
 
-    public ConfigurationManager(BOT bot, String fileName) {
-        this.bot = bot;
+    public ConfigurationManager(String fileName) {
+        this.bot = BOT.getInstance();
         this.configFile = new File(fileName);
     }
 
@@ -27,7 +27,7 @@ public class ConfigurationManager {
         }
 
         try{
-            JSONReader reader = new JSONReader(configFile, bot);
+            JSONReader reader = new JSONReader(configFile);
             JSONArray array = reader.toJSONArray();
 
             for(int i = 0; i < array.length(); i++)
@@ -63,12 +63,18 @@ public class ConfigurationManager {
     }
 
     public String getStringValue(String key){
-        return configKeys.get(key);
+        return configKeys.getOrDefault(key, "");
     }
 
     public Long getLongValue(String key){
-        return Long.valueOf(configKeys.get(key));
+        return Long.valueOf(configKeys.getOrDefault(key, "0"));
     }
 
+    public void setValue(String key, String longValue, boolean save){
+        configKeys.put(key, longValue);
+        if(save){
+            saveData();
+        }
+    }
 
 }

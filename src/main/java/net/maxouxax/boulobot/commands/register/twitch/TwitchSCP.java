@@ -14,9 +14,9 @@ public class TwitchSCP {
     private final BOT bot;
     private final CommandMap commandMap;
 
-    public TwitchSCP(BOT bot, CommandMap commandMap){
-        this.bot = bot;
+    public TwitchSCP(CommandMap commandMap){
         this.commandMap = commandMap;
+        this.bot = BOT.getInstance();
     }
 
     @TwitchCommand(name = "scp", example = "&scp", help = "&scp", description = "Récupérer les informations d'un SPC", rank = TwitchCommand.ExecutorRank.EVERYONE)

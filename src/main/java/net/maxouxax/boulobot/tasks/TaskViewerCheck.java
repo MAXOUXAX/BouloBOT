@@ -15,8 +15,8 @@ public class TaskViewerCheck implements Runnable {
     private final Session session;
     private final String channelId;
 
-    public TaskViewerCheck(BOT bot, String channelId) {
-        this.bot = bot;
+    public TaskViewerCheck(String channelId) {
+        this.bot = BOT.getInstance();
         this.channelId = channelId;
         this.session = bot.getSessionManager().getCurrentSession();
     }

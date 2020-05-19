@@ -16,40 +16,31 @@ public class Logger {
     private final Date date;
     private final BOT bot;
 
-    public Logger(BOT bot) throws IOException {
-        this.bot = bot;
+    public Logger() throws IOException {
+        this.bot = BOT.getInstance();
         this.date = new Date();
-        this.file = new File("logs", "currentlogs.log");
+        this.file = new File("logs", "latest.log");
         this.file.mkdirs();
         this.file.createNewFile();
     }
 
     public void log(Level level, String str){
-        String date = new SimpleDateFormat("HH:mm:ss").format(new Date());
-        System.out.println("("+date+")"+" | BouloBOT > ["+level.getName()+"] "+str);
-        try(BufferedWriter bw = new BufferedWriter(new FileWriter(this.file, true))) {
-            bw.write("("+date+")"+" | BouloBOT > ["+level.getName()+"] "+str+"\n");
-        }catch (IOException e){
-            bot.getErrorHandler().handleException(e);
-        }
+        log(level, str, true);
     }
 
     public void log(Level level, String str, boolean sendConsoleMessage){
-        if(sendConsoleMessage){
-            log(level, str);
-        }else {
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file, true))) {
-                String date = new SimpleDateFormat("HH:mm:ss").format(new Date());
-                bw.write("("+date+")"+" | BouloBOT > ["+level.getName()+"] "+str+"\n");
-            } catch (IOException e) {
-                bot.getErrorHandler().handleException(e);
-            }
+        String date = new SimpleDateFormat("HH:mm:ss").format(new Date());
+        if(sendConsoleMessage)System.out.println("("+date+")"+" | BouloBOT > ["+level.getName()+"] "+str);
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file, true))) {
+            bw.write("("+date+")"+" | BouloBOT > ["+level.getName()+"] "+str+"\n");
+        } catch (IOException e) {
+            bot.getErrorHandler().handleException(e);
         }
     }
 
     public void save() {
         String str = new SimpleDateFormat("dd-MM-yyyy-HH-mm").format(this.date);
-        if(file.renameTo(new File("logs/old-logs-" + str.toLowerCase()))){
+        if(file.renameTo(new File("logs/" + str.toLowerCase()))){
             log(Level.INFO, "Logs saved");
         }
     }

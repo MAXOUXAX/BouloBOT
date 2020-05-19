@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.Command;
 import net.maxouxax.boulobot.commands.CommandMap;
-import net.maxouxax.boulobot.util.Reference;
+import net.maxouxax.boulobot.util.TextFormatter;
 
 import java.util.List;
 import java.util.Random;
@@ -18,9 +18,9 @@ public class CommandOctogone {
     private final BOT bot;
     private final CommandMap commandMap;
 
-    public CommandOctogone(BOT bot, CommandMap commandMap){
-        this.bot = bot;
+    public CommandOctogone(CommandMap commandMap){
         this.commandMap = commandMap;
+        this.bot = BOT.getInstance();
     }
 
     @Command(name = "octogone", description = "Vous voulez vous battre ? Bah battez vous !", help = ".octogone @<participants...>", example = ".octogone @LYORINE @MAXOUXAX @DJOXX", type = Command.ExecutorType.USER)
@@ -48,13 +48,13 @@ public class CommandOctogone {
                 }
 
                 EmbedBuilder embedBuilder = new EmbedBuilder();
-                embedBuilder.setTitle("Octogone", "https://lyorine.com");
-                embedBuilder.setAuthor(user.getName(), null, user.getAvatarUrl()+"?size=256");
+                embedBuilder.setTitle("Octogone", bot.getConfigurationManager().getStringValue("websiteUrl"));
+                embedBuilder.setAuthor(user.getName(), message.getJumpUrl(), user.getAvatarUrl()+"?size=256");
                 embedBuilder.addField(participants.size()+" participants", participantsStr.toString(), true);
                 embedBuilder.addField("Vainqueur", winner.getAsMention(), true);
                 embedBuilder.setDescription("Bien joué à "+winner.getAsMention()+" qui a écrabouillé(e) ses adversaires. Quel(le) malade !");
                 embedBuilder.setColor(15528177);
-                embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
+                embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
                 textChannel.sendMessage(embedBuilder.build()).queue();
             }
         }

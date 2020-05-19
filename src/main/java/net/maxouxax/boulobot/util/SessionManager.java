@@ -17,42 +17,27 @@ public class SessionManager {
     private Session currentSession;
     private final File SESSIONS_FOLDER;
     private final ArrayList<Session> sessions = new ArrayList<>();
-    private final ArrayList<Integer> viewerCountList = new ArrayList<>();
     private ScheduledFuture scheduleViewerCheck;
 
-    public SessionManager(BOT bot) {
-        this.bot = bot;
+    public SessionManager() {
+        this.bot = BOT.getInstance();
         SESSIONS_FOLDER = new File("sessions" + File.separator);
     }
 
     public Session startNewSession(String channelId) {
-        currentSession = new Session(System.currentTimeMillis(), channelId, bot);
+        currentSession = new Session(System.currentTimeMillis(), channelId);
         sessions.add(currentSession);
-        scheduleViewerCheck = bot.getScheduler().scheduleAtFixedRate(new TaskViewerCheck(bot, channelId), 5, 5, TimeUnit.MINUTES);
+        scheduleViewerCheck = bot.getScheduler().scheduleAtFixedRate(new TaskViewerCheck(channelId), 5, 5, TimeUnit.MINUTES);
         return currentSession;
     }
 
     public void endSession() {
-        currentSession.setEndDate(System.currentTimeMillis());
-        Optional<Session> sessionOpt = getSession(currentSession.getUuid().toString());
-        if(sessionOpt.isPresent()){
-            Session session = sessionOpt.get();
-            sessions.set(sessions.indexOf(session), currentSession);
-        }
+        currentSession.endSession();
         scheduleViewerCheck.cancel(true);
-        calculateAverage();
     }
 
     public void deleteCurrentSession(){
         this.currentSession = null;
-    }
-
-    public void calculateAverage() {
-        if(viewerCountList.size() != 0) {
-            int sum = viewerCountList.stream().mapToInt(integer -> integer).sum();
-            int average = sum / viewerCountList.size();
-            currentSession.setAvgViewers(average);
-        }
     }
 
     public ArrayList<Session> getSessions() {
@@ -83,7 +68,7 @@ public class SessionManager {
         for (File file : allSessions) {
             if (file.getName().endsWith(".json")) {
                 try {
-                    JSONReader reader = new JSONReader(file, bot);
+                    JSONReader reader = new JSONReader(file);
                     JSONArray array = reader.toJSONArray();
 
                     for (int i = 0; i < array.length(); i++) {
@@ -91,7 +76,7 @@ public class SessionManager {
                         long startTime = object.getLong("startDate");
                         String channelId = object.getString("channelId");
                         UUID uuid = UUID.fromString(object.getString("uuid"));
-                        Session loadingSession = new Session(startTime, uuid, channelId, bot);
+                        Session loadingSession = new Session(startTime, uuid, channelId);
 
                         loadingSession.setMaxViewers(object.getInt("maxViewers"));
                         loadingSession.setAvgViewers(object.getInt("avgViewers"));
@@ -204,10 +189,7 @@ public class SessionManager {
     }
 
     public void addViewerCount(int viewerCount){
-        viewerCountList.add(viewerCount);
+        currentSession.getViewerCountList().add(viewerCount);
     }
 
-    public ArrayList<Integer> getViewerCountList() {
-        return viewerCountList;
-    }
 }

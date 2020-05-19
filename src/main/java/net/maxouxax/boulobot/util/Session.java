@@ -8,10 +8,7 @@ import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.maxouxax.boulobot.BOT;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 public class Session {
@@ -30,27 +27,18 @@ public class Session {
     private HashMap<String, Integer> commandsUsed = new HashMap<>();
     private int bansAndTimeouts;
     private Message sessionMessage;
+    private final ArrayList<Integer> viewerCountList = new ArrayList<>();
 
     private String title;
     private String currentGameId;
     private ArrayList<String> gameIds = new ArrayList<>();
 
-    public Session(long currentTimeMillis, String channelId, BOT bot) {
-        this.bot = bot;
-        this.channelId = channelId;
-        this.startDate = currentTimeMillis;
-        this.uuid = UUID.randomUUID();
-        this.maxViewers = 0;
-        this.avgViewers = 0;
-        this.commandUsed = 0;
-        this.messageSended = 0;
-        this.newViewers = 0;
-        this.newFollowers = 0;
-        this.bansAndTimeouts = 0;
+    public Session(long currentTimeMillis, String channelId) {
+        this(currentTimeMillis, UUID.randomUUID(), channelId);
     }
 
-    public Session(long currentTimeMillis, UUID uuid, String channelId, BOT bot) {
-        this.bot = bot;
+    public Session(long currentTimeMillis, UUID uuid, String channelId) {
+        this.bot = BOT.getInstance();
         this.channelId = channelId;
         this.startDate = currentTimeMillis;
         this.uuid = uuid;
@@ -224,24 +212,22 @@ public class Session {
     }
 
     public void updateMessage() {
-        Guild discord = bot.getJda().getGuildById(Reference.GuildID.getString());
-        Member lyorine = discord.getMemberById(Reference.LyorineClientID.getString());
-        Role notif = discord.getRoleById(Reference.NotifRoleID.getString());
+        Guild discord = bot.getJda().getGuildById(bot.getConfigurationManager().getStringValue("guildId"));
+        Member lyorine = Objects.requireNonNull(discord).getMemberById(bot.getConfigurationManager().getStringValue("lyorineClientId"));
+        Role notif = discord.getRoleById(bot.getConfigurationManager().getStringValue("notificationRole"));
         String channelName = bot.getChannelName();
         bot.getLogger().log(Level.INFO, "> Updating session message!");
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());
-        embedBuilder.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
+        embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
         embedBuilder.setColor(3066993);
-        embedBuilder.setDescription("Coucou les "+notif.getAsMention()+" !\n**"+lyorine.getAsMention()+"** vient de démarrer son live, v'nez voir !\n» https://twitch.tv/"+channelName.toUpperCase());
+        embedBuilder.setDescription("Coucou les "+ Objects.requireNonNull(notif).getAsMention()+" !\n**"+ Objects.requireNonNull(lyorine).getAsMention()+"** vient de démarrer son live, v'nez voir !\n» https://twitch.tv/"+channelName.toUpperCase());
         embedBuilder.addField(new MessageEmbed.Field("Titre", title, true));
-        GameList resultList = bot.getTwitchClient().getHelix().getGames(Collections.singletonList(currentGameId), null).execute();
+        GameList resultList = bot.getTwitchClient().getHelix().getGames(bot.getConfigurationManager().getStringValue("oauth2Token"), Collections.singletonList(currentGameId), null).execute();
         final String[] gameName = {"Aucun jeu"};
         resultList.getGames().forEach(game -> {
             gameName[0] = game.getName();
-            String boxUrl = game.getBoxArtUrl();
-            boxUrl = boxUrl.replace("{width}", "600");
-            boxUrl = boxUrl.replace("{height}", "800");
+            String boxUrl = game.getBoxArtUrl(600, 800);
             embedBuilder.setThumbnail(boxUrl);
         });
         embedBuilder.addField(new MessageEmbed.Field("Jeu", gameName[0], true));
@@ -253,9 +239,25 @@ public class Session {
         });
 
         embedBuilder.setImage(currentStream[0].getThumbnailUrl(1280, 720));
-        Message newMessage = new MessageBuilder(notif.getAsMention()).setEmbed(embedBuilder.build()).build();
-        this.sessionMessage.editMessage(newMessage).queue();
-        bot.getLogger().log(Level.INFO, "> Updated!");
+        Message message = new MessageBuilder(notif.getAsMention()).setEmbed(embedBuilder.build()).build();
         bot.getJda().getPresence().setActivity(Activity.streaming("avec sa reine à "+gameName[0], "https://twitch.tv/"+channelName.toUpperCase()));
+        if(sessionMessage == null){
+            TextChannel toSend = discord.getTextChannelById(bot.getConfigurationManager().getStringValue("noticationTextChannelId"));
+            Objects.requireNonNull(toSend).sendMessage(message).queue(message1 -> this.sessionMessage = message1);
+        }else{
+            this.sessionMessage.editMessage(message).queue();
+        }
+    }
+
+    public void endSession() {
+        endDate = System.currentTimeMillis();
+        if(viewerCountList.size() != 0) {
+            int sum = viewerCountList.stream().mapToInt(integer -> integer).sum();
+            avgViewers = sum / viewerCountList.size();
+        }
+    }
+
+    public ArrayList<Integer> getViewerCountList() {
+        return viewerCountList;
     }
 }

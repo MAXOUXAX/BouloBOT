@@ -9,16 +9,16 @@ import net.dv8tion.jda.api.entities.User;
 import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.Command;
 import net.maxouxax.boulobot.commands.CommandMap;
-import net.maxouxax.boulobot.util.Reference;
+import net.maxouxax.boulobot.util.TextFormatter;
 
 public class CommandWeather {
 
     private final BOT bot;
     private final CommandMap commandMap;
 
-    public CommandWeather(BOT bot, CommandMap commandMap) {
-        this.bot = bot;
+    public CommandWeather(CommandMap commandMap) {
         this.commandMap = commandMap;
+        this.bot = BOT.getInstance();
     }
 
     @Command(name = "météo", type = Command.ExecutorType.USER, help = ".météo <ville>", example = ".météo Paris", description = "Permet d'obtenir la météo sur la ville spécifiée")
@@ -46,7 +46,7 @@ public class CommandWeather {
 
                 weatherEmbed.setTitle("Météo pour " + cwd.getCityName(), "https://openweathermap.org");
                 weatherEmbed.setDescription("Voici la météo actuelle pour la ville: " + cwd.getCityName());
-                weatherEmbed.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
+                weatherEmbed.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
                 weatherEmbed.setColor(3066993);
 
 
@@ -57,13 +57,6 @@ public class CommandWeather {
                 }
                 weatherEmbed.addField("Température min", cwd.getMainData().getTempMin() + "°C", true);
                 weatherEmbed.addField("Température max", cwd.getMainData().getTempMax() + "°C", true);
-                //TODO: Réactiver ceci lorsque OWM-JAPIS sera de nouveau fonctionnel avec les RainData.
-                /*if (cwd.getRainData() != null && cwd.getRainData().hasPrecipVol3h()) {
-                    weatherEmbed.addField("Précipitations", cwd.getRainData().getPrecipVol3h() + "mm", true);
-                } else {
-                    weatherEmbed.addField("Précipitations", "Aucune donnée", true);
-                }
-                */
                 if (cwd.getWindData() != null && cwd.getWindData().hasSpeed()) {
                     weatherEmbed.addField("Vent", cwd.getWindData().getSpeed() + " m/s", true);
                 } else {
@@ -77,7 +70,7 @@ public class CommandWeather {
             errorEmbed.setTitle("Une erreur est survenue", "https://openweathermap.org");
             errorEmbed.addField("Message d'erreur", "» "+e.getMessage(), true);
             errorEmbed.setColor(15158332);
-            errorEmbed.setFooter(Reference.EmbedFooter.asDate(), Reference.EmbedIcon.getString());
+            errorEmbed.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
             textChannel.sendMessage(errorEmbed.build()).queue();
             bot.getErrorHandler().handleException(e);
         }

@@ -3,7 +3,6 @@ package net.maxouxax.boulobot.event;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.GenericEvent;
-import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
@@ -13,79 +12,65 @@ import net.dv8tion.jda.internal.entities.UserImpl;
 import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.CommandMap;
 import net.maxouxax.boulobot.roles.Grade;
-import net.maxouxax.boulobot.util.Reference;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
+import java.util.Objects;
 
 public class DiscordListener implements EventListener {
 
     private final CommandMap commandMap;
     private final BOT bot;
 
-    private int isSpamming;
-
-    public DiscordListener(CommandMap commandMap, BOT bot){
+    public DiscordListener(CommandMap commandMap){
         this.commandMap = commandMap;
-        this.bot = bot;
+        this.bot = BOT.getInstance();
     }
 
     @Override
-    public void onEvent(GenericEvent event) {
-        bot.getLogger().log(Level.INFO, "Event > "+event.getClass().getSimpleName());
-        if(event instanceof MessageDeleteEvent) onMessageDelete((MessageDeleteEvent) event);
+    public void onEvent(@NotNull GenericEvent event) {
         if(event instanceof MessageReceivedEvent) onMessage((MessageReceivedEvent)event);
         if(event instanceof PrivateMessageReceivedEvent) onDM((PrivateMessageReceivedEvent)event);
         if(event instanceof MessageReactionAddEvent) onReactionAdd((MessageReactionAddEvent)event);
         if(event instanceof MessageReactionRemoveEvent) onReactionRemove((MessageReactionRemoveEvent)event);
     }
 
-    private void onMessageDelete(MessageDeleteEvent e) {
-        if(e.getTextChannel().getId().equalsIgnoreCase(Reference.RulesTextChannelID.getString())){
-            commandMap.discordCommandConsole("sendrules");
-        }
-    }
-
     private void onReactionAdd(MessageReactionAddEvent event) {
-        if(event.getTextChannel().getId().equalsIgnoreCase(Reference.RulesTextChannelID.getString())){
+        if(event.getTextChannel().getId().equalsIgnoreCase(bot.getConfigurationManager().getStringValue("rulesTextChannelId"))){
             Emote reaction = event.getReactionEmote().getEmote();
-            Emote check = event.getGuild().getEmoteById(Reference.CheckEmoteID.getString());
-            Role member = event.getGuild().getRoleById(Reference.RulesRoleID.getString());
+            Emote check = event.getGuild().getEmoteById(bot.getConfigurationManager().getStringValue("rulesAcceptEmoteId"));
+            Role member = event.getGuild().getRoleById(bot.getConfigurationManager().getStringValue("rulesRoleId"));
             if(reaction.equals(check)){
-                    event.getGuild().addRoleToMember(event.getMember(), member).queue();
+                    event.getGuild().addRoleToMember(Objects.requireNonNull(event.getMember()), Objects.requireNonNull(member)).queue();
             }
-        }else if(event.getTextChannel().getId().equalsIgnoreCase(Reference.RankTextChannelID.getString())){
+        }else if(event.getTextChannel().getId().equalsIgnoreCase(bot.getConfigurationManager().getStringValue("rolesTextChannelId"))){
             Emote emote = event.getReactionEmote().getEmote();
             Member member = event.getMember();
             if(bot.getRolesManager().getGrades().stream().anyMatch(grade -> grade.getEmoteId() == emote.getIdLong())){
                 List<Grade> grades = new ArrayList<>();
                 bot.getRolesManager().getGrades().stream().filter(grade -> grade.getEmoteId() == emote.getIdLong()).forEach(grades::add);
-                grades.forEach(grade -> {
-                    event.getGuild().addRoleToMember(member, grade.getRole()).queue();
-                });
+                grades.forEach(grade -> event.getGuild().addRoleToMember(Objects.requireNonNull(member), grade.getRole()).queue());
             }
         }
     }
 
     private void onReactionRemove(MessageReactionRemoveEvent event) {
-        if (event.getTextChannel().getId().equalsIgnoreCase(Reference.RulesTextChannelID.getString())) {
+        if (event.getTextChannel().getId().equalsIgnoreCase(bot.getConfigurationManager().getStringValue("rulesTextChannelId"))) {
             Emote reaction = event.getReactionEmote().getEmote();
-            Emote check = event.getGuild().getEmoteById(Reference.CheckEmoteID.getString());
-            Role member = event.getGuild().getRoleById(Reference.RulesRoleID.getString());
+            Emote check = event.getGuild().getEmoteById(bot.getConfigurationManager().getStringValue("rulesAcceptEmoteId"));
+            Role member = event.getGuild().getRoleById(bot.getConfigurationManager().getStringValue("rulesRoleId"));
             if (reaction.equals(check)) {
-                event.getGuild().removeRoleFromMember(event.getMember(), member).queue();
+                event.getGuild().removeRoleFromMember(Objects.requireNonNull(event.getMember()), Objects.requireNonNull(member)).queue();
             }
-        }else if(event.getTextChannel().getId().equalsIgnoreCase(Reference.RankTextChannelID.getString())){
+        }else if(event.getTextChannel().getId().equalsIgnoreCase(bot.getConfigurationManager().getStringValue("rolesTextChannelId"))){
             Emote emote = event.getReactionEmote().getEmote();
             Member member = event.getMember();
             if(bot.getRolesManager().getGrades().stream().anyMatch(grade -> grade.getEmoteId() == emote.getIdLong())){
                 List<Grade> grades = new ArrayList<>();
                 bot.getRolesManager().getGrades().stream().filter(grade -> grade.getEmoteId() == emote.getIdLong()).forEach(grades::add);
-                grades.forEach(grade -> {
-                    event.getGuild().removeRoleFromMember(member, grade.getRole()).queue();
-                });
+                grades.forEach(grade -> event.getGuild().removeRoleFromMember(Objects.requireNonNull(member), grade.getRole()).queue());
             }
         }
     }
@@ -94,11 +79,11 @@ public class DiscordListener implements EventListener {
     private void onMessage(MessageReceivedEvent event){
         if(event.getChannelType() == ChannelType.PRIVATE)return;
 
-        Emote check = event.getGuild().getEmoteById(Reference.CheckEmoteID.getString());
+        Emote check = event.getGuild().getEmoteById(bot.getConfigurationManager().getStringValue("rulesAcceptEmoteId"));
 
-        if(event.getTextChannel().getId().equalsIgnoreCase(Reference.RulesTextChannelID.getString())){
+        if(event.getTextChannel().getId().equalsIgnoreCase(bot.getConfigurationManager().getStringValue("rulesTextChannelId"))){
             if(event.getAuthor().isBot() && event.getAuthor().getName().startsWith("Attention")){
-                event.getMessage().addReaction(check).queue();
+                event.getMessage().addReaction(Objects.requireNonNull(check)).queue();
             }
         }
 
@@ -114,34 +99,24 @@ public class DiscordListener implements EventListener {
         }
 
         if(event.getMessage().getContentDisplay().startsWith(".helpme")) {
-            if (event.getAuthor().getId().equalsIgnoreCase(Reference.MaxClientID.getString())) {
+            if (event.getAuthor().getId().equalsIgnoreCase(bot.getConfigurationManager().getStringValue("maxouxaxClientId"))){
                 Guild guild = event.getGuild();
-                Role role = guild.getRoleById(Reference.RescueRoleID.getString());
-                guild.addRoleToMember(event.getMember(), role).queue();
+                Role role = guild.getRoleById(bot.getConfigurationManager().getStringValue("rescueRoleId"));
+                guild.addRoleToMember(Objects.requireNonNull(event.getMember()), Objects.requireNonNull(role)).queue();
             }
         }else if(event.getMessage().getContentDisplay().startsWith(".removeme")) {
-            if (event.getAuthor().getId().equalsIgnoreCase(Reference.MaxClientID.getString())) {
+            if (event.getAuthor().getId().equalsIgnoreCase(bot.getConfigurationManager().getStringValue("maxouxaxClientId"))) {
                 Guild guild = event.getGuild();
-                Role role = guild.getRoleById(Reference.RescueRoleID.getString());
-                guild.removeRoleFromMember(event.getMember(), role).queue();
-            }
-        }else if(event.getMessage().getContentDisplay().startsWith(".blockmessages")) {
-            if (event.getAuthor().getId().equalsIgnoreCase(Reference.MaxClientID.getString()) ) {
-                if(isSpamming >= 1){
-                    isSpamming = 0;
-                    event.getTextChannel().sendMessage("Les joueurs peuvent maintenant parler !").queue();
-                }else{
-                    isSpamming = 1;
-                    event.getTextChannel().sendMessage("Les joueurs ne peuvent maintenant plus parler !").queue();
-                }
+                Role role = guild.getRoleById(bot.getConfigurationManager().getStringValue("rescueRoleId"));
+                guild.removeRoleFromMember(Objects.requireNonNull(event.getMember()), Objects.requireNonNull(role)).queue();
             }
         }else if(event.getMessage().getContentDisplay().startsWith(".listroles")) {
-            if (event.getAuthor().getId().equalsIgnoreCase(Reference.MaxClientID.getString()) ) {
+            if (event.getAuthor().getId().equalsIgnoreCase(bot.getConfigurationManager().getStringValue("maxouxaxClientId")) ) {
                 if(!event.getAuthor().hasPrivateChannel())event.getAuthor().openPrivateChannel().complete();
                 ((UserImpl)event.getAuthor()).getPrivateChannel().sendMessage(event.getGuild().getRoles().toString()).queue();
             }
         }else if(event.getMessage().getContentDisplay().startsWith(".listemotes")) {
-            if (event.getAuthor().getId().equalsIgnoreCase(Reference.MaxClientID.getString()) ) {
+            if (event.getAuthor().getId().equalsIgnoreCase(bot.getConfigurationManager().getStringValue("maxouxaxClientId")) ) {
                 if(!event.getAuthor().hasPrivateChannel())event.getAuthor().openPrivateChannel().complete();
                 ((UserImpl)event.getAuthor()).getPrivateChannel().sendMessage(event.getGuild().getEmotes().toString()).queue();
             }
@@ -150,14 +125,13 @@ public class DiscordListener implements EventListener {
 
     private void onDM(PrivateMessageReceivedEvent event){
         if(event.getAuthor().equals(event.getJDA().getSelfUser())) return;
-        //bah le mec peut pas
-        EmbedBuilder builder1 = new EmbedBuilder();
-        builder1.setColor(Color.RED);
-        builder1.setTitle("Private message received of " + event.getAuthor().getName());
-        builder1.setThumbnail("http://icons.iconarchive.com/icons/custom-icon-design/flatastic-1/512/cancel-icon.png?size=64");
-        builder1.setDescription("Cette action est **IMPOSSIBLE**");
-        builder1.setFooter(Reference.EmbedFooter.getString(), Reference.EmbedIcon.getString());
-        event.getChannel().sendMessage(builder1.build()).queue();
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setColor(Color.RED);
+        embedBuilder.setTitle("Private message received of " + event.getAuthor().getName());
+        embedBuilder.setThumbnail(bot.getConfigurationManager().getStringValue("cancelIcon"));
+        embedBuilder.setDescription("Cette action est **IMPOSSIBLE**");
+        embedBuilder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
+        event.getChannel().sendMessage(embedBuilder.build()).queue();
     }
 
 }

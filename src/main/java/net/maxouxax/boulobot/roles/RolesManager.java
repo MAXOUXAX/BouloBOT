@@ -55,26 +55,20 @@ public class RolesManager {
 
     private void loadMessage() {
         long messageId = bot.getConfigurationManager().getLongValue("messageRolesID");
-        textChannelRoles.retrieveMessageById(messageId).queue(message -> this.messageForRoles = message);
-        sendMessage();
+        textChannelRoles.retrieveMessageById(messageId).queue(message -> {
+            this.messageForRoles = message;
+            sendMessage();
+        });
     }
 
     private void sendMessage() {
         if(messageForRoles == null){
             EmbedBuilder embedBuilder = new EmbedBuilder()
                     .setTitle("Grades")
-                    .setDescription("» Afin d'obtenir le grade choisi, veuillez ajouter la réaction correspondante. Veuillez noter, que ces grades sont purement visuels, ils ne vous apporteront aucune permission supplémentaire.")
+                    .setDescription("» Afin d'obtenir le grade choisi, veuillez ajouter la réaction correspondante. Veuillez noter que ces grades sont purement visuels, ils ne vous apporteront aucune permission supplémentaire.")
                     .setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"))
                     .setColor(3447003);
-            EmbedBuilder embedBuilder1 = new EmbedBuilder()
-                    .setTitle("Liste des grades", "https://lyorine.com")
-                    .setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"))
-                    .setThumbnail(bot.getConfigurationManager().getStringValue("rolesThumbnailUrl") + "?size=256")
-                    .setColor(3066993);
-            grades.forEach(grade -> {
-                Emote emote = textChannelRoles.getGuild().getEmoteById(grade.getEmoteId());
-                embedBuilder1.addField("Grade: "+grade.getDisplayName(), grade.getDescription()+"\nRéaction a ajouter » "+emote.getAsMention(), true);
-            });
+            EmbedBuilder embedBuilder1 = generateRoleEmbed();
             textChannelRoles.sendMessage(embedBuilder.build()).queue();
             textChannelRoles.sendMessage(embedBuilder1.build()).queue(message -> {
                 messageForRoles = message;
@@ -85,20 +79,7 @@ public class RolesManager {
                 });
             });
         }else{
-            EmbedBuilder embedBuilder = new EmbedBuilder()
-                    .setTitle("Liste des grades", "https://lyorine.com")
-                    .setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"))
-                    .setThumbnail(bot.getConfigurationManager().getStringValue("rolesThumbnailUrl") + "?size=256")
-                    .setColor(3066993);
-            grades.forEach(grade -> {
-                Emote emote = textChannelRoles.getGuild().getEmoteById(grade.getEmoteId());
-                if(emote != null) {
-                    embedBuilder.addField("Grade: " + grade.getDisplayName(), grade.getDescription() + "\nRéaction a ajouter » " + emote.getAsMention(), true);
-                }else{
-                    embedBuilder.addField("Grade: " + grade.getDisplayName(), grade.getDescription() + "\nRéaction a ajouter » Inconnue (contacter un administrateur !)", true);
-                    bot.getErrorHandler().handleException(new Exception("Unknown emote"));
-                }
-            });
+            EmbedBuilder embedBuilder = generateRoleEmbed();
             messageForRoles.editMessage(embedBuilder.build()).queue(message -> {
                 messageForRoles = message;
                 grades.forEach(grade -> {
@@ -107,6 +88,24 @@ public class RolesManager {
                 });
             });
         }
+    }
+
+    public EmbedBuilder generateRoleEmbed(){
+        EmbedBuilder embedBuilder = new EmbedBuilder()
+                .setTitle("Liste des grades", "https://lyorine.com")
+                .setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"))
+                .setThumbnail(bot.getConfigurationManager().getStringValue("rolesThumbnailUrl") + "?size=256")
+                .setColor(3066993);
+        grades.forEach(grade -> {
+            Emote emote = textChannelRoles.getGuild().getEmoteById(grade.getEmoteId());
+            if(emote != null) {
+                embedBuilder.addField("Grade: " + grade.getDisplayName(), grade.getDescription() + "\nRéaction a ajouter » " + emote.getAsMention(), true);
+            }else{
+                embedBuilder.addField("Grade: " + grade.getDisplayName(), grade.getDescription() + "\nRéaction a ajouter » Inconnue (contacter un administrateur !)", true);
+                bot.getErrorHandler().handleException(new Exception("Unknown emote"));
+            }
+        });
+        return embedBuilder;
     }
 
     public void saveRoles(){

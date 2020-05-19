@@ -17,7 +17,6 @@ public class SessionManager {
     private Session currentSession;
     private final File SESSIONS_FOLDER;
     private final ArrayList<Session> sessions = new ArrayList<>();
-    private final ArrayList<Integer> viewerCountList = new ArrayList<>();
     private ScheduledFuture scheduleViewerCheck;
 
     public SessionManager() {
@@ -33,26 +32,12 @@ public class SessionManager {
     }
 
     public void endSession() {
-        currentSession.setEndDate(System.currentTimeMillis());
-        Optional<Session> sessionOpt = getSession(currentSession.getUuid().toString());
-        if(sessionOpt.isPresent()){
-            Session session = sessionOpt.get();
-            sessions.set(sessions.indexOf(session), currentSession);
-        }
+        currentSession.endSession();
         scheduleViewerCheck.cancel(true);
-        calculateAverage();
     }
 
     public void deleteCurrentSession(){
         this.currentSession = null;
-    }
-
-    public void calculateAverage() {
-        if(viewerCountList.size() != 0) {
-            int sum = viewerCountList.stream().mapToInt(integer -> integer).sum();
-            int average = sum / viewerCountList.size();
-            currentSession.setAvgViewers(average);
-        }
     }
 
     public ArrayList<Session> getSessions() {
@@ -204,10 +189,7 @@ public class SessionManager {
     }
 
     public void addViewerCount(int viewerCount){
-        viewerCountList.add(viewerCount);
+        currentSession.getViewerCountList().add(viewerCount);
     }
 
-    public ArrayList<Integer> getViewerCountList() {
-        return viewerCountList;
-    }
 }

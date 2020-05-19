@@ -27,6 +27,7 @@ public class Session {
     private HashMap<String, Integer> commandsUsed = new HashMap<>();
     private int bansAndTimeouts;
     private Message sessionMessage;
+    private final ArrayList<Integer> viewerCountList = new ArrayList<>();
 
     private String title;
     private String currentGameId;
@@ -212,7 +213,7 @@ public class Session {
 
     public void updateMessage() {
         Guild discord = bot.getJda().getGuildById(bot.getConfigurationManager().getStringValue("guildId"));
-        Member lyorine = Objects.requireNonNull(discord).getMemberById(bot.getConfigurationManager().getStringValue("lyorineId"));
+        Member lyorine = Objects.requireNonNull(discord).getMemberById(bot.getConfigurationManager().getStringValue("lyorineClientId"));
         Role notif = discord.getRoleById(bot.getConfigurationManager().getStringValue("notificationRole"));
         String channelName = bot.getChannelName();
         bot.getLogger().log(Level.INFO, "> Updating session message!");
@@ -246,5 +247,17 @@ public class Session {
         }else{
             this.sessionMessage.editMessage(message).queue();
         }
+    }
+
+    public void endSession() {
+        endDate = System.currentTimeMillis();
+        if(viewerCountList.size() != 0) {
+            int sum = viewerCountList.stream().mapToInt(integer -> integer).sum();
+            avgViewers = sum / viewerCountList.size();
+        }
+    }
+
+    public ArrayList<Integer> getViewerCountList() {
+        return viewerCountList;
     }
 }

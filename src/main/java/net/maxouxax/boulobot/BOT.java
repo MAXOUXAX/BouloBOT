@@ -117,11 +117,10 @@ public class BOT implements Runnable{
 
         //Connecting to TwitchAPI
         OAuth2Credential oAuth2Credential = new OAuth2Credential("twitch", configurationManager.getStringValue("oauth2Token"));
-        OAuth2Credential oAuth2CredentialAuthToken = new OAuth2Credential("twitch", configurationManager.getStringValue("twitchToken"));
         twitchClient = TwitchClientBuilder.builder()
                 .withCredentialManager(credentialManager)
                 .withEnableHelix(true)
-                .withDefaultAuthToken(oAuth2CredentialAuthToken)
+                .withDefaultAuthToken(oAuth2Credential)
                 .withChatAccount(oAuth2Credential)
                 .withEnableChat(true)
                 .withEnableTMI(true)

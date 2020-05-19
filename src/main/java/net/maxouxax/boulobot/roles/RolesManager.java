@@ -55,10 +55,8 @@ public class RolesManager {
 
     private void loadMessage() {
         long messageId = bot.getConfigurationManager().getLongValue("messageRolesID");
-        textChannelRoles.retrieveMessageById(messageId).queue(message -> {
-            this.messageForRoles = message;
-            sendMessage();
-        });
+        this.messageForRoles = textChannelRoles.retrieveMessageById(messageId).complete();
+        sendMessage();
     }
 
     private void sendMessage() {
@@ -92,7 +90,7 @@ public class RolesManager {
 
     public EmbedBuilder generateRoleEmbed(){
         EmbedBuilder embedBuilder = new EmbedBuilder()
-                .setTitle("Liste des grades", "https://lyorine.com")
+                .setTitle("Liste des grades", bot.getConfigurationManager().getStringValue("websiteUrl"))
                 .setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"))
                 .setThumbnail(bot.getConfigurationManager().getStringValue("rolesThumbnailUrl") + "?size=256")
                 .setColor(3066993);
@@ -108,10 +106,9 @@ public class RolesManager {
         return embedBuilder;
     }
 
-    public void saveRoles(){
+    public void saveRoles() {
         JSONArray array = new JSONArray();
-        for(Grade grade : grades)
-        {
+        for (Grade grade : grades) {
             JSONObject object = new JSONObject();
             object.accumulate("id", grade.getRole().getIdLong());
             object.accumulate("displayname", grade.getDisplayName());
@@ -119,23 +116,11 @@ public class RolesManager {
             object.accumulate("emoteId", grade.getEmoteId());
             array.put(object);
         }
-        try(JSONWriter writter = new JSONWriter("roles.json")){
+        try (JSONWriter writter = new JSONWriter("roles.json")) {
             writter.write(array);
             writter.flush();
-        }catch(IOException e){
+        } catch (IOException e) {
             bot.getErrorHandler().handleException(e);
-        }
-
-
-        JSONArray arrayConfig = new JSONArray();
-        JSONObject object = new JSONObject();
-        object.accumulate("messageRolesID", messageForRoles.getIdLong());
-        arrayConfig.put(object);
-        try(JSONWriter writter = new JSONWriter("config.json")){
-            writter.write(arrayConfig);
-            writter.flush();
-        }catch(IOException ioe){
-            ioe.printStackTrace();
         }
     }
 

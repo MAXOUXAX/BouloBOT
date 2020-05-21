@@ -48,6 +48,7 @@ public class BOT implements Runnable{
     private final Logger logger;
     private final ErrorHandler errorHandler;
     private TwitchClient twitchClient;
+    private TwitchListener twitchListener;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private RolesManager rolesManager;
@@ -141,7 +142,8 @@ public class BOT implements Runnable{
         loadNotifications();
 
         //Registering the listener in order to make the events work
-        twitchClient.getEventManager().getEventHandler(SimpleEventHandler.class).registerListener(new TwitchListener(commandMap, this));
+        this.twitchListener = new TwitchListener(commandMap);
+        twitchClient.getEventManager().getEventHandler(SimpleEventHandler.class).registerListener(twitchListener);
     }
 
     private void loadNotifications() {
@@ -286,6 +288,8 @@ public class BOT implements Runnable{
         logger.log(Level.INFO, "> Scanner closed");
         jda.shutdown();
         logger.log(Level.INFO, "> JDA shutdowned");
+        twitchListener.closeListener();
+        logger.log(Level.INFO, "> TwitchListener closed");
         rolesManager.saveRoles();
         logger.log(Level.INFO, "> Roles saved");
         commandMap.save();
@@ -330,6 +334,10 @@ public class BOT implements Runnable{
 
     public ScheduledExecutorService getScheduler() {
         return scheduler;
+    }
+
+    public TwitchListener getTwitchListener() {
+        return twitchListener;
     }
 
     public static BOT getInstance(){

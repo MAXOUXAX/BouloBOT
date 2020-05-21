@@ -55,7 +55,11 @@ public class RolesManager {
 
     private void loadMessage() {
         long messageId = bot.getConfigurationManager().getLongValue("messageRolesID");
-        this.messageForRoles = textChannelRoles.retrieveMessageById(messageId).complete();
+        try{
+            this.messageForRoles = textChannelRoles.retrieveMessageById(messageId).complete();
+        }catch (Exception e){
+            bot.getErrorHandler().handleException(e);
+        }
         sendMessage();
     }
 

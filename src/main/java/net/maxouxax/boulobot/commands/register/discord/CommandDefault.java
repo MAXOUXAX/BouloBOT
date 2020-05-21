@@ -161,13 +161,9 @@ public class CommandDefault {
 
     @Command(name = "sendrules", description = "Permet d'envoyer les règles dans le salon destiné.", type = ExecutorType.CONSOLE)
     private void sendRules(){
-        EmbedBuilder embedBuilder = new EmbedBuilder()
+        EmbedBuilder embedBuilder1 = new EmbedBuilder()
                 .setImage(bot.getConfigurationManager().getStringValue("rulesBanner")+"?size=1000")
                 .setColor(2895667);
-        EmbedBuilder embedBuilder1 = new EmbedBuilder()
-                .setTitle("Bienvenue !")
-                .setColor(3447003)
-                .setDescription("Afin d'obtenir la meilleure expérience utilisateur possible, veuillez lire attentivement les règles qui suivent.");
         EmbedBuilder embedBuilder2 = new EmbedBuilder()
                 .setTitle("Règles")
                 .setColor(15105570)
@@ -194,7 +190,7 @@ public class CommandDefault {
             textChannel.sendMessage(embedBuilder2.build()).queue();
             textChannel.sendMessage(embedBuilder3.build()).queue();
             textChannel.sendMessage(embedBuilder4.build()).queue(message -> message
-                    .addReaction(bot.getConfigurationManager().getStringValue("rulesAcceptEmoteId")).queue());
+                    .addReaction(Objects.requireNonNull(textChannel.getGuild().getEmoteById(bot.getConfigurationManager().getStringValue("rulesAcceptEmoteId")))).queue());
         }
     }
 }

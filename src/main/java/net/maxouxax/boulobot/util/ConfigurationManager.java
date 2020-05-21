@@ -70,8 +70,8 @@ public class ConfigurationManager {
         return Long.valueOf(configKeys.getOrDefault(key, "0"));
     }
 
-    public void setValue(String key, String longValue, boolean save){
-        configKeys.put(key, longValue);
+    public void setValue(String key, String value, boolean save){
+        configKeys.put(key, value);
         if(save){
             saveData();
         }

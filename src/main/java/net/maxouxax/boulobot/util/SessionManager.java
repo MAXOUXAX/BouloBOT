@@ -33,7 +33,7 @@ public class SessionManager {
 
     public void endSession() {
         currentSession.endSession();
-        scheduleViewerCheck.cancel(true);
+        scheduleViewerCheck.cancel(false);
     }
 
     public void deleteCurrentSession(){

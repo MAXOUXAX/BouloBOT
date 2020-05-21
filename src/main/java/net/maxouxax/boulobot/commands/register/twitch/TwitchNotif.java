@@ -8,6 +8,7 @@ import net.maxouxax.boulobot.commands.CommandMap;
 import net.maxouxax.boulobot.commands.TwitchCommand;
 
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class TwitchNotif {
 
@@ -20,15 +21,17 @@ public class TwitchNotif {
     }
 
     @TwitchCommand(name = "notif", example = "&notif", help = "&notif", description = "Permet de manuellement déclencher l'envoi de la notif de début de live", rank = TwitchCommand.ExecutorRank.MOD)
-    private void notif(User user, Long broadcasterIdLong, String[] args){
+    private void notif(User user, Long broadcasterIdLong, String broadcaster, String[] args){
         String broadcasterId = broadcasterIdLong.toString();
         StreamList streamResultList = bot.getTwitchClient().getHelix().getStreams(bot.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, null, Collections.singletonList(broadcasterId), null).execute();
-        final Stream[] currentStream = new Stream[1];
-        streamResultList.getStreams().forEach(stream -> {
-            currentStream[0] = stream;
-        });
-        String title = currentStream[0].getTitle();
-        String gameId = currentStream[0].getGameId();
+        AtomicReference<Stream> currentStream = new AtomicReference<>();
+        streamResultList.getStreams().forEach(currentStream::set);
+        if(currentStream.get() == null){
+            bot.getTwitchClient().getChat().sendMessage(broadcaster, "Aucun stream n'est en cours !");
+            return;
+        }
+        String title = currentStream.get().getTitle();
+        String gameId = currentStream.get().getGameId();
         bot.sendGoLiveNotif(title, gameId, broadcasterId);
     }
 

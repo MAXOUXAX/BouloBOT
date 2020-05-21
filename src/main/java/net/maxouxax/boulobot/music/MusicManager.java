@@ -50,17 +50,16 @@ public class MusicManager {
                 AudioTrackInfo info = track.getInfo();
                 EmbedBuilder builder = new EmbedBuilder();
 
-                Long totalMillis = info.length;
-                Duration duration = Duration.ofMillis(totalMillis);
+                Duration duration = Duration.ofMillis(info.length);
                 String durationfinal = duration.toString();
                 durationfinal = durationfinal.replace("PT", "");
                 durationfinal = durationfinal.replace("M", " minute(s) ");
                 durationfinal = durationfinal.replace("S", " seconde(s) ");
 
                 builder.setColor(Color.GREEN);
-                builder.setTitle("Play command requested by "+user.getName());
-                builder.setThumbnail(user.getAvatarUrl()+"?size=256");
-                builder.setDescription("Titre: **"+info.title+"**\nAuteur: **"+info.author+"**\nDurée: **"+durationfinal+"**\nURL: **"+info.uri+"**");
+                builder.setTitle("Musique");
+                builder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
+                builder.setDescription("Titre: **"+info.title+"**\nAuteur: "+info.author+"\nDurée: "+durationfinal+"\nURL: "+info.uri+"");
                 builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
 
                 channel.sendMessage(builder.build()).queue();
@@ -75,8 +74,8 @@ public class MusicManager {
 
 
                 builder.setColor(Color.GREEN);
-                builder.setTitle("Play(list) command requested by "+user.getName());
-                builder.setThumbnail(user.getAvatarUrl()+"?size=256");
+                builder.setTitle("Musique");
+                builder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
                 builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
 
                 for(int i = 0; i < playlist.getTracks().size(); i++) {
@@ -86,17 +85,16 @@ public class MusicManager {
 
                 for(int i = 0; i < playlist.getTracks().size() && i < 5; i++){
                     AudioTrackInfo info = playlist.getTracks().get(i).getInfo();
-                    Long totalMillis = info.length;
-                    Duration duration = Duration.ofMillis(totalMillis);
+                    Duration duration = Duration.ofMillis(info.length);
                     String durationfinal = duration.toString();
                     durationfinal = durationfinal.replace("PT", "");
                     durationfinal = durationfinal.replace("M", " minute(s) ");
                     durationfinal = durationfinal.replace("S", " seconde(s) ");
-                    sbuilder.append("\n-----------------\n").append("Titre: **" + info.title + "**\nAuteur: **" + info.author + "**\nDurée: **" + durationfinal + "**\nURL: **" + info.uri+"**");
+                    sbuilder.append("\n---\n").append("Titre: **").append(info.title).append("\nAuteur: ").append(info.author).append("\nDurée: ").append(durationfinal).append("\nURL: ").append(info.uri);
                 }
                 if(playlist.getTracks().size() > 5){
-                    final Integer b = (playlist.getTracks().size()-5);
-                    sbuilder.append("\n\n*et "+b+" autre(s) !*");
+                    final int b = (playlist.getTracks().size()-5);
+                    sbuilder.append("\n\n*et ").append(b).append(" autre(s) !*");
                 }
                 builder.setDescription(sbuilder.toString());
                 channel.sendMessage(builder.build()).queue();
@@ -108,9 +106,9 @@ public class MusicManager {
             public void noMatches() {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.RED);
-                builder.setTitle("Play command requested by "+user.getName());
-                builder.setDescription("La piste " + source + " n'a pas été trouvé.");
-                builder.setThumbnail(user.getAvatarUrl()+"?size=256");
+                builder.setTitle("Musique");
+                builder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
+                builder.setDescription("La piste " + source + " n'a pas été trouvée.");
                 builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
                 channel.sendMessage(builder.build()).queue();
             }
@@ -119,9 +117,9 @@ public class MusicManager {
             public void loadFailed(FriendlyException exception) {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.RED);
-                builder.setTitle("Play command requested by "+user.getName());
+                builder.setTitle("Musique");
+                builder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
                 builder.setDescription("Impossible de jouer la piste (raison:" + exception.getMessage()+")");
-                builder.setThumbnail(user.getAvatarUrl()+"?size=256");
                 builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
                 channel.sendMessage(builder.build()).queue();
             }

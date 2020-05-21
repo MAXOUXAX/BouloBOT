@@ -25,7 +25,7 @@ public class MusicCommand {
         this.commandMap = commandMap;
     }
 
-    @Command(name="play",type= Command.ExecutorType.USER,description = "Permet de jouer de la musique en indiquant un lien YouTube ou SoundCloud (autres formats acceptés)", example = ".play https://www.youtube.com/watch?v=GS3GYQQUS3o", help = ".play <lien>")
+    @Command(name="play",type= Command.ExecutorType.USER,description = "Permet de jouer de la musique en indiquant un lien YouTube ou SoundCloud (autres formats acceptés)", example = "play https://www.youtube.com/watch?v=GS3GYQQUS3o", help = "play <lien>")
     private void play(Guild guild, TextChannel textChannel, User user, String command, String[] args){
         EmbedBuilder helperEmbed = commandMap.getHelpEmbed("play");
         if(args.length == 0){
@@ -47,42 +47,42 @@ public class MusicCommand {
         }
     }
 
-    @Command(name="skip",type= Command.ExecutorType.USER,description = "Permet de passer la musique actuellement en lecture", help = ".skip", example = ".skip")
+    @Command(name="skip",type= Command.ExecutorType.USER,description = "Permet de passer la musique actuellement en lecture", help = "skip", example = "skip")
     private void skip(Guild guild, TextChannel textChannel){
         if(!guild.getAudioManager().isConnected() && !guild.getAudioManager().isAttemptingToConnect()){
-            textChannel.sendMessage("Le player n'as pas de piste en cours.").queue();
+            textChannel.sendMessage("Aucune piste n'est en cours de lecture").queue();
             return;
         }
 
         manager.getPlayer(guild).skipTrack();
-        textChannel.sendMessage("La lecture est passée à la piste suivante.").queue();
+        textChannel.sendMessage("La piste actuelle a bien été passée.").queue();
     }
 
-    @Command(name="clear",type= Command.ExecutorType.USER,description = "Permet de vider la liste d'attente", example = ".clear", help = ".clear")
+    @Command(name="clear",type= Command.ExecutorType.USER,description = "Permet de vider la liste d'attente", example = "clear", help = "clear")
     private void clear(TextChannel textChannel){
         MusicPlayer player = manager.getPlayer(textChannel.getGuild());
 
         if(player.getListener().getTracks().isEmpty()){
-            textChannel.sendMessage("Il n'y a pas de piste dans la liste d'attente.").queue();
+            textChannel.sendMessage("Aucune piste n'est dans la liste d'attente").queue();
             return;
         }
 
         player.getListener().getTracks().clear();
-        textChannel.sendMessage("La liste d'attente à été vidée.").queue();
+        textChannel.sendMessage("La liste d'attente a été vidée.").queue();
     }
 
-    @Command(name = "queue",type = Command.ExecutorType.USER,description = "Permet de visualier les musiques en file d'attente", help = ".queue", example = ".queue")
+    @Command(name = "queue",type = Command.ExecutorType.USER,description = "Permet de visualier les musiques en file d'attente", help = "queue", example = "queue")
     private void queue(TextChannel textChannel, User user){
         MusicPlayer player = manager.getPlayer(textChannel.getGuild());
         if(player.getListener().getTracks().isEmpty()){
-            textChannel.sendMessage("Aucune musique en attente !").queue();
+            textChannel.sendMessage("Aucune piste n'est dans la liste d'attente").queue();
         }else {
             StringBuilder sb = new StringBuilder();
             EmbedBuilder builder = new EmbedBuilder();
 
             builder.setColor(Color.YELLOW);
-            builder.setTitle("Queue command requested by "+user.getName());
-            builder.setThumbnail(user.getAvatarUrl()+"?size=256");
+            builder.setTitle("Musique");
+            builder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
             builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
 
             int position = 1;
@@ -92,13 +92,12 @@ public class MusicCommand {
                     if(position > 5){
                         break;
                     }
-                    Long totalMillis = at.getDuration();
-                    Duration duration = Duration.ofMillis(totalMillis);
+                    Duration duration = Duration.ofMillis(at.getDuration());
                     String durationfinal = duration.toString();
                     durationfinal = durationfinal.replace("PT", "");
                     durationfinal = durationfinal.replace("M", " minute(s) ");
                     durationfinal = durationfinal.replace("S", " seconde(s) ");
-                    sb.append("-----------------\nPosition: **" + position + "**\n • Titre: **" + at.getInfo().title + "**\n • Chaîne: **" + at.getInfo().author + "**\n • Durée: **" + durationfinal + "**\n • URL: **" + at.getInfo().uri +"**\n");
+                    sb.append("---\nPosition: ").append(position).append("\n • Titre: **").append(at.getInfo().title).append("**\n • Chaîne: ").append(at.getInfo().author).append("\n • Durée: ").append(durationfinal).append("\n • URL: ").append(at.getInfo().uri).append("\n");
                     position++;
                 }
                 sb.append("\n\net ").append(player.getListener().getTracks().size() - 5).append(" autre(s) !");
@@ -110,7 +109,7 @@ public class MusicCommand {
                     durationfinal = durationfinal.replace("PT", "");
                     durationfinal = durationfinal.replace("M", " minute(s) ");
                     durationfinal = durationfinal.replace("S", " seconde(s) ");
-                    sb.append("-----------------\nPosition: **" + position + "**\n • Titre: **" + at.getInfo().title + "**\n • Chaîne: **" + at.getInfo().author + "**\n • Durée: **" + durationfinal + "**\n • URL: **" + at.getInfo().uri +"**");
+                    sb.append("---\nPosition: ").append(position).append("\n • Titre: **").append(at.getInfo().title).append("**\n • Chaîne: ").append(at.getInfo().author).append("\n • Durée: ").append(durationfinal).append("\n • URL: ").append(at.getInfo().uri);
                     position++;
                 }
             }
@@ -126,56 +125,49 @@ public class MusicCommand {
             textChannel.sendMessage(helperEmbed.build()).queue();
         }else {
             MusicPlayer player = manager.getPlayer(textChannel.getGuild());
-            Long time = Long.parseLong(command.replaceFirst("goto ", ""));
-            time = time * 1000;
+            long time = Long.parseLong(command.replaceFirst("goto ", "")) * 1000;
             player.getAudioPlayer().getPlayingTrack().setPosition(time);
         }
     }
 
-    @Command(name = "track",type = Command.ExecutorType.USER,description = "Permet d'obtenir les informations sur la musique en cours de lecture",help = ".track", example = ".track")
+    @Command(name = "track",type = Command.ExecutorType.USER,description = "Permet d'obtenir les informations sur la musique en cours de lecture",help = "track", example = "track")
     private void track(TextChannel textChannel, User user){
         MusicPlayer player = manager.getPlayer(textChannel.getGuild());
         EmbedBuilder builder = new EmbedBuilder();
         AudioTrackInfo track = player.getAudioPlayer().getPlayingTrack().getInfo();
 
-        Long totalMillis = track.length;
-        Duration duration = Duration.ofMillis(totalMillis);
-        String durationfinal = duration.toString();
-        durationfinal = durationfinal.replace("PT", "");
-        durationfinal = durationfinal.replace("M", "m");
-        durationfinal = durationfinal.replace("S", "s");
+        String duration = Duration.ofMillis(track.length).toString();
+        duration = duration.replace("PT", "");
+        duration = duration.replace("M", "m");
+        duration = duration.replace("S", "s");
 
-        Long timeelapsed = player.getAudioPlayer().getPlayingTrack().getPosition();
-        Duration duration1 = Duration.ofMillis(timeelapsed);
-        String durationfinal1 = duration1.toString();
-        durationfinal1 = durationfinal1.replace("PT", "");
-        durationfinal1 = durationfinal1.replace("M", "m");
-        durationfinal1 = durationfinal1.replace("S", "s");
+        String position = Duration.ofMillis(player.getAudioPlayer().getPlayingTrack().getPosition()).toString();
+        position = position.replace("PT", "");
+        position = position.replace("M", "m");
+        position = position.replace("S", "s");
 
         builder.setColor(Color.GREEN);
-        builder.setTitle("Track command requested by "+user.getName());
-        builder.setThumbnail(user.getAvatarUrl()+"?size=256");
-        builder.setDescription("Titre: **"+track.title+"**\nAuteur: **"+track.author+"**\nDurée: **"+durationfinal1+"** / **"+durationfinal+"**\nURL: "+track.uri);
+        builder.setTitle("Musique");
+        builder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
+        builder.setDescription("Titre: **"+track.title+"**\nAuteur: "+track.author+"\nDurée: "+position+" / "+duration+"\nURL: "+track.uri);
         builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
         textChannel.sendMessage(builder.build()).queue();
     }
 
-    @Command(name = "pause", description = "Permet d'arrêter ou de jouer la musique (un play/pause quoi)", type = Command.ExecutorType.USER, example = ".pause", help = ".pause")
+    @Command(name = "pause", description = "Permet d'arrêter ou de jouer la musique (un play/pause quoi)", type = Command.ExecutorType.USER, example = "pause", help = "pause")
     private void pause(TextChannel textChannel, User user){
         MusicPlayer player = manager.getPlayer(textChannel.getGuild());
-        //si la musique est en pause
-        //sinon (donc si la musique est pas en pause donc qu'elle JOUE
-        //on pause
-        player.getAudioPlayer().setPaused(!player.getAudioPlayer().isPaused());//on retire la pause (donc on fait play)
+        player.getAudioPlayer().setPaused(!player.getAudioPlayer().isPaused());
+        textChannel.sendMessage("La piste en cours a correctement été "+(player.getAudioPlayer().isPaused() ? "mise en pause" : "résumée")).queue();
     }
 
-    @Command(name = "volume",description = "Permet de modifier le volume de la musique", type = Command.ExecutorType.USER, help = ".volume <volume>", example = ".volume 50")
+    @Command(name = "volume",description = "Permet de modifier le volume de la musique", type = Command.ExecutorType.USER, help = "volume <volume>", example = "volume 50")
     private void volume(TextChannel textChannel, User user, Guild guild, String[] args) {
         EmbedBuilder helperEmbed = commandMap.getHelpEmbed("volume");
         if (args.length == 0) {
             textChannel.sendMessage(helperEmbed.build()).queue();
         } else {
-            Integer volume = Integer.parseInt(args[0]);
+            int volume = Integer.parseInt(args[0]);
             MusicPlayer player = manager.getPlayer(textChannel.getGuild());
             boolean tooLargeVolume = false;
             boolean tooLowVolume = false;

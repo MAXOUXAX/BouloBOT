@@ -49,7 +49,7 @@ public class CommandOctogone {
 
                 EmbedBuilder embedBuilder = new EmbedBuilder();
                 embedBuilder.setTitle("Octogone", bot.getConfigurationManager().getStringValue("websiteUrl"));
-                embedBuilder.setAuthor(user.getName(), message.getJumpUrl(), user.getAvatarUrl()+"?size=256");
+                embedBuilder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
                 embedBuilder.addField(participants.size()+" participants", participantsStr.toString(), true);
                 embedBuilder.addField("Vainqueur", winner.getAsMention(), true);
                 embedBuilder.setDescription("Bien joué à "+winner.getAsMention()+" qui a écrabouillé(e) ses adversaires. Quel(le) malade !");

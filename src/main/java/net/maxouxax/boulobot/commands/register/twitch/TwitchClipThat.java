@@ -31,7 +31,7 @@ public class TwitchClipThat {
         CreateClipList clipData = bot.getTwitchClient().getHelix().createClip(bot.getConfigurationManager().getStringValue("oauth2Token"), broadcasterUser[0].getId(), false).execute();
         bot.getTwitchClient().getChat().sendMessage(broadcaster, "\uD83C\uDFAC Création du clip... [5s \uD83D\uDEAB]");
         bot.getScheduler().schedule(() -> clipData.getData().forEach(clip -> {
-            bot.getTwitchClient().getChat().sendMessage(broadcaster, "\uD83C\uDFA5 Clip créé et disponible ici (le lien peut ne pas fonctionner immédiatement) > "+clip.getEditUrl().replaceFirst("/edit", ""));
+            bot.getTwitchClient().getChat().sendMessage(broadcaster, "\uD83C\uDFA5 Clip créé et disponible ici » "+clip.getEditUrl().replaceFirst("/edit", ""));
         }), 5, TimeUnit.SECONDS);
     }
 

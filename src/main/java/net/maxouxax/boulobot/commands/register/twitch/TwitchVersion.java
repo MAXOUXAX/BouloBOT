@@ -20,7 +20,6 @@ public class TwitchVersion {
             bot.getTwitchClient().getChat().sendMessage(broadcaster, "BouloBOT by MAXOUXAX • Amazingly powerful. | Je suis en version " + bot.getVersion() + " | Je gère " + commandMap.getDiscordCommands().size() + " commandes Discord | Je gère " + commandMap.getTwitchCommands().size() + " commandes Twitch | J'ai souhaité la bienvenue à " + commandMap.getUserIds().size() + " viewers !");
         }catch (Exception e){
             bot.getErrorHandler().handleException(e);
-            e.printStackTrace();
             bot.getTwitchClient().getChat().sendMessage(broadcaster, "An error occured. > "+e.getMessage());
         }
     }

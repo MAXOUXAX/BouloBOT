@@ -21,8 +21,7 @@ public class TwitchAquoijouer {
         StringBuilder str = new StringBuilder();
         GameTopList resultList = bot.getTwitchClient().getHelix().getTopGames(bot.getConfigurationManager().getStringValue("oauth2Token"), null, null, "10").execute();
         resultList.getGames().forEach(game -> str.append(game.getName()).append(", "));
-        bot.getTwitchClient().getChat().sendMessage(broadcaster, "Voici quelques idées de jeux: ");
-        bot.getTwitchClient().getChat().sendMessage(broadcaster, str.toString());
+        bot.getTwitchClient().getChat().sendMessage(broadcaster, "Voici quelques idées de jeux: " +str.toString());
     }
 
 }

@@ -34,18 +34,7 @@ public class CommandIgnore {
                 embedBuilder.setTitle("Ignore", bot.getConfigurationManager().getStringValue("websiteUrl"));
                 embedBuilder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl() + "?size=256");
                 StringBuilder stringBuilder = new StringBuilder("Voici la liste des utilisateurs ignorés: ");
-                chatSpyManager.getIgnoredUsers().forEach(s -> {
-                    UserList resultList = bot.getTwitchClient().getHelix().getUsers(bot.getConfigurationManager().getStringValue("oauth2Token"), Collections.singletonList(s), null).execute();
-                    if(resultList.getUsers().isEmpty()){
-                        chatSpyManager.getIgnoredUsers().remove(s);
-                        chatSpyManager.saveIgnoredUsers();
-                        textChannel.sendMessage("Un utilisateur ignoré a été automatiquement supprimé car son compte a été supprimé (id="+s+")").queue();
-                    }else{
-                        AtomicReference<com.github.twitch4j.helix.domain.User> twitchUser = new AtomicReference<>();
-                        resultList.getUsers().stream().findFirst().ifPresent(twitchUser::set);
-                        stringBuilder.append(twitchUser.get().getDisplayName()).append(" - ");
-                    }
-                });
+                chatSpyManager.getIgnoredUsers().forEach(s -> stringBuilder.append(s).append(" - "));
                 embedBuilder.setDescription(stringBuilder.toString());
                 embedBuilder.setColor(15158332);
                 embedBuilder.setFooter(TextFormatter.asDate(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter"))), bot.getConfigurationManager().getStringValue("embedIconUrl"));
@@ -61,10 +50,10 @@ public class CommandIgnore {
                 }else{
                     AtomicReference<com.github.twitch4j.helix.domain.User> twitchUser = new AtomicReference<>();
                     resultList.getUsers().stream().findFirst().ifPresent(twitchUser::set);
-                    if(chatSpyManager.getIgnoredUsers().contains(twitchUser.get().getId())){
+                    if(chatSpyManager.getIgnoredUsers().contains(twitchUser.get().getDisplayName())){
                         textChannel.sendMessage("Cet utilisateur est déjà ignoré").queue();
                     }else{
-                        chatSpyManager.getIgnoredUsers().add(twitchUser.get().getId());
+                        chatSpyManager.getIgnoredUsers().add(twitchUser.get().getDisplayName());
                         chatSpyManager.saveIgnoredUsers();
                         textChannel.sendMessage("Cet utilisateur est désormais ignoré").queue();
                     }
@@ -76,8 +65,8 @@ public class CommandIgnore {
                 }else{
                     AtomicReference<com.github.twitch4j.helix.domain.User> twitchUser = new AtomicReference<>();
                     resultList.getUsers().stream().findFirst().ifPresent(twitchUser::set);
-                    if(chatSpyManager.getIgnoredUsers().contains(twitchUser.get().getId())){
-                        chatSpyManager.getIgnoredUsers().remove(twitchUser.get().getId());
+                    if(chatSpyManager.getIgnoredUsers().contains(twitchUser.get().getDisplayName())){
+                        chatSpyManager.getIgnoredUsers().remove(twitchUser.get().getDisplayName());
                         chatSpyManager.saveIgnoredUsers();
                         textChannel.sendMessage("Cet utilisateur n'est désormais plus ignoré").queue();
                     }else{

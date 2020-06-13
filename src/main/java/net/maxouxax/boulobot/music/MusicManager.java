@@ -90,7 +90,7 @@ public class MusicManager {
                     durationfinal = durationfinal.replace("PT", "");
                     durationfinal = durationfinal.replace("M", " minute(s) ");
                     durationfinal = durationfinal.replace("S", " seconde(s) ");
-                    sbuilder.append("\n---\n").append("Titre: **").append(info.title).append("\nAuteur: ").append(info.author).append("\nDurée: ").append(durationfinal).append("\nURL: ").append(info.uri);
+                    sbuilder.append("\n---\n").append("Titre: **").append(info.title).append("**\nAuteur: ").append(info.author).append("\nDurée: ").append(durationfinal).append("\nURL: ").append(info.uri);
                 }
                 if(playlist.getTracks().size() > 5){
                     final int b = (playlist.getTracks().size()-5);

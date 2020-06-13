@@ -28,7 +28,7 @@ public class CommandVersion {
             builder.addField("J'ai souhaité la bienvenue à", commandMap.getUserIds().size()+" viewers", true);
             channel.sendMessage(builder.build()).queue();
         }catch (Exception e) {
-            e.printStackTrace();
+            bot.getErrorHandler().handleException(e);
             channel.sendMessage("An error occured. > " + e.getMessage()).queue();
         }
     }

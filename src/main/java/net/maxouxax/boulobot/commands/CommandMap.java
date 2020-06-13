@@ -282,13 +282,13 @@ public final class CommandMap {
         Object[] object = getDiscordCommand(command);
         if(object[0] == null || ((SimpleCommand)object[0]).getExecutorType() == Command.ExecutorType.CONSOLE) return false;
 
-        if(message.getGuild() != null && ((SimpleCommand)object[0]).getPower() > getPowerUser(message.getGuild(), message.getAuthor())) return false;
+        if(((SimpleCommand) object[0]).getPower() > getPowerUser(message.getGuild(), message.getAuthor())) return false;
 
         try{
             executeDiscordCommand(((SimpleCommand)object[0]), command,(String[])object[1], message);
         }catch(Exception e){
             bot.getLogger().log(Level.SEVERE,"La methode "+((SimpleCommand)object[0]).getMethod().getName()+" n'est pas correctement initialisé. ("+e.getMessage()+")");
-            e.printStackTrace();
+            bot.getErrorHandler().handleException(e);
         }
         return true;
     }

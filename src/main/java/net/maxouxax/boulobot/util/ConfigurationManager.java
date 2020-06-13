@@ -58,7 +58,7 @@ public class ConfigurationManager {
             writter.flush();
 
         }catch(IOException ioe){
-            ioe.printStackTrace();
+            bot.getErrorHandler().handleException(ioe);
         }
     }
 

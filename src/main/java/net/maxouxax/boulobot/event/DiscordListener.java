@@ -18,6 +18,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class DiscordListener implements EventListener {
 
@@ -94,7 +95,8 @@ public class DiscordListener implements EventListener {
         if (message.startsWith(commandMap.getDiscordTag())) {//on vérifie si le message commence par le tag commande (donc .)
             message = message.replaceFirst(commandMap.getDiscordTag(), "");//on retire le tag du message (pour avoir que la commande sans le .)
             if (commandMap.discordCommandUser(event.getAuthor(), message, event.getMessage())) {//la on exécute la commande
-                event.getMessage().delete().queue();
+                event.getChannel().sendTyping().queue();
+                event.getMessage().delete().queueAfter(5, TimeUnit.SECONDS);
             }
         }
 

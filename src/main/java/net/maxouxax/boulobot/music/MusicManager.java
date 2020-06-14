@@ -14,7 +14,6 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.maxouxax.boulobot.BOT;
 
-import java.awt.*;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +55,7 @@ public class MusicManager {
                 durationfinal = durationfinal.replace("M", " minute(s) ");
                 durationfinal = durationfinal.replace("S", " seconde(s) ");
 
-                builder.setColor(Color.GREEN);
+                builder.setColor(3066993);
                 builder.setTitle("Musique");
                 builder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
                 builder.setDescription("Titre: **"+info.title+"**\nAuteur: "+info.author+"\nDurée: "+durationfinal+"\nURL: "+info.uri+"");
@@ -73,7 +72,7 @@ public class MusicManager {
                 EmbedBuilder builder = new EmbedBuilder();
 
 
-                builder.setColor(Color.GREEN);
+                builder.setColor(3066993);
                 builder.setTitle("Musique");
                 builder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
                 builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
@@ -105,7 +104,7 @@ public class MusicManager {
             @Override
             public void noMatches() {
                 EmbedBuilder builder = new EmbedBuilder();
-                builder.setColor(Color.RED);
+                builder.setColor(15158332);
                 builder.setTitle("Musique");
                 builder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
                 builder.setDescription("La piste " + source + " n'a pas été trouvée.");
@@ -116,7 +115,7 @@ public class MusicManager {
             @Override
             public void loadFailed(FriendlyException exception) {
                 EmbedBuilder builder = new EmbedBuilder();
-                builder.setColor(Color.RED);
+                builder.setColor(15158332);
                 builder.setTitle("Musique");
                 builder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
                 builder.setDescription("Impossible de jouer la piste (raison:" + exception.getMessage()+")");

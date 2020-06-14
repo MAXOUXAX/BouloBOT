@@ -11,7 +11,6 @@ import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.Command;
 import net.maxouxax.boulobot.commands.CommandMap;
 
-import java.awt.*;
 import java.time.Duration;
 
 public class MusicCommand {
@@ -80,7 +79,7 @@ public class MusicCommand {
             StringBuilder sb = new StringBuilder();
             EmbedBuilder builder = new EmbedBuilder();
 
-            builder.setColor(Color.YELLOW);
+            builder.setColor(15105570);
             builder.setTitle("Musique");
             builder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
             builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
@@ -146,7 +145,7 @@ public class MusicCommand {
         position = position.replace("M", "m");
         position = position.replace("S", "s");
 
-        builder.setColor(Color.GREEN);
+        builder.setColor(3066993);
         builder.setTitle("Musique");
         builder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
         builder.setDescription("Titre: **"+track.title+"**\nAuteur: "+track.author+"\nDurée: "+position+" / "+duration+"\nURL: "+track.uri);

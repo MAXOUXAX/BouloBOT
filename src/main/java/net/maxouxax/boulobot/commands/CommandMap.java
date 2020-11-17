@@ -39,7 +39,7 @@ public final class CommandMap {
     public CommandMap() {
         this.bot = BOT.getInstance();
 
-        registerCommands(new CommandDefault(this), new RoleCommand(this), new HelpCommand(this), new MusicCommand(this), new CommandWeather(this), new CommandNotif(this), new CommandChangelog(this), new CommandVersion(this), new CommandSession(this), new CommandOctogone(this), new CommandSay(this), new CommandEmbed(this), new CommandIgnore(this));
+        registerCommands(new CommandDefault(this), new RoleCommand(this), new HelpCommand(this), new MusicCommand(this), new CommandWeather(this), new CommandNotif(this), new CommandChangelog(this), new CommandVersion(this), new CommandSession(this), new CommandOctogone(this), new CommandSay(this), new CommandEmbed(this), new CommandIgnore(this), new CommandLock());
         registerTwitchCommands(new TwitchWeather(this), new TwitchHelp(this), new TwitchNotif(this), new TwitchVersion(this), new TwitchAquoijouer(this), new TwitchClipThat(this), new TwitchSCP(this), new TwitchJeparticipe(this));
 
         load();

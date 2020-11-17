@@ -3,7 +3,6 @@ package net.maxouxax.boulobot.util;
 import com.github.twitch4j.helix.domain.GameList;
 import com.github.twitch4j.helix.domain.Stream;
 import com.github.twitch4j.helix.domain.StreamList;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.maxouxax.boulobot.BOT;
@@ -217,20 +216,19 @@ public class Session {
         Role notif = discord.getRoleById(bot.getConfigurationManager().getStringValue("notificationRole"));
         String channelName = bot.getChannelName();
         bot.getLogger().log(Level.INFO, "> Updating session message!");
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase());
-        embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
-        embedBuilder.setColor(3066993);
-        embedBuilder.setDescription("Coucou les "+ Objects.requireNonNull(notif).getAsMention()+" !\n**"+ Objects.requireNonNull(lyorine).getAsMention()+"** vient de démarrer son live, v'nez voir !\n» https://twitch.tv/"+channelName.toUpperCase());
-        embedBuilder.addField(new MessageEmbed.Field("Titre", title, true));
+        EmbedCrafter embedCrafter = new EmbedCrafter();
+        embedCrafter.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase())
+                    .setColor(3066993)
+                    .setDescription("Coucou les "+ Objects.requireNonNull(notif).getAsMention()+" !\n**"+ Objects.requireNonNull(lyorine).getAsMention()+"** vient de démarrer son live, v'nez voir !\n» https://twitch.tv/"+channelName.toUpperCase())
+                    .addField(new MessageEmbed.Field("Titre", title, true));
         GameList resultList = bot.getTwitchClient().getHelix().getGames(bot.getConfigurationManager().getStringValue("oauth2Token"), Collections.singletonList(currentGameId), null).execute();
         final String[] gameName = {"Aucun jeu"};
         resultList.getGames().forEach(game -> {
             gameName[0] = game.getName();
             String boxUrl = game.getBoxArtUrl(600, 800);
-            embedBuilder.setThumbnail(boxUrl);
+            embedCrafter.setThumbnailUrl(boxUrl);
         });
-        embedBuilder.addField(new MessageEmbed.Field("Jeu", gameName[0], true));
+        embedCrafter.addField(new MessageEmbed.Field("Jeu", gameName[0], true));
 
         StreamList streamResultList = bot.getTwitchClient().getHelix().getStreams(bot.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, null, Collections.singletonList(channelId), null).execute();
         final Stream[] currentStream = new Stream[1];
@@ -238,8 +236,8 @@ public class Session {
             currentStream[0] = stream;
         });
 
-        embedBuilder.setImage(currentStream[0].getThumbnailUrl(1280, 720));
-        Message message = new MessageBuilder(notif.getAsMention()).setEmbed(embedBuilder.build()).build();
+        embedCrafter.setImageUrl(currentStream[0].getThumbnailUrl(1280, 720));
+        Message message = new MessageBuilder(notif.getAsMention()).setEmbed(embedCrafter.build()).build();
         bot.getJda().getPresence().setActivity(Activity.streaming("avec sa reine à "+gameName[0], "https://twitch.tv/"+channelName.toUpperCase()));
         if(sessionMessage == null){
             TextChannel toSend = discord.getTextChannelById(bot.getConfigurationManager().getStringValue("noticationTextChannelId"));

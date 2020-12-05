@@ -1,6 +1,5 @@
 package net.maxouxax.boulobot.event;
 
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -12,6 +11,7 @@ import net.dv8tion.jda.internal.entities.UserImpl;
 import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.CommandMap;
 import net.maxouxax.boulobot.roles.Grade;
+import net.maxouxax.boulobot.util.EmbedCrafter;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -127,13 +127,12 @@ public class DiscordListener implements EventListener {
 
     private void onDM(PrivateMessageReceivedEvent event){
         if(event.getAuthor().equals(event.getJDA().getSelfUser())) return;
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setColor(Color.RED);
-        embedBuilder.setTitle("Private message received of " + event.getAuthor().getName());
-        embedBuilder.setThumbnail(bot.getConfigurationManager().getStringValue("cancelIcon"));
-        embedBuilder.setDescription("Cette action est **IMPOSSIBLE**");
-        embedBuilder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
-        event.getChannel().sendMessage(embedBuilder.build()).queue();
+        EmbedCrafter embedCrafter = new EmbedCrafter();
+        embedCrafter.setColor(Color.RED)
+            .setTitle("Private message received of " + event.getAuthor().getName())
+            .setThumbnailUrl(bot.getConfigurationManager().getStringValue("cancelIcon"))
+            .setDescription("Cette action est **IMPOSSIBLE**");
+        event.getChannel().sendMessage(embedCrafter.build()).queue();
     }
 
 }

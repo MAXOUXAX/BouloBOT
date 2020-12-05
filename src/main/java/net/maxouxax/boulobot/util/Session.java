@@ -213,7 +213,7 @@ public class Session {
     public void updateMessage() {
         Guild discord = bot.getJda().getGuildById(bot.getConfigurationManager().getStringValue("guildId"));
         Member lyorine = Objects.requireNonNull(discord).getMemberById(bot.getConfigurationManager().getStringValue("lyorineClientId"));
-        Role notif = discord.getRoleById(bot.getConfigurationManager().getStringValue("notificationRole"));
+        Role notif = discord.getRoleById(bot.getConfigurationManager().getStringValue("notificationRoleId"));
         String channelName = bot.getChannelName();
         bot.getLogger().log(Level.INFO, "> Updating session message!");
         EmbedCrafter embedCrafter = new EmbedCrafter();

@@ -1,14 +1,13 @@
 package net.maxouxax.boulobot.commands.register.discord;
 
 import com.github.twitch4j.helix.domain.UserList;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.Command;
 import net.maxouxax.boulobot.commands.CommandMap;
 import net.maxouxax.boulobot.util.ChatSpyManager;
-import net.maxouxax.boulobot.util.TextFormatter;
+import net.maxouxax.boulobot.util.EmbedCrafter;
 
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,20 +26,19 @@ public class CommandIgnore {
     public void ignore(User user, TextChannel textChannel, String[] args) {
         ChatSpyManager chatSpyManager = bot.getTwitchListener().getChatSpyManager();
         if (args.length == 0) {
-            textChannel.sendMessage(commandMap.getHelpEmbed("ignore").build()).queue();
+            textChannel.sendMessage(commandMap.getHelpEmbed("ignore")).queue();
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("list")) {
-                EmbedBuilder embedBuilder = new EmbedBuilder();
-                embedBuilder.setTitle("Ignore", bot.getConfigurationManager().getStringValue("websiteUrl"));
-                embedBuilder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl() + "?size=256");
+                EmbedCrafter embedCrafter = new EmbedCrafter();
+                embedCrafter.setTitle("Ignore", bot.getConfigurationManager().getStringValue("websiteUrl"))
+                    .setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl() + "?size=256")
+                    .setColor(15158332);
                 StringBuilder stringBuilder = new StringBuilder("Voici la liste des utilisateurs ignorés: ");
                 chatSpyManager.getIgnoredUsers().forEach(s -> stringBuilder.append(s).append(" - "));
-                embedBuilder.setDescription(stringBuilder.toString());
-                embedBuilder.setColor(15158332);
-                embedBuilder.setFooter(TextFormatter.asDate(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter"))), bot.getConfigurationManager().getStringValue("embedIconUrl"));
-                textChannel.sendMessage(embedBuilder.build()).queue();
+                embedCrafter.setDescription(stringBuilder.toString());
+                textChannel.sendMessage(embedCrafter.build()).queue();
             } else {
-                textChannel.sendMessage(commandMap.getHelpEmbed("ignore").build()).queue();
+                textChannel.sendMessage(commandMap.getHelpEmbed("ignore")).queue();
             }
         }else if(args.length == 2){
             if(args[0].equalsIgnoreCase("add")){
@@ -75,7 +73,7 @@ public class CommandIgnore {
                 }
             }
         }else{
-            textChannel.sendMessage(commandMap.getHelpEmbed("ignore").build()).queue();
+            textChannel.sendMessage(commandMap.getHelpEmbed("ignore")).queue();
         }
     }
 

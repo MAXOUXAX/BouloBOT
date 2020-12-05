@@ -1,8 +1,8 @@
 package net.maxouxax.boulobot.commands.register.discord;
 
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.maxouxax.boulobot.BOT;
@@ -29,26 +29,24 @@ public class CommandChangelog {
     @Command(name = "changelog",help = ".changelog",example = ".changelog", description = "Permet d'avoir de l'aide sur les commandes de changelogs", type = Command.ExecutorType.USER, power = 100)
     public void changelog(TextChannel textChannel, String[] args, SimpleCommand simpleCommand) {
         if(args.length == 0) {
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.setTitle(simpleCommand.getName().toUpperCase(), bot.getConfigurationManager().getStringValue("websiteUrl"));
-            embedBuilder.addField(".changelog set", "Permet de définir les propriétés du changelog à poster", false);
-            embedBuilder.addField(".changelog add", "Permet d'ajouter une modification au changelog à poster", false);
-            embedBuilder.addField(".changelog remove", "Permet de supprimer une modification au changelog à poster", false);
-            embedBuilder.addField(".changelog list", "Permet d'afficher la liste des modifications au changelog à poster", false);
-            embedBuilder.addField(".changelog post", "Permet de poster le changelog", false);
-            embedBuilder.setColor(3447003);
-            embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
-            textChannel.sendMessage(embedBuilder.build()).queue();
+            EmbedCrafter embedCrafter = new EmbedCrafter();
+            embedCrafter.setTitle(simpleCommand.getName().toUpperCase(), bot.getConfigurationManager().getStringValue("websiteUrl"))
+                .addField(".changelog set", "Permet de définir les propriétés du changelog à poster", false)
+                .addField(".changelog add", "Permet d'ajouter une modification au changelog à poster", false)
+                .addField(".changelog remove", "Permet de supprimer une modification au changelog à poster", false)
+                .addField(".changelog list", "Permet d'afficher la liste des modifications au changelog à poster", false)
+                .addField(".changelog post", "Permet de poster le changelog", false)
+                .setColor(3447003);
+            textChannel.sendMessage(embedCrafter.build()).queue();
         }else{
             String arg1 = args[0];
             if(arg1.equalsIgnoreCase("set")){
                 if(args.length == 1){
-                    EmbedBuilder embedBuilder = new EmbedBuilder();
-                    embedBuilder.setTitle("Changelog » SET", bot.getConfigurationManager().getStringValue("websiteUrl"));
-                    embedBuilder.addField(".changelog set <name> ²² <oldver>", "Permet de définir les propriétés du changelog à poster", false);
-                    embedBuilder.setColor(3447003);
-                    embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
-                    textChannel.sendMessage(embedBuilder.build()).queue();
+                    EmbedCrafter embedCrafter = new EmbedCrafter();
+                    embedCrafter.setTitle("Changelog » SET", bot.getConfigurationManager().getStringValue("websiteUrl"))
+                        .addField(".changelog set <name> ²² <oldver>", "Permet de définir les propriétés du changelog à poster", false)
+                        .setColor(3447003);
+                    textChannel.sendMessage(embedCrafter.build()).queue();
                 }else{
                     if (toPost != null) {
                         StringBuilder str = new StringBuilder();
@@ -92,14 +90,13 @@ public class CommandChangelog {
                 }
             }else if(arg1.equalsIgnoreCase("add")){
                 if(args.length == 1){
-                    EmbedBuilder embedBuilder = new EmbedBuilder();
-                    embedBuilder.setTitle("Changelog » ADD", bot.getConfigurationManager().getStringValue("websiteUrl"));
-                    embedBuilder.addField(".changelog add <name> ²² <description> ²² <type> ²² <platform>", "Permet d'ajouter une modification au changelog à poster", false);
-                    embedBuilder.addField("Liste des types", Arrays.toString(State.values()), false);
-                    embedBuilder.addField("Liste des platformes", Arrays.toString(Platform.values()), false);
-                    embedBuilder.setColor(3447003);
-                    embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
-                    textChannel.sendMessage(embedBuilder.build()).queue();
+                    EmbedCrafter embedCrafter = new EmbedCrafter();
+                    embedCrafter.setTitle("Changelog » ADD", bot.getConfigurationManager().getStringValue("websiteUrl"))
+                        .addField(".changelog add <name> ²² <description> ²² <type> ²² <platform>", "Permet d'ajouter une modification au changelog à poster", false)
+                        .addField("Liste des types", Arrays.toString(State.values()), false)
+                        .addField("Liste des platformes", Arrays.toString(Platform.values()), false)
+                        .setColor(3447003);
+                    textChannel.sendMessage(embedCrafter.build()).queue();
                 }else {
                     if (toPost != null) {
                         StringBuilder str = new StringBuilder();
@@ -135,13 +132,12 @@ public class CommandChangelog {
                 }
             }else if(arg1.equalsIgnoreCase("remove")){
                 if(args.length == 1){
-                    EmbedBuilder embedBuilder = new EmbedBuilder();
-                    embedBuilder.setTitle("Changelog » REMOVE", bot.getConfigurationManager().getStringValue("websiteUrl"));
-                    embedBuilder.addField(".changelog remove <name> ²² <platform>", "Permet de supprimer une modification du changelog à poster", false);
-                    embedBuilder.addField("Liste des platformes", Platform.values().toString(), false);
-                    embedBuilder.setColor(3447003);
-                    embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
-                    textChannel.sendMessage(embedBuilder.build()).queue();
+                    EmbedCrafter embedCrafter = new EmbedCrafter();
+                    embedCrafter.setTitle("Changelog » REMOVE", bot.getConfigurationManager().getStringValue("websiteUrl"))
+                        .addField(".changelog remove <name> ²² <platform>", "Permet de supprimer une modification du changelog à poster", false)
+                        .addField("Liste des platformes", Platform.values().toString(), false)
+                        .setColor(3447003);
+                    textChannel.sendMessage(embedCrafter.build()).queue();
                 }else {
                     if (toPost != null) {
                         StringBuilder str = new StringBuilder();
@@ -178,16 +174,15 @@ public class CommandChangelog {
                 if(toPost == null){
                     textChannel.sendMessage("Pour créer un changelog, utilisez la commande .changelog").queue();
                 }else{
-                    EmbedBuilder embedBuilder = new EmbedBuilder();
-                    ArrayList<EmbedBuilder> embedBuilders = new ArrayList<>();
-                    embedBuilder.setTitle("Changelog » Liste des modifications", bot.getConfigurationManager().getStringValue("websiteUrl"));
-                    embedBuilder.setColor(3447003);
-                    embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
+                    EmbedCrafter embedCrafter = new EmbedCrafter();
+                    ArrayList<MessageEmbed> embedBuilders = new ArrayList<>();
+                    embedCrafter.setTitle("Changelog » Liste des modifications", bot.getConfigurationManager().getStringValue("websiteUrl"))
+                        .setColor(3447003);
                     if(toPost.getHashMap().isEmpty()){
-                        embedBuilder.addField("Aucune modification", "Aucune modification", true);
-                        textChannel.sendMessage(embedBuilder.build()).queue();
+                        embedCrafter.addField("Aucune modification", "Aucune modification", true);
+                        textChannel.sendMessage(embedCrafter.build()).queue();
                     }else {
-                        embedBuilder.setDescription("Voici la liste des modifications:");
+                        embedCrafter.setDescription("Voici la liste des modifications:");
                         for(Platform platform : Platform.values()){
                             textChannel.sendMessage("Platform: "+platform.getName()).queue();
                             textChannel.sendMessage(toPost.getHashMap().toString()).queue();
@@ -196,31 +191,29 @@ public class CommandChangelog {
                                 ArrayList<Modifications> arrayList = toPost.getHashMap().get(platform);
                                 if (!arrayList.isEmpty()) {
                                     textChannel.sendMessage("ArrayList isn't empty").queue();
-                                    EmbedBuilder embed = new EmbedBuilder();
+                                    EmbedCrafter embedCrafter1 = new EmbedCrafter();
                                     textChannel.sendMessage("Created new Embed").queue();
-                                    embed.setTitle(platform.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"));
+                                    embedCrafter1.setTitle(platform.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"));
                                     textChannel.sendMessage("setTitle").queue();
-                                    embed.setColor(platform.getEmbedColor());
+                                    embedCrafter1.setColor(platform.getEmbedColor());
                                     textChannel.sendMessage("setColor").queue();
-                                    embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
-                                    textChannel.sendMessage("setFooter").queue();
                                     arrayList.forEach(modifications -> {
                                         textChannel.sendMessage("forEach").queue();
-                                        embed.addField(modifications.getState().getName() + " | " + modifications.getName(), modifications.getDescription(), true);
+                                        embedCrafter1.addField(modifications.getState().getName() + " | " + modifications.getName(), modifications.getDescription(), true);
                                         textChannel.sendMessage("forEach::addField").queue();
                                     });
-                                    embedBuilders.add(embed);
+                                    embedBuilders.add(embedCrafter1.build());
                                     textChannel.sendMessage("added the embed to embedbuilders list").queue();
                                 }else{
                                     textChannel.sendMessage("ArrayList empty").queue();
                                 }
                             }
                         }
-                        textChannel.sendMessage(embedBuilder.build()).queue();
+                        textChannel.sendMessage(embedCrafter.build()).queue();
                         textChannel.sendMessage("base embed").queue();
-                        embedBuilders.forEach(embedBuilder1 -> {
+                        embedBuilders.forEach(messageEmbed -> {
                             textChannel.sendMessage("send embedbuilders").queue();
-                            textChannel.sendMessage(embedBuilder1.build()).queue();
+                            textChannel.sendMessage(messageEmbed).queue();
                         });
                     }
                 }
@@ -236,35 +229,33 @@ public class CommandChangelog {
                             nbOfModif += toPost.getHashMap().get(platform).size();
                         }
                     }
-                    EmbedBuilder embedBuilder = new EmbedBuilder();
-                    ArrayList<EmbedBuilder> embedBuilders = new ArrayList<>();
-                    embedBuilder.setTitle("Changelog » "+toPost.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"));
-                    embedBuilder.setDescription(toPost.getOldVersion()+"» "+toPost.getVersion()+"\nCette nouvelle version ("+toPost.getVersion()+") comporte "+nbOfModif+" modifications !\nUUID: "+toPost.getUuid().toString());
-                    embedBuilder.setColor(3447003);
-                    embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
+                    EmbedCrafter embedCrafter = new EmbedCrafter();
+                    ArrayList<MessageEmbed> embedBuilders = new ArrayList<>();
+                    embedCrafter.setTitle("Changelog » "+toPost.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"))
+                        .setDescription(toPost.getOldVersion()+"» "+toPost.getVersion()+"\nCette nouvelle version ("+toPost.getVersion()+") comporte "+nbOfModif+" modifications !\nUUID: "+toPost.getUuid().toString())
+                        .setColor(3447003);
                     if(toPost.getHashMap().isEmpty()){
-                        embedBuilder.addField("Aucune modification", "Aucune modification", true);
-                        textChannel.sendMessage(embedBuilder.build()).queue();
+                        embedCrafter.addField("Aucune modification", "Aucune modification", true);
+                        textChannel.sendMessage(embedCrafter.build()).queue();
                     }else {
                         for (Platform platform : Platform.values()) {
                             if (toPost.getHashMap().containsKey(platform)) {
                                 ArrayList<Modifications> arrayList = toPost.getHashMap().get(platform);
                                 if (!arrayList.isEmpty()) {
-                                    EmbedBuilder embed = new EmbedBuilder();
-                                    embed.setTitle(platform.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"));
-                                    embed.setColor(platform.getEmbedColor());
-                                    embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
+                                    EmbedCrafter embedCrafter1 = new EmbedCrafter();
+                                    embedCrafter1.setTitle(platform.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"))
+                                        .setColor(platform.getEmbedColor());
                                     arrayList.forEach(modifications -> {
-                                        embed.addField(modifications.getState().getName() + " | " + modifications.getName(), modifications.getDescription(), true);
+                                        embedCrafter1.addField(modifications.getState().getName() + " | " + modifications.getName(), modifications.getDescription(), true);
                                     });
-                                    embedBuilders.add(embed);
+                                    embedBuilders.add(embedCrafter1.build());
                                 }
                             }
                         }
-                        Message message = new MessageBuilder(changelog.getAsMention()).setEmbed(embedBuilder.build()).build();
+                        Message message = new MessageBuilder(changelog.getAsMention()).setEmbed(embedCrafter.build()).build();
                         textChannel.sendMessage(message).queue();
                         embedBuilders.forEach(embedBuilder1 -> {
-                            textChannel.sendMessage(embedBuilder1.build()).queue();
+                            textChannel.sendMessage(embedBuilder1).queue();
                         });
                     }
                 }

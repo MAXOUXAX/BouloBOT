@@ -1,6 +1,5 @@
 package net.maxouxax.boulobot.commands.register.discord;
 
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -8,7 +7,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.Command;
 import net.maxouxax.boulobot.commands.CommandMap;
-import net.maxouxax.boulobot.util.TextFormatter;
+import net.maxouxax.boulobot.util.EmbedCrafter;
 
 import java.util.List;
 import java.util.Random;
@@ -28,12 +27,10 @@ public class CommandOctogone {
         textChannel.sendTyping().queue();
         List<Member> participants = message.getMentionedMembers();
         if(participants.isEmpty()){
-            EmbedBuilder em = commandMap.getHelpEmbed("octogone");
-            textChannel.sendMessage(em.build()).queue();
+            textChannel.sendMessage(commandMap.getHelpEmbed("octogone")).queue();
         }else{
             if(participants.size() == 1 && participants.get(0).getId().equalsIgnoreCase(user.getId())){
-                EmbedBuilder em = commandMap.getHelpEmbed("octogone");
-                textChannel.sendMessage(em.build()).queue();
+                textChannel.sendMessage(commandMap.getHelpEmbed("octogone")).queue();
             }else{
                 int random = new Random().nextInt(participants.size());
                 Member winner = participants.get(random);
@@ -47,15 +44,14 @@ public class CommandOctogone {
                     }
                 }
 
-                EmbedBuilder embedBuilder = new EmbedBuilder();
-                embedBuilder.setTitle("Octogone", bot.getConfigurationManager().getStringValue("websiteUrl"));
-                embedBuilder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
-                embedBuilder.addField(participants.size()+" participants", participantsStr.toString(), true);
-                embedBuilder.addField("Vainqueur", winner.getAsMention(), true);
-                embedBuilder.setDescription("Bien joué à "+winner.getAsMention()+" qui a écrabouillé(e) ses adversaires. Quel(le) malade !");
-                embedBuilder.setColor(15528177);
-                embedBuilder.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
-                textChannel.sendMessage(embedBuilder.build()).queue();
+                EmbedCrafter embedCrafter = new EmbedCrafter();
+                embedCrafter.setTitle("Octogone", bot.getConfigurationManager().getStringValue("websiteUrl"))
+                    .setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256")
+                    .addField(participants.size()+" participants", participantsStr.toString(), true)
+                    .addField("Vainqueur", winner.getAsMention(), true)
+                    .setDescription("Bien joué à "+winner.getAsMention()+" qui a écrabouillé(e) ses adversaires. Quel(le) malade !")
+                    .setColor(15528177);
+                textChannel.sendMessage(embedCrafter.build()).queue();
             }
         }
     }

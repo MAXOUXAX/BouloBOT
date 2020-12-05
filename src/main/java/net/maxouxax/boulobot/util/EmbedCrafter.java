@@ -20,6 +20,7 @@ public class EmbedCrafter {
     private String thumbnailUrl;
     private String imageUrl;
     private String authorName, authorUrl, authorIconUrl;
+    private String footerText, footerIconUrl;
 
     public String getTitle() {
         return title;
@@ -122,6 +123,14 @@ public class EmbedCrafter {
         return this;
     }
 
+    public String getFooterText() {
+        return footerText;
+    }
+
+    public String getFooterIconUrl() {
+        return footerIconUrl;
+    }
+
     public MessageEmbed build(){
         BOT bot = BOT.getInstance();
         EmbedBuilder embedBuilder = new EmbedBuilder();
@@ -130,6 +139,13 @@ public class EmbedCrafter {
                 .setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"))
                 .setTimestamp(OffsetDateTime.now(ZoneId.of("ECT")));
         fields.forEach(embedBuilder::addField);
+        if(footerText != null){
+            if(footerIconUrl != null){
+                embedBuilder.setFooter(footerText, footerIconUrl);
+            }else {
+                embedBuilder.setFooter(footerText);
+            }
+        }
         if(title != null){
             if(url != null){
                 embedBuilder.setTitle(title, url);
@@ -161,4 +177,9 @@ public class EmbedCrafter {
         return this;
     }
 
+    public EmbedCrafter forceFooter(String text, String iconUrl) {
+        this.footerText = text;
+        this.footerIconUrl = iconUrl;
+        return this;
+    }
 }

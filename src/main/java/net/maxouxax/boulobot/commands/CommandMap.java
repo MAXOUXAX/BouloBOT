@@ -9,6 +9,7 @@ import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.register.discord.*;
 import net.maxouxax.boulobot.commands.register.twitch.*;
 import net.maxouxax.boulobot.music.MusicCommand;
+import net.maxouxax.boulobot.util.EmbedCrafter;
 import net.maxouxax.boulobot.util.JSONReader;
 import net.maxouxax.boulobot.util.JSONWriter;
 import org.json.JSONArray;
@@ -173,19 +174,19 @@ public final class CommandMap {
         }
     }
 
-    public EmbedBuilder getHelpEmbed(String command) {
+    public MessageEmbed getHelpEmbed(String command) {
         try {
             SimpleCommand command1 = discordCommands.get(command);
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.setTitle("Aide » "+discordTag + command);
-            embedBuilder.setDescription(command1.getDescription());
-            embedBuilder.addField("Utilisation:", discordTag+command1.getHelp(), true);
-            embedBuilder.addField("Exemple:", discordTag+command1.getExemple(), true);
-            return embedBuilder;
+            EmbedCrafter embedCrafter = new EmbedCrafter();
+            embedCrafter.setTitle("Aide » "+discordTag + command)
+                .setDescription(command1.getDescription())
+                .addField("Utilisation:", discordTag+command1.getHelp(), true)
+                .addField("Exemple:", discordTag+command1.getExemple(), true);
+            return embedCrafter.build();
         }catch (Exception e){
             bot.getErrorHandler().handleException(e);
         }
-        return new EmbedBuilder();
+        return new EmbedBuilder().build();
     }
 
     public String getTwitchHelpString(String command){

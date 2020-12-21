@@ -38,33 +38,25 @@ public class TwitchWeather {
 
                 StringBuilder weatherString = new StringBuilder();
 
-                weatherString.append("Ville: ").append(city);
+                weatherString.append("Météo pour ").append(city);
 
 
                 if (cwd.getMainData() != null && cwd.getMainData().hasTemp()) {
-                    weatherString.append(" | Température » ").append(cwd.getMainData().getTemp()).append("°C");
+                    weatherString.append(" • Temp. » ").append(cwd.getMainData().getTemp()).append("°C");
                 } else {
-                    weatherString.append(" | Température » Aucune donnée");
+                    weatherString.append(" • Temp. » Aucune donnée");
                 }
-                weatherString.append(" | Température min » ").append(cwd.getMainData().getTempMin()).append("°C");
-                weatherString.append(" | Température max » ").append(cwd.getMainData().getTempMax()).append("°C");
-                //TODO: Réactiver ceci lorsque OWM-JAPIS sera de nouveau fonctionnel avec les RainData.
-                /*if (cwd.getRainData() != null && cwd.getRainData().hasPrecipVol3h()) {
-                    weatherString.append(" | Précipitations » ").append(cwd.getRainData().getPrecipVol3h()).append("mm");
-                } else {
-                    weatherString.append(" | Précipitations » Aucune donnée");
-                }
-                */
+                weatherString.append(" • Temp. min » ").append(cwd.getMainData().getTempMin()).append("°C");
+                weatherString.append(" • Temp. max » ").append(cwd.getMainData().getTempMax()).append("°C");
                 if (cwd.getWindData() != null && cwd.getWindData().hasSpeed()) {
-                    weatherString.append(" | Vent » ").append(cwd.getWindData().getSpeed()).append(" m/s");
+                    weatherString.append(" • Vent » ").append(cwd.getWindData().getSpeed()).append(" m/s");
                 } else {
-                    weatherString.append(" | Vent » Aucune donnée");
+                    weatherString.append(" • Vent » Aucune donnée");
                 }
                 bot.getTwitchClient().getChat().sendMessage(broadcaster, weatherString.toString());
             }
         } catch (Exception e) {
-            String errorString = "Une erreur est survenue | Message d'erreur » "+ e.getMessage();
-            bot.getTwitchClient().getChat().sendMessage(broadcaster, errorString);
+            bot.getTwitchClient().getChat().sendMessage(broadcaster, "Une erreur est survenue • Message d'erreur » "+ e.getMessage());
             bot.getErrorHandler().handleException(e);
         }
     }

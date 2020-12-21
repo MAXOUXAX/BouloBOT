@@ -49,20 +49,20 @@ public class ChatSpyManager {
         stringsToPost.clear();
     }
 
-    public void endSpy(){
+    public void stopSpying(){
         scheduleChatSpy.cancel(false);
     }
 
-    public void addMessage(String usernameId, String string) {
-        if (!isIgnored(usernameId)) {
+    public void addMessage(String userName, String string) {
+        if (!isIgnored(userName)) {
             String date = new SimpleDateFormat("HH:mm:ss").format(new Date());
             stringsToPost.add("`" + date + "` • " + string);
         }
     }
 
-    public boolean isIgnored(String usernameId){
+    public boolean isIgnored(String userName){
         for (String s : ignoredUsers) {
-            if (s.equalsIgnoreCase(usernameId)) {
+            if (s.equalsIgnoreCase(userName)) {
                 return true;
             }
         }

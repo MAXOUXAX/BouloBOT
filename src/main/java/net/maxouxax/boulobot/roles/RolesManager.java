@@ -1,10 +1,10 @@
 package net.maxouxax.boulobot.roles;
 
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.maxouxax.boulobot.BOT;
+import net.maxouxax.boulobot.util.EmbedCrafter;
 import net.maxouxax.boulobot.util.JSONReader;
 import net.maxouxax.boulobot.util.JSONWriter;
 import org.json.JSONArray;
@@ -65,14 +65,13 @@ public class RolesManager {
 
     private void sendMessage() {
         if(messageForRoles == null){
-            EmbedBuilder embedBuilder = new EmbedBuilder()
+            EmbedCrafter embedCrafter = new EmbedCrafter()
                     .setTitle("Grades")
                     .setDescription("» Afin d'obtenir le grade choisi, veuillez ajouter la réaction correspondante. Veuillez noter que ces grades sont purement visuels, ils ne vous apporteront aucune permission supplémentaire.")
-                    .setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"))
                     .setColor(3447003);
-            EmbedBuilder embedBuilder1 = generateRoleEmbed();
-            textChannelRoles.sendMessage(embedBuilder.build()).queue();
-            textChannelRoles.sendMessage(embedBuilder1.build()).queue(message -> {
+            EmbedCrafter embedCrafter2 = generateRoleEmbed();
+            textChannelRoles.sendMessage(embedCrafter.build()).queue();
+            textChannelRoles.sendMessage(embedCrafter2.build()).queue(message -> {
                 messageForRoles = message;
                 bot.getConfigurationManager().setValue("messageRolesID", message.getId(), true);
                 grades.forEach(grade -> {
@@ -81,8 +80,8 @@ public class RolesManager {
                 });
             });
         }else{
-            EmbedBuilder embedBuilder = generateRoleEmbed();
-            messageForRoles.editMessage(embedBuilder.build()).queue(message -> {
+            EmbedCrafter embedCrafter = generateRoleEmbed();
+            messageForRoles.editMessage(embedCrafter.build()).queue(message -> {
                 messageForRoles = message;
                 grades.forEach(grade -> {
                     Emote emote = textChannelRoles.getGuild().getEmoteById(grade.getEmoteId());
@@ -92,22 +91,21 @@ public class RolesManager {
         }
     }
 
-    public EmbedBuilder generateRoleEmbed(){
-        EmbedBuilder embedBuilder = new EmbedBuilder()
+    public EmbedCrafter generateRoleEmbed(){
+        EmbedCrafter embedCrafter = new EmbedCrafter()
                 .setTitle("Liste des grades", bot.getConfigurationManager().getStringValue("websiteUrl"))
-                .setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"))
-                .setThumbnail(bot.getConfigurationManager().getStringValue("rolesThumbnailUrl") + "?size=256")
+                .setThumbnailUrl(bot.getConfigurationManager().getStringValue("rolesThumbnailUrl") + "?size=256")
                 .setColor(3066993);
         grades.forEach(grade -> {
             Emote emote = textChannelRoles.getGuild().getEmoteById(grade.getEmoteId());
             if(emote != null) {
-                embedBuilder.addField("Grade: " + grade.getDisplayName(), grade.getDescription() + "\nRéaction a ajouter » " + emote.getAsMention(), true);
+                embedCrafter.addField("Grade: " + grade.getDisplayName(), grade.getDescription() + "\nRéaction a ajouter » " + emote.getAsMention(), true);
             }else{
-                embedBuilder.addField("Grade: " + grade.getDisplayName(), grade.getDescription() + "\nRéaction a ajouter » Inconnue (contacter un administrateur !)", true);
+                embedCrafter.addField("Grade: " + grade.getDisplayName(), grade.getDescription() + "\nRéaction a ajouter » Inconnue (contacter un administrateur !)", true);
                 bot.getErrorHandler().handleException(new Exception("Unknown emote"));
             }
         });
-        return embedBuilder;
+        return embedCrafter;
     }
 
     public void saveRoles() {

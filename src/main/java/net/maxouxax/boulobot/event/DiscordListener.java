@@ -1,6 +1,5 @@
 package net.maxouxax.boulobot.event;
 
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -12,12 +11,14 @@ import net.dv8tion.jda.internal.entities.UserImpl;
 import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.CommandMap;
 import net.maxouxax.boulobot.roles.Grade;
+import net.maxouxax.boulobot.util.EmbedCrafter;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class DiscordListener implements EventListener {
 
@@ -94,7 +95,8 @@ public class DiscordListener implements EventListener {
         if (message.startsWith(commandMap.getDiscordTag())) {//on vérifie si le message commence par le tag commande (donc .)
             message = message.replaceFirst(commandMap.getDiscordTag(), "");//on retire le tag du message (pour avoir que la commande sans le .)
             if (commandMap.discordCommandUser(event.getAuthor(), message, event.getMessage())) {//la on exécute la commande
-                event.getMessage().delete().queue();
+                event.getChannel().sendTyping().queue();
+                event.getMessage().delete().queueAfter(5, TimeUnit.SECONDS);
             }
         }
 
@@ -125,13 +127,12 @@ public class DiscordListener implements EventListener {
 
     private void onDM(PrivateMessageReceivedEvent event){
         if(event.getAuthor().equals(event.getJDA().getSelfUser())) return;
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setColor(Color.RED);
-        embedBuilder.setTitle("Private message received of " + event.getAuthor().getName());
-        embedBuilder.setThumbnail(bot.getConfigurationManager().getStringValue("cancelIcon"));
-        embedBuilder.setDescription("Cette action est **IMPOSSIBLE**");
-        embedBuilder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
-        event.getChannel().sendMessage(embedBuilder.build()).queue();
+        EmbedCrafter embedCrafter = new EmbedCrafter();
+        embedCrafter.setColor(Color.RED)
+            .setTitle("Private message received of " + event.getAuthor().getName())
+            .setThumbnailUrl(bot.getConfigurationManager().getStringValue("cancelIcon"))
+            .setDescription("Cette action est **IMPOSSIBLE**");
+        event.getChannel().sendMessage(embedCrafter.build()).queue();
     }
 
 }

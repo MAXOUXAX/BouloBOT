@@ -12,7 +12,6 @@ import com.github.twitch4j.common.events.channel.ChannelGoOfflineEvent;
 import com.github.twitch4j.helix.domain.Stream;
 import com.github.twitch4j.helix.domain.StreamList;
 import io.sentry.Sentry;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -163,7 +162,7 @@ public class BOT implements Runnable{
                 logger.log(Level.SEVERE, "Gosh! We're in trouble... Session wasn't null, it means that a session was already started! We need to fix that!");
                 return;
             }
-            StreamList streamResultList = twitchClient.getHelix().getStreams(configurationManager.getStringValue("oauth2Token"), "", "", null, null, null, null, Collections.singletonList(channelId), null).execute();
+            StreamList streamResultList = twitchClient.getHelix().getStreams(configurationManager.getStringValue("oauth2Token"), "", "", 1, null, null, Collections.singletonList(channelId), null).execute();
             AtomicReference<Stream> currentStream = new AtomicReference<>();
             streamResultList.getStreams().stream().findFirst().ifPresent(currentStream::set);
             if(currentStream.get() == null){
@@ -190,28 +189,27 @@ public class BOT implements Runnable{
             Session session = sessionManager.getCurrentSession();
             sessionManager.endSession();
             logger.log(Level.INFO, "> Le stream est OFFLINE!");
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.setTitle("Live terminé \uD83D\uDD14", "https://twitch.tv/" + channelName.toUpperCase());
-            embedBuilder.setFooter(TextFormatter.asDate(configurationManager.getStringValue("embedFooter")), configurationManager.getStringValue("embedIconUrl"));
-            embedBuilder.setColor(15158332);
-            embedBuilder.setDescription("Oh dommage...\nLe live est désormais terminé !\nVous pourrez retrouver " + channelName.toUpperCase() + " une prochaine fois, à l'adresse suivante !\n» https://twitch.tv/" + channelName.toUpperCase());
-            embedBuilder.addField("Nombre de viewer maximum", session.getMaxViewers() + "", true);
-            embedBuilder.addField("Nombre de viewer moyen", session.getAvgViewers() + "", true);
-            embedBuilder.addField("Titre", session.getTitle(), true);
-            embedBuilder.addField("Nombre de ban & timeout", session.getBansAndTimeouts() + "", true);
-            embedBuilder.addField("Nombre de commandes utilisées", session.getCommandUsed() + "", true);
-            embedBuilder.addField("Nombre de messages envoyés", session.getMessageSended() + "", true);
-            embedBuilder.addField("Nombre de followers", session.getNewFollowers() + "", true);
-            embedBuilder.addField("Nombre de nouveaux viewers", session.getNewViewers() + "", true);
+            EmbedCrafter embedCrafter = new EmbedCrafter();
+            embedCrafter.setTitle("Live terminé \uD83D\uDD14", "https://twitch.tv/" + channelName.toUpperCase())
+                    .setColor(15158332)
+                    .setDescription("Oh dommage...\nLe live est désormais terminé !\nVous pourrez retrouver " + channelName.toUpperCase() + " une prochaine fois, à l'adresse suivante !\n» https://twitch.tv/" + channelName.toUpperCase())
+                    .addField("Nombre de viewer maximum", session.getMaxViewers() + "", true)
+                    .addField("Nombre de viewer moyen", session.getAvgViewers() + "", true)
+                    .addField("Titre", session.getTitle(), true)
+                    .addField("Nombre de ban & timeout", session.getBansAndTimeouts() + "", true)
+                    .addField("Nombre de commandes utilisées", session.getCommandUsed() + "", true)
+                    .addField("Nombre de messages envoyés", session.getMessageSended() + "", true)
+                    .addField("Nombre de followers", session.getNewFollowers() + "", true)
+                    .addField("Nombre de nouveaux viewers", session.getNewViewers() + "", true);
             LocalDateTime start = new Date(session.getStartDate()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
             LocalDateTime end = new Date(session.getEndDate()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
             int minutesC = Math.toIntExact(Duration.between(start, end).toMinutes());
             int hours = minutesC / 60;
             int minutes = minutesC % 60;
 
-            embedBuilder.addField("Durée", hours + "h" + (minutes < 10 ? "0" : "") + minutes, true);
+            embedCrafter.addField("Durée", hours + "h" + (minutes < 10 ? "0" : "") + minutes, true);
             jda.getPresence().setActivity(Activity.playing("Amazingly powerful"));
-            session.getSessionMessage().editMessage(" ").embed(embedBuilder.build()).queue();
+            session.getSessionMessage().editMessage(" ").embed(embedCrafter.build()).queue();
             logger.log(Level.INFO, "> Updated!");
             sessionManager.deleteCurrentSession();
         } catch (Exception e) {

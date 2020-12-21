@@ -36,83 +36,81 @@ public class TwitchListener {
     }
 
     private void channelJoinEvent(ChannelJoinEvent event) {
-        chatSpyManager.addMessage(event.getUser().getId(), "✅ `" + event.getUser().getName() + "` a rejoint le chat");
+        chatSpyManager.addMessage(event.getUser().getName(), "✅ `" + event.getUser().getName() + "` a rejoint le chat");
     }
 
     private void channelLeaveEvent(ChannelLeaveEvent event) {
-        chatSpyManager.addMessage(event.getUser().getId(), "❌ `" + event.getUser().getName() + "` a quitté le chat");
+        chatSpyManager.addMessage(event.getUser().getName(), "❌ `" + event.getUser().getName() + "` a quitté le chat");
     }
 
-    private void followEvent(FollowEvent followEvent) {
+    private void followEvent(FollowEvent event) {
         if (bot.getSessionManager().isSessionStarted()) {
             bot.getSessionManager().getCurrentSession().addFollower();
         }
-        bot.getLogger().log(Level.INFO, followEvent.getUser().getName() + " vient de follow !");
+        chatSpyManager.addMessage(event.getUser().getName(), "\uD83C\uDD95 `" + event.getUser().getName() + "` vient de follow");
+        bot.getLogger().log(Level.INFO, event.getUser().getName() + " vient de follow !");
     }
 
     private void ircMessage(IRCMessageEvent event) {
-        if (event.getMessage().isPresent()) {
-            String message = event.getMessage().get();
-            if (event.getUser() != null) {
-                String username = event.getUser().getName();
-                bot.getLogger().log(Level.INFO, "LiveChat > " + username + " > " + message);
-                String id = event.getUser().getId();
-                if (id == null) return;
-                if (!commandMap.isKnown(id)) {
-                    commandMap.addKnownUser(id);
-                    event.getTwitchChat().sendMessage(bot.getChannelName().toLowerCase(), "Coucou @" + username + " ! Passe un bon moment sur le stream, et pose toi avec ton PopCorn !");
-                    if (bot.getSessionManager().isSessionStarted()) {
-                        bot.getSessionManager().getCurrentSession().addNewViewer();
-                    }
-                }
-            }
-        } else {
+        if (!event.getMessage().isPresent()) {
             bot.getLogger().log(Level.INFO, event.getRawMessage());
         }
     }
 
-    private void onBan(UserBanEvent userBanEvent) {
+    private void onBan(UserBanEvent event) {
         if (bot.getSessionManager().isSessionStarted()) {
             bot.getSessionManager().getCurrentSession().addBanOrTimeout();
         }
-        chatSpyManager.addMessage(userBanEvent.getUser().getId(), "⛔ `" + userBanEvent.getUser().getName() + "` vient d'être banni pour " + userBanEvent.getReason());
-        bot.getLogger().log(Level.INFO, userBanEvent.getUser().getName() + " vient d'être banni");
+        chatSpyManager.addMessage(event.getUser().getName(), "⛔ `" + event.getUser().getName() + "` vient d'être banni pour " + event.getReason());
+        bot.getLogger().log(Level.INFO, event.getUser().getName() + " vient d'être banni");
     }
 
-    private void onTimeOut(UserTimeoutEvent userTimeoutEvent) {
+    private void onTimeOut(UserTimeoutEvent event) {
         if (bot.getSessionManager().isSessionStarted()) {
             bot.getSessionManager().getCurrentSession().addBanOrTimeout();
         }
-        chatSpyManager.addMessage(userTimeoutEvent.getUser().getId(), "\uD83D\uDCDB `" + userTimeoutEvent.getUser().getName() + "` vient d'être timeout pour " + userTimeoutEvent.getReason());
-        bot.getLogger().log(Level.INFO, userTimeoutEvent.getUser().getName() + " vient d'être timeout");
+        chatSpyManager.addMessage(event.getUser().getName(), "\uD83D\uDCDB `" + event.getUser().getName() + "` vient d'être timeout pour " + event.getReason());
+        bot.getLogger().log(Level.INFO, event.getUser().getName() + " vient d'être timeout");
     }
 
-    private void onGameUpdate(ChannelChangeGameEvent channelChangeGameEvent) {
-        bot.getSessionManager().updateGame(channelChangeGameEvent.getGameId());
+    private void onGameUpdate(ChannelChangeGameEvent event) {
+        if(bot.getSessionManager().isSessionStarted()) {
+            bot.getSessionManager().updateGame(event.getGameId());
+        }
     }
 
-    private void onMessageEvent(ChannelMessageEvent channelMessageEvent) {
-        String message = channelMessageEvent.getMessage();
-        chatSpyManager.addMessage(channelMessageEvent.getUser().getId(), "\uD83D\uDCAC `" + channelMessageEvent.getUser().getName() + "` » " + message);
+    private void onMessageEvent(ChannelMessageEvent event) {
+        String message = event.getMessage();
+        String username = event.getUser().getName();
+        String id = event.getUser().getId();
+        bot.getLogger().log(Level.INFO, "LiveChat > " + username + " > " + message);
+        chatSpyManager.addMessage(event.getUser().getName(), "\uD83D\uDCAC `" + username + "` » " + message);
+        if (!commandMap.isKnown(id)) {
+            commandMap.addKnownUser(id);
+            event.getTwitchChat().sendMessage(bot.getChannelName().toLowerCase(), "Coucou @" + username + " ! Passe un bon moment sur le stream, et pose toi avec ton PopCorn !");
+            if (bot.getSessionManager().isSessionStarted()) {
+                bot.getSessionManager().getCurrentSession().addNewViewer();
+            }
+        }
         if (bot.getSessionManager().isSessionStarted()) {
             bot.getSessionManager().getCurrentSession().addMessage();
         }
         if (message.startsWith(commandMap.getTwitchTag())) {
-            EventUser user = channelMessageEvent.getUser();
+            EventUser user = event.getUser();
             User userUser = bot.getTwitchClient().getHelix().getUsers(bot.getConfigurationManager().getStringValue("oauth2Token"), Collections.singletonList(user.getId()), null).execute().getUsers().get(0);
-            String broadcaster = channelMessageEvent.getChannel().getName();
-            String broadcasterId = channelMessageEvent.getChannel().getId();
-            TwitchCommand.ExecutorRank executorRank = commandMap.getRank(channelMessageEvent.getPermissions());
+            String broadcaster = event.getChannel().getName();
+            String broadcasterId = event.getChannel().getId();
+            TwitchCommand.ExecutorRank executorRank = commandMap.getRank(event.getPermissions());
             message = message.replaceFirst(commandMap.getTwitchTag(), "");
             if (bot.getSessionManager().isSessionStarted()) {
                 bot.getSessionManager().getCurrentSession().addCommandUse(message.split(" ")[0]);
             }
-            commandMap.twitchCommandUser(userUser, broadcaster, broadcasterId, executorRank, message, channelMessageEvent.getPermissions());
+            commandMap.twitchCommandUser(userUser, broadcaster, broadcasterId, executorRank, message, event.getPermissions());
         }
     }
 
     public void closeListener() {
-        chatSpyManager.endSpy();
+        chatSpyManager.stopSpying();
     }
 
     public ChatSpyManager getChatSpyManager() {

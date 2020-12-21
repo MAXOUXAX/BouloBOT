@@ -2,14 +2,13 @@ package net.maxouxax.boulobot.commands.register.discord;
 
 import net.aksingh.owmjapis.core.OWM;
 import net.aksingh.owmjapis.model.CurrentWeather;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.Command;
 import net.maxouxax.boulobot.commands.CommandMap;
-import net.maxouxax.boulobot.util.TextFormatter;
+import net.maxouxax.boulobot.util.EmbedCrafter;
 
 public class CommandWeather {
 
@@ -24,9 +23,8 @@ public class CommandWeather {
     @Command(name = "météo", type = Command.ExecutorType.USER, help = ".météo <ville>", example = ".météo Paris", description = "Permet d'obtenir la météo sur la ville spécifiée")
     private void météo(User user, TextChannel textChannel, Guild guild, String[] args) {
         try {
-            EmbedBuilder em = commandMap.getHelpEmbed("météo");
             if (args.length == 0) {
-                textChannel.sendMessage(em.build()).queue();
+                textChannel.sendMessage(commandMap.getHelpEmbed("météo")).queue();
             } else {
 
                 textChannel.sendTyping().queue();
@@ -42,12 +40,11 @@ public class CommandWeather {
                 owm.setUnit(OWM.Unit.METRIC);
                 CurrentWeather cwd = owm.currentWeatherByCityName(city);
 
-                EmbedBuilder weatherEmbed = new EmbedBuilder();
+                EmbedCrafter weatherEmbed = new EmbedCrafter();
 
-                weatherEmbed.setTitle("Météo pour " + cwd.getCityName(), "https://openweathermap.org");
-                weatherEmbed.setDescription("Voici la météo actuelle pour la ville: " + cwd.getCityName());
-                weatherEmbed.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
-                weatherEmbed.setColor(3066993);
+                weatherEmbed.setTitle("Météo pour " + cwd.getCityName(), "https://openweathermap.org")
+                    .setDescription("Voici la météo actuelle pour la ville: " + cwd.getCityName())
+                    .setColor(3066993);
 
 
                 if (cwd.getMainData() != null && cwd.getMainData().hasTemp()) {
@@ -65,12 +62,11 @@ public class CommandWeather {
                 textChannel.sendMessage(weatherEmbed.build()).queue();
             }
         } catch (Exception e) {
-            EmbedBuilder errorEmbed = new EmbedBuilder();
+            EmbedCrafter errorEmbed = new EmbedCrafter();
 
-            errorEmbed.setTitle("Une erreur est survenue", "https://openweathermap.org");
-            errorEmbed.addField("Message d'erreur", "» "+e.getMessage(), true);
-            errorEmbed.setColor(15158332);
-            errorEmbed.setFooter(TextFormatter.asDate(bot.getConfigurationManager().getStringValue("embedFooter")), bot.getConfigurationManager().getStringValue("embedIconUrl"));
+            errorEmbed.setTitle("Une erreur est survenue", "https://openweathermap.org")
+                .addField("Message d'erreur", "» "+e.getMessage(), true)
+                .setColor(15158332);
             textChannel.sendMessage(errorEmbed.build()).queue();
             bot.getErrorHandler().handleException(e);
         }

@@ -2,7 +2,6 @@ package net.maxouxax.boulobot.music;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -10,8 +9,8 @@ import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.Command;
 import net.maxouxax.boulobot.commands.CommandMap;
+import net.maxouxax.boulobot.util.EmbedCrafter;
 
-import java.awt.*;
 import java.time.Duration;
 
 public class MusicCommand {
@@ -27,9 +26,8 @@ public class MusicCommand {
 
     @Command(name="play",type= Command.ExecutorType.USER,description = "Permet de jouer de la musique en indiquant un lien YouTube ou SoundCloud (autres formats acceptés)", example = "play https://www.youtube.com/watch?v=GS3GYQQUS3o", help = "play <lien>")
     private void play(Guild guild, TextChannel textChannel, User user, String command, String[] args){
-        EmbedBuilder helperEmbed = commandMap.getHelpEmbed("play");
         if(args.length == 0){
-            textChannel.sendMessage(helperEmbed.build()).queue();
+            textChannel.sendMessage(commandMap.getHelpEmbed("play")).queue();
         }else {
             if (!guild.getAudioManager().isConnected() && !guild.getAudioManager().isAttemptingToConnect()) {
                 VoiceChannel voiceChannel = guild.getMember(user).getVoiceState().getChannel();
@@ -78,12 +76,11 @@ public class MusicCommand {
             textChannel.sendMessage("Aucune piste n'est dans la liste d'attente").queue();
         }else {
             StringBuilder sb = new StringBuilder();
-            EmbedBuilder builder = new EmbedBuilder();
+            EmbedCrafter embedCrafter = new EmbedCrafter();
 
-            builder.setColor(Color.YELLOW);
-            builder.setTitle("Musique");
-            builder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
-            builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
+            embedCrafter.setColor(15105570)
+                .setTitle("Musique")
+                .setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
 
             int position = 1;
 
@@ -113,16 +110,15 @@ public class MusicCommand {
                     position++;
                 }
             }
-            builder.setDescription("**File d'attente:** \n\n" + sb.toString());
-            textChannel.sendMessage(builder.build()).queue();
+            embedCrafter.setDescription("**File d'attente:** \n\n" + sb.toString());
+            textChannel.sendMessage(embedCrafter.build()).queue();
         }
     }
 
     @Command(name = "goto",type = Command.ExecutorType.USER,description = "Permet, en indiquant un nombre de secondes, se rendre au moment donné de la musique (ex: Si je fais .goto 10, je vais me rendre à la 10ème seconde de la musique)", example = ".goto 200", help = ".goto <temps en secondes>")
     private void gototime(TextChannel textChannel, String command, String[] args){
-        EmbedBuilder helperEmbed = commandMap.getHelpEmbed("goto");
         if(args.length == 0) {
-            textChannel.sendMessage(helperEmbed.build()).queue();
+            textChannel.sendMessage(commandMap.getHelpEmbed("goto")).queue();
         }else {
             MusicPlayer player = manager.getPlayer(textChannel.getGuild());
             long time = Long.parseLong(command.replaceFirst("goto ", "")) * 1000;
@@ -133,7 +129,7 @@ public class MusicCommand {
     @Command(name = "track",type = Command.ExecutorType.USER,description = "Permet d'obtenir les informations sur la musique en cours de lecture",help = "track", example = "track")
     private void track(TextChannel textChannel, User user){
         MusicPlayer player = manager.getPlayer(textChannel.getGuild());
-        EmbedBuilder builder = new EmbedBuilder();
+        EmbedCrafter embedCrafter = new EmbedCrafter();
         AudioTrackInfo track = player.getAudioPlayer().getPlayingTrack().getInfo();
 
         String duration = Duration.ofMillis(track.length).toString();
@@ -146,12 +142,11 @@ public class MusicCommand {
         position = position.replace("M", "m");
         position = position.replace("S", "s");
 
-        builder.setColor(Color.GREEN);
-        builder.setTitle("Musique");
-        builder.setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256");
-        builder.setDescription("Titre: **"+track.title+"**\nAuteur: "+track.author+"\nDurée: "+position+" / "+duration+"\nURL: "+track.uri);
-        builder.setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"));
-        textChannel.sendMessage(builder.build()).queue();
+        embedCrafter.setColor(3066993)
+            .setTitle("Musique")
+            .setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256")
+            .setDescription("Titre: **"+track.title+"**\nAuteur: "+track.author+"\nDurée: "+position+" / "+duration+"\nURL: "+track.uri);
+        textChannel.sendMessage(embedCrafter.build()).queue();
     }
 
     @Command(name = "pause", description = "Permet d'arrêter ou de jouer la musique (un play/pause quoi)", type = Command.ExecutorType.USER, example = "pause", help = "pause")
@@ -163,9 +158,8 @@ public class MusicCommand {
 
     @Command(name = "volume",description = "Permet de modifier le volume de la musique", type = Command.ExecutorType.USER, help = "volume <volume>", example = "volume 50")
     private void volume(TextChannel textChannel, User user, Guild guild, String[] args) {
-        EmbedBuilder helperEmbed = commandMap.getHelpEmbed("volume");
         if (args.length == 0) {
-            textChannel.sendMessage(helperEmbed.build()).queue();
+            textChannel.sendMessage(commandMap.getHelpEmbed("volume")).queue();
         } else {
             int volume = Integer.parseInt(args[0]);
             MusicPlayer player = manager.getPlayer(textChannel.getGuild());

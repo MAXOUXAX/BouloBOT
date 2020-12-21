@@ -9,6 +9,7 @@ import net.maxouxax.boulobot.BOT;
 import net.maxouxax.boulobot.commands.register.discord.*;
 import net.maxouxax.boulobot.commands.register.twitch.*;
 import net.maxouxax.boulobot.music.MusicCommand;
+import net.maxouxax.boulobot.util.EmbedCrafter;
 import net.maxouxax.boulobot.util.JSONReader;
 import net.maxouxax.boulobot.util.JSONWriter;
 import org.json.JSONArray;
@@ -39,7 +40,7 @@ public final class CommandMap {
     public CommandMap() {
         this.bot = BOT.getInstance();
 
-        registerCommands(new CommandDefault(this), new RoleCommand(this), new HelpCommand(this), new MusicCommand(this), new CommandWeather(this), new CommandNotif(this), new CommandChangelog(this), new CommandVersion(this), new CommandSession(this), new CommandOctogone(this), new CommandSay(this), new CommandEmbed(this), new CommandIgnore(this));
+        registerCommands(new CommandDefault(this), new RoleCommand(this), new HelpCommand(this), new MusicCommand(this), new CommandWeather(this), new CommandNotif(this), new CommandChangelog(this), new CommandVersion(this), new CommandSession(this), new CommandOctogone(this), new CommandSay(this), new CommandEmbed(this), new CommandIgnore(this), new CommandLock());
         registerTwitchCommands(new TwitchWeather(this), new TwitchHelp(this), new TwitchNotif(this), new TwitchVersion(this), new TwitchAquoijouer(this), new TwitchClipThat(this), new TwitchSCP(this), new TwitchJeparticipe(this));
 
         load();
@@ -173,19 +174,19 @@ public final class CommandMap {
         }
     }
 
-    public EmbedBuilder getHelpEmbed(String command) {
+    public MessageEmbed getHelpEmbed(String command) {
         try {
             SimpleCommand command1 = discordCommands.get(command);
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.setTitle("Aide » "+discordTag + command);
-            embedBuilder.setDescription(command1.getDescription());
-            embedBuilder.addField("Utilisation:", discordTag+command1.getHelp(), true);
-            embedBuilder.addField("Exemple:", discordTag+command1.getExemple(), true);
-            return embedBuilder;
+            EmbedCrafter embedCrafter = new EmbedCrafter();
+            embedCrafter.setTitle("Aide » "+discordTag + command)
+                .setDescription(command1.getDescription())
+                .addField("Utilisation:", discordTag+command1.getHelp(), true)
+                .addField("Exemple:", discordTag+command1.getExemple(), true);
+            return embedCrafter.build();
         }catch (Exception e){
             bot.getErrorHandler().handleException(e);
         }
-        return new EmbedBuilder();
+        return new EmbedBuilder().build();
     }
 
     public String getTwitchHelpString(String command){
@@ -282,13 +283,13 @@ public final class CommandMap {
         Object[] object = getDiscordCommand(command);
         if(object[0] == null || ((SimpleCommand)object[0]).getExecutorType() == Command.ExecutorType.CONSOLE) return false;
 
-        if(message.getGuild() != null && ((SimpleCommand)object[0]).getPower() > getPowerUser(message.getGuild(), message.getAuthor())) return false;
+        if(((SimpleCommand) object[0]).getPower() > getPowerUser(message.getGuild(), message.getAuthor())) return false;
 
         try{
             executeDiscordCommand(((SimpleCommand)object[0]), command,(String[])object[1], message);
         }catch(Exception e){
             bot.getLogger().log(Level.SEVERE,"La methode "+((SimpleCommand)object[0]).getMethod().getName()+" n'est pas correctement initialisé. ("+e.getMessage()+")");
-            e.printStackTrace();
+            bot.getErrorHandler().handleException(e);
         }
         return true;
     }

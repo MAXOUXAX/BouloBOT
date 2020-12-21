@@ -27,8 +27,10 @@ public class AudioListener extends AudioEventAdapter{
 
     public void nextTrack(){
         if(tracks.isEmpty()){
-            if(player.getGuild().getAudioManager().getConnectedChannel() != null)
+            if(player.getGuild().getAudioManager().getConnectedChannel() != null) {
                 player.getGuild().getAudioManager().closeAudioConnection();
+                player.getAudioPlayer().startTrack(null, false);
+            }
             return;
         }
         player.getAudioPlayer().startTrack(tracks.poll(), false);

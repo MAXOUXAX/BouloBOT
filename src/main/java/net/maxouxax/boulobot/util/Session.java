@@ -227,7 +227,7 @@ public class Session {
         resultList.getGames().forEach(game -> {
             gameName[0] = game.getName();
             String boxUrl = game.getBoxArtUrl(600, 800);
-            embedCrafter.setThumbnailUrl(boxUrl + "?r=" + CryptoUtils.generateNonce(4));
+            embedCrafter.setThumbnailUrl(boxUrl);
         });
         embedCrafter.addField(new MessageEmbed.Field("Jeu", gameName[0], true));
 
@@ -237,7 +237,7 @@ public class Session {
             currentStream[0] = stream;
         });
 
-        embedCrafter.setImageUrl(currentStream[0].getThumbnailUrl(1280, 720));
+        embedCrafter.setImageUrl(currentStream[0].getThumbnailUrl(1280, 720) + "?r=" + CryptoUtils.generateNonce(4));
         Message message = new MessageBuilder(notif.getAsMention()).setEmbed(embedCrafter.build()).build();
         bot.getJda().getPresence().setActivity(Activity.streaming("avec sa reine à "+gameName[0], "https://twitch.tv/"+channelName.toUpperCase()));
         if(sessionMessage == null){

@@ -1,5 +1,6 @@
 package net.maxouxax.boulobot.util;
 
+import com.github.twitch4j.common.util.CryptoUtils;
 import com.github.twitch4j.helix.domain.GameList;
 import com.github.twitch4j.helix.domain.Stream;
 import com.github.twitch4j.helix.domain.StreamList;
@@ -226,7 +227,7 @@ public class Session {
         resultList.getGames().forEach(game -> {
             gameName[0] = game.getName();
             String boxUrl = game.getBoxArtUrl(600, 800);
-            embedCrafter.setThumbnailUrl(boxUrl);
+            embedCrafter.setThumbnailUrl(boxUrl + "?r=" + CryptoUtils.generateNonce(4));
         });
         embedCrafter.addField(new MessageEmbed.Field("Jeu", gameName[0], true));
 

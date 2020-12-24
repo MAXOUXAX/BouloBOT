@@ -78,14 +78,14 @@ public class TwitchJeparticipe {
                         timer.schedule(new TimerTask() {
                             @Override
                             public void run() {
-                                bot.getTwitchClient().getChat().sendMessage(broadcaster, "Nous avons un gagnant !");
+                                bot.getTwitchClient().getChat().sendMessage(broadcaster, "Nous avons un(e) gagnant(e) !");
                             }
                         }, 2*1000);
                         timer.schedule(new TimerTask() {
                             @Override
                             public void run() {
                                 bot.getTwitchClient().getChat().sendMessage(broadcaster, "Il s'agit de... " + winningUser.get().getDisplayName() + " !");
-                                bot.getTwitchClient().getChat().sendMessage(broadcaster, "Bien joué à lui ! LUL ");
+                                bot.getTwitchClient().getChat().sendMessage(broadcaster, "Bien joué ! LUL ");
                             }
                         }, 4*1000);
                         timer.schedule(new TimerTask() {

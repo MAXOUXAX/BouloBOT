@@ -2,9 +2,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.maxouxax.boulobot</groupId>
+    <groupId>me.maxouxax.boulobot</groupId>
     <artifactId>BouloBOT</artifactId>
-    <version>1.6.3-RELEASE</version>
+    <version>1.6.4-RELEASE</version>
 
     <name>BouloBOT</name>
     <description>BouloBOT • Amazingly powerful</description>
@@ -18,7 +18,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>net.maxouxax.boulobot.BOT</mainClass>
+                            <mainClass>me.maxouxax.boulobot.BOT</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

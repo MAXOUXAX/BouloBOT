@@ -258,7 +258,7 @@ public class Session {
     }
 
     private void cancelSession() {
-        bot.getSessionManager().deleteCurrentSession();
+        bot.getSessionManager().cancelCurrentSession();
     }
 
     public void endSession() {
@@ -290,7 +290,6 @@ public class Session {
         bot.getJda().getPresence().setActivity(Activity.playing("Amazingly powerful"));
         getSessionMessage().editMessage(" ").embed(embedCrafter.build()).queue();
         bot.getLogger().log(Level.INFO, "> Updated!");
-        bot.getSessionManager().deleteCurrentSession();
     }
 
     public ArrayList<Integer> getViewerCountList() {

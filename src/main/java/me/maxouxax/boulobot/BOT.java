@@ -212,8 +212,6 @@ public class BOT implements Runnable{
         logger.log(Level.INFO, "> CommandMap saved");
         logger.save();
         logger.log(Level.INFO, "> Logger saved");
-        sessionManager.saveSessions();
-        logger.log(Level.INFO, "> Sessions saved");
         logger.log(Level.INFO, "--------------- STOPPING ---------------");
         logger.log(Level.INFO, "Arrêt du BOT réussi");
         System.exit(0);

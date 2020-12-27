@@ -77,8 +77,10 @@ public class SessionManager {
     }
 
     public void endSession() {
-        currentSession.endSession();
         scheduleViewerCheck.cancel(false);
+        currentSession.endSession();
+        saveSession(currentSession);
+        deleteCurrentSession();
     }
 
     public void deleteCurrentSession(){
@@ -147,41 +149,39 @@ public class SessionManager {
 
 
 
-    public void saveSessions() {
+    public void saveSession(Session session) {
         if (!SESSIONS_FOLDER.exists()) {
             SESSIONS_FOLDER.mkdirs();
         }
 
-        for (Session session : sessions) {
-            File file = new File(SESSIONS_FOLDER, session.getUuid().toString() + ".json");
-            JSONArray array = new JSONArray();
+        File file = new File(SESSIONS_FOLDER, session.getUuid().toString() + ".json");
+        JSONArray array = new JSONArray();
 
-            JSONObject object = new JSONObject();
-            object.accumulate("uuid", session.getUuid().toString());
-            object.accumulate("channelId", session.getChannelId());
-            object.accumulate("maxViewers", session.getMaxViewers());
-            object.accumulate("avgViewers", session.getAvgViewers());
-            object.accumulate("bansAndTimeouts", session.getBansAndTimeouts());
-            object.accumulate("commandUsed", session.getCommandUsed());
-            object.accumulate("startDate", session.getStartDate());
-            object.accumulate("endDate", session.getEndDate());
-            object.accumulate("messageSended", session.getMessageSended());
-            object.accumulate("newViewers", session.getNewViewers());
-            object.accumulate("newFollowers", session.getNewFollowers());
-            object.accumulate("commandsUsed", crushMap(session.getCommandsUsed()));
-            object.accumulate("gameIds", crushList(session.getGameIds()));
-            object.accumulate("title", session.getTitle());
+        JSONObject object = new JSONObject();
+        object.accumulate("uuid", session.getUuid().toString());
+        object.accumulate("channelId", session.getChannelId());
+        object.accumulate("maxViewers", session.getMaxViewers());
+        object.accumulate("avgViewers", session.getAvgViewers());
+        object.accumulate("bansAndTimeouts", session.getBansAndTimeouts());
+        object.accumulate("commandUsed", session.getCommandUsed());
+        object.accumulate("startDate", session.getStartDate());
+        object.accumulate("endDate", session.getEndDate());
+        object.accumulate("messageSended", session.getMessageSended());
+        object.accumulate("newViewers", session.getNewViewers());
+        object.accumulate("newFollowers", session.getNewFollowers());
+        object.accumulate("commandsUsed", crushMap(session.getCommandsUsed()));
+        object.accumulate("gameIds", crushList(session.getGameIds()));
+        object.accumulate("title", session.getTitle());
 
-            array.put(object);
+        array.put(object);
 
-            try(JSONWriter writter = new JSONWriter(file)){
+        try (JSONWriter writter = new JSONWriter(file)) {
 
-                writter.write(array);
-                writter.flush();
+            writter.write(array);
+            writter.flush();
 
-            }catch(IOException e){
-                bot.getErrorHandler().handleException(e);
-            }
+        } catch (IOException e) {
+            bot.getErrorHandler().handleException(e);
         }
     }
 
@@ -237,4 +237,8 @@ public class SessionManager {
         currentSession.getViewerCountList().add(viewerCount);
     }
 
+    public void cancelCurrentSession() {
+        sessions.remove(currentSession);
+        deleteCurrentSession();
+    }
 }

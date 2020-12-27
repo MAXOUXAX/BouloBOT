@@ -21,7 +21,7 @@ public class TwitchNotif {
     }
 
     @TwitchCommand(name = "notif", example = "&notif", help = "&notif", description = "Permet de manuellement déclencher l'envoi de la notif de début de live", rank = TwitchCommand.ExecutorRank.MOD)
-    private void notif(User user, Long broadcasterIdLong, String broadcaster, String[] args){
+    private void notification(User user, Long broadcasterIdLong, String broadcaster, String[] args){
         String broadcasterId = broadcasterIdLong.toString();
         StreamList streamResultList = bot.getTwitchClient().getHelix().getStreams(bot.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, Collections.singletonList(broadcasterId), null).execute();
         AtomicReference<Stream> currentStream = new AtomicReference<>();

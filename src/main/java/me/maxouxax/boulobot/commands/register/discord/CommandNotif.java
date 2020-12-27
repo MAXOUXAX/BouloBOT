@@ -32,7 +32,7 @@ public class CommandNotif {
         streamResultList.getStreams().stream().findFirst().ifPresent(currentStream::set);
         String title = currentStream.get().getTitle();
         String gameId = currentStream.get().getGameId();
-        bot.sendGoLiveNotif(title, gameId, broadcasterId);
+        bot.getSessionManager().streamStarted(title, gameId, broadcasterId);
     }
 
 }

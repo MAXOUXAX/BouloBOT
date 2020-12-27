@@ -159,23 +159,45 @@ public class CommandDefault {
     private void sendRules(){
         EmbedCrafter embedCrafter = new EmbedCrafter()
                 .setImageUrl(bot.getConfigurationManager().getStringValue("rulesBanner")+"?size=1000")
-                .setColor(2895667);
+                .setColor(2895667)
+                .noFooter();
         EmbedCrafter embedCrafterRules = new EmbedCrafter()
                 .setTitle("Règles")
                 .setColor(15105570)
                 .setThumbnailUrl(bot.getConfigurationManager().getStringValue("rulesEmbedThumbnail"))
-                .setDescription(":eight_pointed_black_star:️ 1 - Pas d'insulte\n:eight_pointed_black_star:️ 2 - Pas de majuscules abusives ou de spam/flood\n:eight_pointed_black_star:️ 3 - Pas de propos racistes, sexistes ou homophobes\n:eight_pointed_black_star:️ 4 - Aucune image à caractère raciste ou de type sexuelle (que ce soit en photo de profil ou en message)\n:eight_pointed_black_star:️ 5 - Pas d'appellation de jeux à caractère sexuel, violent ou raciste\n:eight_pointed_black_star:️ 6 - Pas de pseudos incorrects ou remplis d'émoticônes ou de caractères spéciaux empêchant de vous mentionner");
+                .setDescription(":small_orange_diamond: 1. **Traitez tout le monde avec respect**. " +
+                        "Aucun harcèlement, sexisme, racisme ou discours de haine ne sera toléré. " +
+                        "**Cette règle s'applique aux pseudonymes ainsi qu'aux statuts personnalisés !**\n" +
+
+                        ":small_orange_diamond: 2. **Pas de spam ni d'autopromotion** (invitations de serveurs" +
+                        ", publicités, etc.) sans l'autorisation d'un modérateur du serveur, y compris via les messages " +
+                        "privés envoyés aux autres membres.\n" +
+
+                        ":small_orange_diamond: 3. **Pas de contenu violent, obscène ou NSFW**, qu'il s'agisse " +
+                        "de texte, d'images ou de liens mettant en scène de la nudité, du sexe, de l'hyperviolence " +
+                        "ou un quelconque contenu dérangeant, et ce, **y compris dans les photos de profil**.\n" +
+
+                        ":small_orange_diamond: 4. **Pas de majuscules abusives ou de spam/flood**\n" +
+
+                        ":small_orange_diamond: 5. **Pas de pseudos incorrects ou remplis d'émoticônes ou de " +
+                        "caractères spéciaux** empêchant de vous mentionner\n" +
+
+                        ":small_orange_diamond: 6. Si tu remarques quelque chose de contraire aux règles ou qui " +
+                        "te met dans un sentiment d'insécurité, informe-en les modérateurs. Nous voulons que ce " +
+                        "serveur soit accueillant pour tout le monde !")
+                .noFooter();
         EmbedCrafter embedCrafterModeration = new EmbedCrafter()
                 .setTitle("Modération")
                 .setThumbnailUrl(bot.getConfigurationManager().getStringValue("rulesEmbedThumbnailModeration"))
                 .setColor(3066993)
-                .setDescription("Avant de pouvoir accèder à la totalité des fonctionnalités du Discord, vous devrez valider nos règles. Une fois celle-ci validées, vous aurez accès à l'ensemble du serveur et acceptez que notre équipe de modération peut vous sanctionner à tout moment si vous les enfreinez.");
+                .setDescription("En rejoignant ce serveur Discord, vous acceptez que notre équipe de modération puisse vous sanctionner à tout moment si vous enfreignez une des règles précédemment citées")
+                .noFooter();
         EmbedCrafter embedCrafterWarning = new EmbedCrafter()
                 .setTitle("Attention !")
                 .setColor(15158332)
                 .setThumbnailUrl(bot.getConfigurationManager().getStringValue("rulesAttentionThumbnailUrl"))
-                .setDescription("Avant de pouvoir accèder au Discord, nous souhaitons nous assurer que vous acceptiez nos règles.\n\nÊtes-vous sûr d'accepter notre règlement ?\n\nSi vous ne respectez pas une règle, vous recevrez un avertissement.\n\nAu bout de 3 avertissements, vous serez banni définitivement du serveur.\n\n**DE PLUS**, si vous commetez une sanction très grave, l'équipe de modération se réserve le droit de vous bannir directement, sans avertissement.")
-                .forceFooter("Ajoutez une réaction afin de rejoindre le serveur", bot.getConfigurationManager().getStringValue("rulesAttentionFooterIconUrl")+"?size=256");
+                .setDescription("Si vous ne respectez pas une des règles précédemment citées, vous recevrez un avertissement.\n\nAu bout de 3 avertissements, vous serez banni définitivement du serveur par notre équipe de modération.\n\n**DE PLUS**, si vous commettez une sanction très grave, l'équipe de modération se réserve le droit de vous bannir sans avertissement.")
+                .forceFooter("Dernière mise à jour des règles");
         TextChannel textChannel = Objects.requireNonNull(bot.getJda()
                 .getGuildById(bot.getConfigurationManager().getStringValue("guildId")))
                 .getTextChannelById(bot.getConfigurationManager().getStringValue("rulesTextChannelId"));
@@ -185,8 +207,7 @@ public class CommandDefault {
             textChannel.sendMessage(embedCrafter.build()).queue();
             textChannel.sendMessage(embedCrafterRules.build()).queue();
             textChannel.sendMessage(embedCrafterModeration.build()).queue();
-            textChannel.sendMessage(embedCrafterWarning.build()).queue(message -> message
-                    .addReaction(Objects.requireNonNull(textChannel.getGuild().getEmoteById(bot.getConfigurationManager().getStringValue("rulesAcceptEmoteId")))).queue());
+            textChannel.sendMessage(embedCrafterWarning.build()).queue();
         }
     }
 }

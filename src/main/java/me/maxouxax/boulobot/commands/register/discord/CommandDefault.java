@@ -167,20 +167,20 @@ public class CommandDefault {
                 .setThumbnailUrl(bot.getConfigurationManager().getStringValue("rulesEmbedThumbnail"))
                 .setDescription(":small_orange_diamond: 1. **Traitez tout le monde avec respect**. " +
                         "Aucun harcèlement, sexisme, racisme ou discours de haine ne sera toléré. " +
-                        "**Cette règle s'applique aux pseudonymes ainsi qu'aux statuts personnalisés !**\n" +
+                        "**Cette règle s'applique aux pseudonymes ainsi qu'aux statuts personnalisés !**\n\n" +
 
                         ":small_orange_diamond: 2. **Pas de spam ni d'autopromotion** (invitations de serveurs" +
                         ", publicités, etc.) sans l'autorisation d'un modérateur du serveur, y compris via les messages " +
-                        "privés envoyés aux autres membres.\n" +
+                        "privés envoyés aux autres membres.\n\n" +
 
                         ":small_orange_diamond: 3. **Pas de contenu violent, obscène ou NSFW**, qu'il s'agisse " +
                         "de texte, d'images ou de liens mettant en scène de la nudité, du sexe, de l'hyperviolence " +
-                        "ou un quelconque contenu dérangeant, et ce, **y compris dans les photos de profil**.\n" +
+                        "ou un quelconque contenu dérangeant, et ce, **y compris dans les photos de profil**.\n\n" +
 
-                        ":small_orange_diamond: 4. **Pas de majuscules abusives ou de spam/flood**\n" +
+                        ":small_orange_diamond: 4. **Pas de majuscules abusives ou de spam/flood**\n\n" +
 
                         ":small_orange_diamond: 5. **Pas de pseudos incorrects ou remplis d'émoticônes ou de " +
-                        "caractères spéciaux** empêchant de vous mentionner\n" +
+                        "caractères spéciaux** empêchant de vous mentionner\n\n" +
 
                         ":small_orange_diamond: 6. Si tu remarques quelque chose de contraire aux règles ou qui " +
                         "te met dans un sentiment d'insécurité, informe-en les modérateurs. Nous voulons que ce " +

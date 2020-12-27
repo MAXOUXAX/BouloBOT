@@ -1,7 +1,12 @@
-package me.maxouxax.boulobot.util;
+package me.maxouxax.boulobot.sessions;
 
+import com.github.philippheuer.events4j.simple.SimpleEventHandler;
+import com.github.twitch4j.common.events.channel.ChannelGoLiveEvent;
+import com.github.twitch4j.common.events.channel.ChannelGoOfflineEvent;
 import me.maxouxax.boulobot.BOT;
 import me.maxouxax.boulobot.tasks.TaskViewerCheck;
+import me.maxouxax.boulobot.util.JSONReader;
+import me.maxouxax.boulobot.util.JSONWriter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -10,6 +15,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 public class SessionManager {
 
@@ -22,13 +28,52 @@ public class SessionManager {
     public SessionManager() {
         this.bot = BOT.getInstance();
         SESSIONS_FOLDER = new File("sessions" + File.separator);
+        loadNotifications();
     }
 
-    public Session startNewSession(String channelId) {
+    private void loadNotifications() {
+        bot.getTwitchClient().getClientHelper().enableStreamEventListener(bot.getChannelName());
+        bot.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(ChannelGoLiveEvent.class, channelGoLiveEvent -> {
+            streamStarted(channelGoLiveEvent.getTitle(), channelGoLiveEvent.getGameId(), channelGoLiveEvent.getChannel().getId());
+        });
+        bot.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(ChannelGoOfflineEvent.class, channelGoOfflineEvent -> {
+            streamEnded();
+        });
+    }
+
+    public void streamStarted(String title, String gameId, String channelId) {
+        try {
+            if (getCurrentSession() != null) {
+                bot.getErrorHandler().handleException(new Exception("A session is already running! Aborting!"));
+            } else {
+                bot.getLogger().log(Level.INFO, "> Stream started!");
+                startNewSession(channelId, gameId, title);
+            }
+        } catch (Exception e) {
+            bot.getErrorHandler().handleException(e);
+        }
+    }
+
+    public void streamEnded() {
+        try {
+            if (getCurrentSession() == null) {
+                bot.getErrorHandler().handleException(new Exception("No sessions were running! Aborting!"));
+            }else {
+                bot.getLogger().log(Level.INFO, "> Stream ended!");
+                endSession();
+            }
+        } catch (Exception e) {
+            bot.getErrorHandler().handleException(e);
+        }
+    }
+
+    public void startNewSession(String channelId, String gameId, String title) {
         currentSession = new Session(System.currentTimeMillis(), channelId);
         sessions.add(currentSession);
-        scheduleViewerCheck = bot.getScheduler().scheduleAtFixedRate(new TaskViewerCheck(channelId), 5, 5, TimeUnit.MINUTES);
-        return currentSession;
+        scheduleViewerCheck = bot.getScheduler().scheduleAtFixedRate(new TaskViewerCheck(channelId), 2, 2, TimeUnit.MINUTES);
+        currentSession.newGame(gameId);
+        currentSession.setTitle(title);
+        currentSession.updateMessage();
     }
 
     public void endSession() {

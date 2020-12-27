@@ -3,9 +3,10 @@ package me.maxouxax.boulobot.tasks;
 import com.github.twitch4j.helix.domain.Stream;
 import com.github.twitch4j.helix.domain.StreamList;
 import me.maxouxax.boulobot.BOT;
-import me.maxouxax.boulobot.util.Session;
+import me.maxouxax.boulobot.sessions.Session;
 
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
 public class TaskViewerCheck implements Runnable {
@@ -33,12 +34,10 @@ public class TaskViewerCheck implements Runnable {
     }
 
     private void refreshStreamObject() {
-        StreamList streamResultList = bot.getTwitchClient().getHelix().getStreams(bot.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, null, Collections.singletonList(channelId), null).execute();
-        final Stream[] currentStream = new Stream[1];
-        streamResultList.getStreams().forEach(stream -> {
-            currentStream[0] = stream;
-        });
-        this.stream = currentStream[0];
+        StreamList streamResultList = bot.getTwitchClient().getHelix().getStreams(bot.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, Collections.singletonList(channelId), null).execute();
+        final AtomicReference<Stream> currentStream = new AtomicReference<>();
+        streamResultList.getStreams().forEach(currentStream::set);
+        this.stream = currentStream.get();
     }
 
 }

@@ -7,16 +7,15 @@ import com.github.philippheuer.events4j.simple.SimpleEventHandler;
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.auth.providers.TwitchIdentityProvider;
-import com.github.twitch4j.common.events.channel.ChannelGoLiveEvent;
-import com.github.twitch4j.common.events.channel.ChannelGoOfflineEvent;
-import com.github.twitch4j.helix.domain.Stream;
-import com.github.twitch4j.helix.domain.StreamList;
 import io.sentry.Sentry;
 import me.maxouxax.boulobot.commands.CommandMap;
 import me.maxouxax.boulobot.event.DiscordListener;
 import me.maxouxax.boulobot.event.TwitchListener;
 import me.maxouxax.boulobot.roles.RolesManager;
-import me.maxouxax.boulobot.util.*;
+import me.maxouxax.boulobot.sessions.SessionManager;
+import me.maxouxax.boulobot.util.ConfigurationManager;
+import me.maxouxax.boulobot.util.ErrorHandler;
+import me.maxouxax.boulobot.util.Logger;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -26,16 +25,10 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Collections;
-import java.util.Date;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
 public class BOT implements Runnable{
@@ -137,84 +130,9 @@ public class BOT implements Runnable{
         this.sessionManager = new SessionManager();
         sessionManager.loadSessions();
 
-        //Notification system
-        loadNotifications();
-
         //Registering the listener in order to make the events work
         this.twitchListener = new TwitchListener(commandMap);
         twitchClient.getEventManager().getEventHandler(SimpleEventHandler.class).registerListener(twitchListener);
-    }
-
-    private void loadNotifications() {
-        twitchClient.getClientHelper().enableStreamEventListener(channelName);
-        twitchClient.getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(ChannelGoLiveEvent.class, channelGoLiveEvent -> {
-            sendGoLiveNotif(channelGoLiveEvent.getTitle(), channelGoLiveEvent.getGameId(), channelGoLiveEvent.getChannel().getId());
-        });
-        twitchClient.getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(ChannelGoOfflineEvent.class, channelGoOfflineEvent -> {
-            sendGoOfflineNotif();
-        });
-    }
-
-    public void sendGoLiveNotif(String title, String gameId, String channelId){
-        try {
-
-            if (sessionManager.getCurrentSession() != null) {
-                logger.log(Level.SEVERE, "Gosh! We're in trouble... Session wasn't null, it means that a session was already started! We need to fix that!");
-                return;
-            }
-            StreamList streamResultList = twitchClient.getHelix().getStreams(configurationManager.getStringValue("oauth2Token"), "", "", 1, null, null, Collections.singletonList(channelId), null).execute();
-            AtomicReference<Stream> currentStream = new AtomicReference<>();
-            streamResultList.getStreams().stream().findFirst().ifPresent(currentStream::set);
-            if(currentStream.get() == null){
-                errorHandler.handleException(new Exception("currentStream[0] == null"));
-                return;
-            }
-
-            Session session = sessionManager.startNewSession(channelId);
-            session.newGame(gameId);
-            session.setTitle(title);
-            session.updateMessage();
-        }catch (Exception e){
-            getErrorHandler().handleException(e);
-        }
-    }
-
-    public void sendGoOfflineNotif() {
-        try {
-            if (sessionManager.getCurrentSession() == null) {
-                logger.log(Level.SEVERE, "Hmmm... There's a problem, a GoOffline has been sended, but no session was running... Erhm.");
-                return;
-            }
-
-            Session session = sessionManager.getCurrentSession();
-            sessionManager.endSession();
-            logger.log(Level.INFO, "> Le stream est OFFLINE!");
-            EmbedCrafter embedCrafter = new EmbedCrafter();
-            embedCrafter.setTitle("Live terminé \uD83D\uDD14", "https://twitch.tv/" + channelName.toUpperCase())
-                    .setColor(15158332)
-                    .setDescription("Oh dommage...\nLe live est désormais terminé !\nVous pourrez retrouver " + channelName.toUpperCase() + " une prochaine fois, à l'adresse suivante !\n» https://twitch.tv/" + channelName.toUpperCase())
-                    .addField("Nombre de viewer maximum", session.getMaxViewers() + "", true)
-                    .addField("Nombre de viewer moyen", session.getAvgViewers() + "", true)
-                    .addField("Titre", session.getTitle(), true)
-                    .addField("Nombre de ban & timeout", session.getBansAndTimeouts() + "", true)
-                    .addField("Nombre de commandes utilisées", session.getCommandUsed() + "", true)
-                    .addField("Nombre de messages envoyés", session.getMessageSended() + "", true)
-                    .addField("Nombre de followers", session.getNewFollowers() + "", true)
-                    .addField("Nombre de nouveaux viewers", session.getNewViewers() + "", true);
-            LocalDateTime start = new Date(session.getStartDate()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-            LocalDateTime end = new Date(session.getEndDate()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-            int minutesC = Math.toIntExact(Duration.between(start, end).toMinutes());
-            int hours = minutesC / 60;
-            int minutes = minutesC % 60;
-
-            embedCrafter.addField("Durée", hours + "h" + (minutes < 10 ? "0" : "") + minutes, true);
-            jda.getPresence().setActivity(Activity.playing("Amazingly powerful"));
-            session.getSessionMessage().editMessage(" ").embed(embedCrafter.build()).queue();
-            logger.log(Level.INFO, "> Updated!");
-            sessionManager.deleteCurrentSession();
-        } catch (Exception e) {
-            getErrorHandler().handleException(e);
-        }
     }
 
     private void loadDiscord() throws LoginException, InterruptedException {

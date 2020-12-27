@@ -99,9 +99,9 @@ public class RolesManager {
         grades.forEach(grade -> {
             Emote emote = textChannelRoles.getGuild().getEmoteById(grade.getEmoteId());
             if(emote != null) {
-                embedCrafter.addField("Grade: " + grade.getDisplayName(), grade.getDescription() + "\nRéaction a ajouter » " + emote.getAsMention(), true);
+                embedCrafter.addField(grade.getDisplayName(), grade.getDescription() + "\nRéaction a ajouter » " + emote.getAsMention(), true);
             }else{
-                embedCrafter.addField("Grade: " + grade.getDisplayName(), grade.getDescription() + "\nRéaction a ajouter » Inconnue (contacter un administrateur !)", true);
+                embedCrafter.addField(grade.getDisplayName(), grade.getDescription() + "\nRéaction a ajouter » Inconnue (contacter un administrateur !)", true);
                 bot.getErrorHandler().handleException(new Exception("Unknown emote"));
             }
         });

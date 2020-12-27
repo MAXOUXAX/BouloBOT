@@ -134,12 +134,14 @@ public class EmbedCrafter {
     public MessageEmbed build(){
         BOT bot = BOT.getInstance();
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder
-                .setColor(color)
-                .setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"))
-                .setTimestamp(OffsetDateTime.now(ZoneId.of("Europe/Paris")));
+        embedBuilder.setColor(color);
+        if(footerText == null || !footerText.equals("noFooter")) {
+            embedBuilder
+                    .setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"))
+                    .setTimestamp(OffsetDateTime.now(ZoneId.of("Europe/Paris")));
+        }
         fields.forEach(embedBuilder::addField);
-        if(footerText != null){
+        if(footerText != null && !footerText.equals("noFooter")){
             if(footerIconUrl != null){
                 embedBuilder.setFooter(footerText, footerIconUrl);
             }else {
@@ -180,6 +182,16 @@ public class EmbedCrafter {
     public EmbedCrafter forceFooter(String text, String iconUrl) {
         this.footerText = text;
         this.footerIconUrl = iconUrl;
+        return this;
+    }
+
+    public EmbedCrafter forceFooter(String text) {
+        this.footerText = text;
+        return this;
+    }
+
+    public EmbedCrafter noFooter() {
+        this.footerText = "noFooter";
         return this;
     }
 }

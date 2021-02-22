@@ -4,7 +4,7 @@ import com.github.philippheuer.events4j.simple.SimpleEventHandler;
 import com.github.twitch4j.common.events.channel.ChannelGoLiveEvent;
 import com.github.twitch4j.common.events.channel.ChannelGoOfflineEvent;
 import me.maxouxax.boulobot.BOT;
-import me.maxouxax.boulobot.tasks.TaskViewerCheck;
+import me.maxouxax.boulobot.tasks.TaskUpdateSessionMessage;
 import me.maxouxax.boulobot.util.JSONReader;
 import me.maxouxax.boulobot.util.JSONWriter;
 import org.json.JSONArray;
@@ -70,10 +70,20 @@ public class SessionManager {
     public void startNewSession(String channelId, String gameId, String title) {
         currentSession = new Session(System.currentTimeMillis(), channelId);
         sessions.add(currentSession);
-        scheduleViewerCheck = bot.getScheduler().scheduleAtFixedRate(new TaskViewerCheck(channelId), 2, 2, TimeUnit.MINUTES);
+        scheduleViewerCheck = bot.getScheduler().scheduleAtFixedRate(new TaskUpdateSessionMessage(channelId), 2, 2, TimeUnit.MINUTES);
         currentSession.newGame(gameId);
         currentSession.setTitle(title);
-        currentSession.updateMessage();
+        if(!currentSession.updateMessage()){
+            startRetrying();
+        }
+    }
+
+    private void startRetrying() {
+        RetryTask retryTask = new RetryTask(currentSession);
+        retryTask.setCallbackOnEachTry(session -> {
+            retryTask.success(session.updateMessage());
+        });
+        retryTask.retryIn(10, TimeUnit.SECONDS);
     }
 
     public void endSession() {
@@ -241,4 +251,9 @@ public class SessionManager {
         sessions.remove(currentSession);
         deleteCurrentSession();
     }
+
+    public void retryStartingSession() {
+
+    }
+
 }

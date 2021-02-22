@@ -217,7 +217,7 @@ public class Session {
         newFollowers++;
     }
 
-    public void updateMessage() {
+    public boolean updateMessage() {
         Guild discord = bot.getJda().getGuildById(bot.getConfigurationManager().getStringValue("guildId"));
         Member lyorine = Objects.requireNonNull(discord).getMemberById(bot.getConfigurationManager().getStringValue("lyorineClientId"));
         Role notif = discord.getRoleById(bot.getConfigurationManager().getStringValue("notificationRoleId"));
@@ -226,7 +226,7 @@ public class Session {
         EmbedCrafter embedCrafter = new EmbedCrafter();
         embedCrafter.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase())
                     .setColor(3066993)
-                    .setDescription("Coucou les "+ Objects.requireNonNull(notif).getAsMention()+" !\n**"+ Objects.requireNonNull(lyorine).getAsMention()+"** vient de démarrer son live, v'nez voir !\n» https://twitch.tv/"+channelName.toUpperCase())
+                    .setDescription("Coucou les "+ Objects.requireNonNull(notif).getAsMention()+" !\n**"+ Objects.requireNonNull(lyorine).getAsMention()+"** est en live, rejoignez là !\n» https://lyor.in/twitch")
                     .addField(new MessageEmbed.Field("Titre", title, true));
         GameList resultList = bot.getTwitchClient().getHelix().getGames(bot.getConfigurationManager().getStringValue("oauth2Token"), Collections.singletonList(currentGameId), null).execute();
         final AtomicReference<String> gameName = new AtomicReference<>("Aucun jeu");
@@ -237,12 +237,10 @@ public class Session {
         });
         embedCrafter.addField(new MessageEmbed.Field("Jeu", gameName.get(), true));
 
-        StreamList streamResultList = bot.getTwitchClient().getHelix().getStreams(bot.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, Collections.singletonList(channelId), null).execute();
-        final AtomicReference<Stream> currentStream = new AtomicReference<>();
-        streamResultList.getStreams().forEach(currentStream::set);
+        Stream currentStream = getStream(bot, channelId);
 
-        if(currentStream.get() != null) {
-            embedCrafter.setImageUrl(currentStream.get().getThumbnailUrl(1280, 720) + "?r=" + CryptoUtils.generateNonce(4));
+        if(currentStream != null) {
+            embedCrafter.setImageUrl(currentStream.getThumbnailUrl(1280, 720) + "?r=" + CryptoUtils.generateNonce(4));
             Message message = new MessageBuilder(notif.getAsMention()).setEmbed(embedCrafter.build()).build();
             bot.getJda().getPresence().setActivity(Activity.streaming("avec sa reine à " + gameName.get(), "https://twitch.tv/" + channelName.toUpperCase()));
             if (sessionMessage == null) {
@@ -252,9 +250,16 @@ public class Session {
                 this.sessionMessage.editMessage(message).queue();
             }
         }else{
-            bot.getErrorHandler().handleException(new Exception("There is currently no stream. Did the stream ended?"));
-            cancelSession();
+            return false;
         }
+        return true;
+    }
+
+    public static Stream getStream(BOT bot, String channelId) {
+        StreamList streamResultList = bot.getTwitchClient().getHelix().getStreams(bot.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, Collections.singletonList(channelId), null).execute();
+        final AtomicReference<Stream> currentStream = new AtomicReference<>();
+        streamResultList.getStreams().forEach(currentStream::set);
+        return currentStream.get();
     }
 
     private void cancelSession() {

@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,9 +20,9 @@ public final class SimpleCommand {
     private final Method method;
     private final int power;
     private final boolean guildOnly;
-    private final List<OptionData> optionData = null;
-    private final List<SubcommandData> subcommandData = null;
-    private final List<SubcommandGroupData> subcommandGroupData = null;
+    private final List<OptionData> optionData = new ArrayList<>();
+    private final List<SubcommandData> subcommandData = new ArrayList<>();
+    private final List<SubcommandGroupData> subcommandGroupData = new ArrayList<>();
 
     public SimpleCommand(String name, String description, String help, String exemple, Object object, Method method, int power, boolean guildOnly){
         super();

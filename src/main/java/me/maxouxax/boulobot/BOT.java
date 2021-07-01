@@ -186,7 +186,7 @@ public class BOT implements Runnable{
             if (scanner.hasNextLine()) {
                 //Scanning for console commands
                 String nextLine = scanner.nextLine();
-                commandMap.discordCommandConsole(nextLine);
+                commandMap.consoleCommand(nextLine);
             }
         }
 

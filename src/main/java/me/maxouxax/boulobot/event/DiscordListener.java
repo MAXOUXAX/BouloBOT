@@ -6,6 +6,7 @@ import me.maxouxax.boulobot.roles.Grade;
 import me.maxouxax.boulobot.util.EmbedCrafter;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.GenericEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
@@ -18,7 +19,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 public class DiscordListener implements EventListener {
 
@@ -36,6 +36,7 @@ public class DiscordListener implements EventListener {
         if(event instanceof PrivateMessageReceivedEvent) onDM((PrivateMessageReceivedEvent)event);
         if(event instanceof MessageReactionAddEvent) onReactionAdd((MessageReactionAddEvent)event);
         if(event instanceof MessageReactionRemoveEvent) onReactionRemove((MessageReactionRemoveEvent)event);
+        if(event instanceof SlashCommandEvent) onCommand((SlashCommandEvent) event);
     }
 
     private void onReactionAdd(MessageReactionAddEvent event) {
@@ -76,6 +77,10 @@ public class DiscordListener implements EventListener {
         }
     }
 
+    private void onCommand(SlashCommandEvent event) {
+        //TODO: event.deferReply(true).queue();
+        commandMap.discordCommandUser(event.getName(), event);
+    }
 
     private void onMessage(MessageReceivedEvent event){
         if(event.getChannelType() == ChannelType.PRIVATE)return;
@@ -90,15 +95,6 @@ public class DiscordListener implements EventListener {
 
         if(event.getMessage().getAuthor().isBot())return;
         if (event.getAuthor().equals(event.getJDA().getSelfUser()))return;
-
-        String message = event.getMessage().getContentDisplay();
-        if (message.startsWith(commandMap.getDiscordTag())) {//on vérifie si le message commence par le tag commande (donc .)
-            message = message.replaceFirst(commandMap.getDiscordTag(), "");//on retire le tag du message (pour avoir que la commande sans le .)
-            if (commandMap.discordCommandUser(event.getAuthor(), message, event.getMessage())) {//la on exécute la commande
-                event.getChannel().sendTyping().queue();
-                event.getMessage().delete().queueAfter(5, TimeUnit.SECONDS);
-            }
-        }
 
         if(event.getMessage().getContentDisplay().startsWith(".helpme")) {
             if (event.getAuthor().getId().equalsIgnoreCase(bot.getConfigurationManager().getStringValue("maxouxaxClientId"))){

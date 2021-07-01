@@ -4,6 +4,7 @@ import com.github.twitch4j.common.enums.CommandPermission;
 import me.maxouxax.boulobot.BOT;
 import me.maxouxax.boulobot.commands.register.discord.*;
 import me.maxouxax.boulobot.commands.register.twitch.*;
+import me.maxouxax.boulobot.database.DatabaseManager;
 import me.maxouxax.boulobot.music.MusicCommand;
 import me.maxouxax.boulobot.util.EmbedCrafter;
 import me.maxouxax.boulobot.util.JSONReader;
@@ -12,6 +13,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -19,54 +23,114 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.sql.Date;
+import java.sql.*;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 
 public final class CommandMap {
 
     private final BOT bot;
 
-    private final Map<Long, Integer> powers = new HashMap<>();
+    private final Map<String, Long> powers = new HashMap<>();
 
     private final List<String> userIds = new ArrayList<>();
     private final List<String> giveawayUsersIds = new ArrayList<>();
 
     private final Map<String, SimpleCommand> discordCommands = new HashMap<>();
     private final Map<String, SimpleTwitchCommand> twitchCommands = new HashMap<>();
+    private final Map<String, SimpleConsoleCommand> consoleCommands = new HashMap<>();
     private final String discordTag = ".";
     private final String twitchTag = "&";
 
     public CommandMap() {
         this.bot = BOT.getInstance();
 
-        registerCommands(new CommandDefault(this), new RoleCommand(this), new HelpCommand(this), new MusicCommand(this), new CommandWeather(this), new CommandNotif(this), new CommandChangelog(this), new CommandVersion(this), new CommandSession(this), new CommandOctogone(this), new CommandSay(this), new CommandEmbed(this), new CommandIgnore(this), new CommandLock());
-        registerTwitchCommands(new TwitchWeather(this), new TwitchHelp(this), new TwitchNotif(this), new TwitchVersion(this), new TwitchAquoijouer(this), new TwitchClipThat(this), new TwitchSCP(this), new TwitchJeparticipe(this));
+        registerCommands(new CommandDefault(this),
+                new RoleCommand(this),
+                new HelpCommand(this),
+                new MusicCommand(this),
+                new CommandWeather(this),
+                new CommandNotif(this),
+                //new CommandChangelog(this),
+                new CommandVersion(this),
+                //new CommandSession(this),
+                //new CommandOctogone(this),
+                new CommandSay(this),
+                new CommandEmbed(this),
+                new CommandIgnore(this),
+                //new CommandLock(),
+                new TwitchWeather(this),
+                new TwitchHelp(this),
+                new TwitchNotif(this),
+                new TwitchVersion(this),
+                new TwitchAquoijouer(this),
+                new TwitchClipThat(this),
+                new TwitchSCP(this),
+                new TwitchJeparticipe(this));
 
+        List<CommandData> commands = new ArrayList<>();
+        discordCommands.forEach((s, simpleCommand) -> {
+            CommandData commandData = new CommandData(simpleCommand.getName(), simpleCommand.getDescription());
+            if(simpleCommand.getOptionsData().length != 0)commandData.addOptions(simpleCommand.getOptionsData());
+            if(simpleCommand.getSubcommandsData().length != 0)commandData.addSubcommands(simpleCommand.getSubcommandsData());
+            if(simpleCommand.getSubcommandsGroups().length != 0)commandData.addSubcommandGroups(simpleCommand.getSubcommandsGroups());
+
+            commands.add(commandData);
+        });
+        bot.getJda().updateCommands().addCommands(commands).queue();
+
+        loadPower();
         load();
+    }
+
+    private void loadPower()
+    {
+        try {
+            Connection connection = DatabaseManager.getDatabaseAccess().getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM users");
+
+            final ResultSet resultSet = preparedStatement.executeQuery();
+
+            while(resultSet.next()){
+                String id = resultSet.getString("id");
+                long power = resultSet.getLong("power");
+                powers.put(id, power);
+            }
+            connection.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public void savePower(String id, long power) throws SQLException {
+        Connection connection = DatabaseManager.getDatabaseAccess().getConnection();
+        if(power > 0) {
+            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE users SET power = ?, updated_at = ? WHERE id = ?");
+            preparedStatement.setLong(1, power);
+            preparedStatement.setDate(2, new java.sql.Date(System.currentTimeMillis()));
+            preparedStatement.setString(3, id);
+
+            final int updateCount = preparedStatement.executeUpdate();
+
+            if (updateCount < 1) {
+                PreparedStatement insertPreparedStatement = connection.prepareStatement("INSERT INTO users (id, power, updated_at) VALUES (?, ?, ?)");
+                insertPreparedStatement.setString(1, id);
+                insertPreparedStatement.setLong(2, power);
+                insertPreparedStatement.setDate(3, new Date(System.currentTimeMillis()));
+                insertPreparedStatement.execute();
+            }
+        }else{
+            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM users WHERE id = ?");
+            preparedStatement.setString(1, id);
+
+            preparedStatement.execute();
+        }
+        connection.close();
     }
 
     private void load()
     {
-
-        //Loading users powers
-
-        File file = new File("userspower.json");
-        if(!file.exists()) return;
-
-        try{
-            JSONReader reader = new JSONReader(file);
-            JSONArray array = reader.toJSONArray();
-
-            for(int i = 0; i < array.length(); i++)
-            {
-                JSONObject object = array.getJSONObject(i);
-                powers.put(object.getLong("id"), object.getInt("power"));
-            }
-
-        }catch(IOException e){
-            bot.getErrorHandler().handleException(e);
-        }
 
         //Loading users ids
 
@@ -111,27 +175,6 @@ public final class CommandMap {
 
     public void save()
     {
-
-        //Users power
-
-        JSONArray array = new JSONArray();
-
-        for(Entry<Long, Integer> power : powers.entrySet())
-        {
-            JSONObject object = new JSONObject();
-            object.accumulate("id", power.getKey());
-            object.accumulate("power", power.getValue());
-            array.put(object);
-        }
-
-        try(JSONWriter writter = new JSONWriter("userspower.json")){
-
-            writter.write(array);
-            writter.flush();
-
-        }catch(IOException e){
-            bot.getErrorHandler().handleException(e);
-        }
 
         //FILE IDS
 
@@ -215,21 +258,24 @@ public final class CommandMap {
         return giveawayUsersIds.contains(id);
     }
 
-    public void addUserPower(User user, int power)
+    public void setUserPower(User user, long power)
     {
-        if(power == 0) removeUserPower(user);
-        else powers.put(user.getIdLong(), power);
+        if(power == 0){
+            powers.remove(user.getId());
+        }else{
+            powers.put(user.getId(), power);
+        }
+        try {
+            savePower(user.getId(), power);
+        } catch (SQLException sqlException) {
+            sqlException.printStackTrace();
+        }
     }
 
-    public void removeUserPower(User user)
-    {
-        powers.remove(user.getIdLong());
-    }
-
-    public int getPowerUser(Guild guild, User user)
+    public long getPowerUser(Guild guild, User user)
     {
         if(guild.getMember(user).hasPermission(Permission.ADMINISTRATOR)) return 150;
-        return powers.containsKey(user.getIdLong()) ? powers.get(user.getIdLong()) : 0;
+        return powers.getOrDefault(user.getId(), 0L);
     }
 
     public String getDiscordTag() {
@@ -242,6 +288,10 @@ public final class CommandMap {
 
     public Collection<SimpleCommand> getDiscordCommands(){
         return discordCommands.values();
+    }
+
+    public Collection<SimpleConsoleCommand> getConsoleCommands(){
+        return consoleCommands.values();
     }
 
     public Collection<SimpleTwitchCommand> getTwitchCommands(){
@@ -259,39 +309,67 @@ public final class CommandMap {
             if(method.isAnnotationPresent(Command.class)){
                 Command command = method.getAnnotation(Command.class);
                 method.setAccessible(true);
-                SimpleCommand simpleCommand = new SimpleCommand(command.name(), command.description(), command.help(), command.example(), command.type(), object, method, command.power());
+                SimpleCommand simpleCommand = new SimpleCommand(command.name(), command.description(), command.help(), command.example(), object, method, command.power(), command.guildOnly());
                 discordCommands.put(command.name(), simpleCommand);
+            }else if(method.isAnnotationPresent(TwitchCommand.class)){
+                TwitchCommand command = method.getAnnotation(TwitchCommand.class);
+                method.setAccessible(true);
+                SimpleTwitchCommand simpleTwitchCommand = new SimpleTwitchCommand(command.name(), command.description(), command.help(), command.example(), command.rank(), object, method);
+                twitchCommands.put(command.name(), simpleTwitchCommand);
+            }else if(method.isAnnotationPresent(ConsoleCommand.class)){
+                ConsoleCommand command = method.getAnnotation(ConsoleCommand.class);
+                method.setAccessible(true);
+                SimpleConsoleCommand simpleConsoleCommand = new SimpleConsoleCommand(command.name(), command.description(), command.help(), object, method);
+                consoleCommands.put(command.name(), simpleConsoleCommand);
             }
         }
     }
 
-    public void discordCommandConsole(String command){
-        Object[] object = getDiscordCommand(command);
-        if(object[0] == null || ((SimpleCommand)object[0]).getExecutorType() == Command.ExecutorType.USER){
-            bot.getLogger().log(Level.WARNING,"Commande inconnue.");
-            return;
-        }
+    private Object[] getConsoleCommand(String command){
+        String[] commandSplit = command.split(" ");
+        String[] args = new String[commandSplit.length-1];
+        for(int i = 1; i < commandSplit.length; i++) args[i-1] = commandSplit[i];
+        SimpleConsoleCommand simpleConsoleCommand = consoleCommands.get(commandSplit[0]);
+        return new Object[]{simpleConsoleCommand, args};
+    }
+
+    public void consoleCommand(String command){
+        SimpleConsoleCommand simpleConsoleCommand = (SimpleConsoleCommand) getConsoleCommand(command)[0];
+
         try{
-            executeDiscordCommand(((SimpleCommand)object[0]), command, (String[])object[1], null);
+            executeConsoleCommand(simpleConsoleCommand, (String[]) getConsoleCommand(command)[1]);
         }catch(Exception e){
-            bot.getLogger().log(Level.SEVERE,"La commande "+command+" ne s'est pas exécutée à cause d'un problème sur la méthode "+((SimpleCommand)object[0]).getMethod().getName()+" qui ne s'est pas correctement exécutée.");
+            bot.getLogger().log(Level.SEVERE,"La methode "+simpleConsoleCommand.getMethod().getName()+" n'est pas correctement initialisé. ("+e.getMessage()+")");
             bot.getErrorHandler().handleException(e);
         }
     }
 
-    public boolean discordCommandUser(User user, String command, Message message){
-        Object[] object = getDiscordCommand(command);
-        if(object[0] == null || ((SimpleCommand)object[0]).getExecutorType() == Command.ExecutorType.CONSOLE) return false;
+    private void executeConsoleCommand(SimpleConsoleCommand simpleConsoleCommand, String[] args) throws Exception{
+        Parameter[] parameters = simpleConsoleCommand.getMethod().getParameters();
+        Object[] objects = new Object[parameters.length];
+        for(int i = 0; i < parameters.length; i++){
+            if(parameters[i].getType() == String[].class) objects[i] = args;
+            else if(parameters[i].getType() == String.class) objects[i] = simpleConsoleCommand.getName();
+            else if(parameters[i].getType() == JDA.class) objects[i] = bot.getJda();
+            else if(parameters[i].getType() == SimpleCommand.class) objects[i] = simpleConsoleCommand;
+        }
+        simpleConsoleCommand.getMethod().invoke(simpleConsoleCommand.getObject(), objects);
+    }
 
-        if(((SimpleCommand) object[0]).getPower() > getPowerUser(message.getGuild(), message.getAuthor())) return false;
+    public void discordCommandUser(String command, SlashCommandEvent slashCommandEvent){
+        SimpleCommand simpleCommand = (SimpleCommand) getDiscordCommand(command)[0];
+
+        if(simpleCommand.isGuildOnly() && !slashCommandEvent.isFromGuild() || simpleCommand.isGuildOnly() && slashCommandEvent.isFromGuild() && simpleCommand.getPower() > getPowerUser(slashCommandEvent.getGuild(), slashCommandEvent.getUser())){
+            slashCommandEvent.reply("Vous ne pouvez pas utiliser cette commande.").setEphemeral(true).queue();
+            return;
+        }
 
         try{
-            executeDiscordCommand(((SimpleCommand)object[0]), command,(String[])object[1], message);
+            executeDiscordCommand(simpleCommand, slashCommandEvent.getOptions(), slashCommandEvent);
         }catch(Exception e){
-            bot.getLogger().log(Level.SEVERE,"La methode "+((SimpleCommand)object[0]).getMethod().getName()+" n'est pas correctement initialisé. ("+e.getMessage()+")");
+            bot.getLogger().log(Level.SEVERE,"La methode "+simpleCommand.getMethod().getName()+" n'est pas correctement initialisé. ("+e.getMessage()+")");
             bot.getErrorHandler().handleException(e);
         }
-        return true;
     }
 
     private Object[] getDiscordCommand(String command){
@@ -306,39 +384,21 @@ public final class CommandMap {
         return discordCommands.get(command);
     }
 
-    private void executeDiscordCommand(SimpleCommand simpleCommand, String command, String[] args, Message message) throws Exception{
+    private void executeDiscordCommand(SimpleCommand simpleCommand, List<OptionMapping> args, SlashCommandEvent slashCommandEvent) throws Exception{
         Parameter[] parameters = simpleCommand.getMethod().getParameters();
         Object[] objects = new Object[parameters.length];
         for(int i = 0; i < parameters.length; i++){
-            if(parameters[i].getType() == String[].class) objects[i] = args;
-            else if(parameters[i].getType() == User.class) objects[i] = message == null ? null : message.getAuthor();
-            else if(parameters[i].getType() == TextChannel.class) objects[i] = message == null ? null : message.getTextChannel();
-            else if(parameters[i].getType() == PrivateChannel.class) objects[i] = message == null ? null : message.getPrivateChannel();
-            else if(parameters[i].getType() == Guild.class) objects[i] = message == null ? null : message.getGuild();
-            else if(parameters[i].getType() == String.class) objects[i] = command;
-            else if(parameters[i].getType() == Message.class) objects[i] = message;
+            if(parameters[i].getType() == List[].class) objects[i] = args;
+            else if(parameters[i].getType() == User.class) objects[i] = slashCommandEvent.getUser();
+            else if(parameters[i].getType() == TextChannel.class) objects[i] = slashCommandEvent.getTextChannel();
+            else if(parameters[i].getType() == PrivateChannel.class) objects[i] = slashCommandEvent.getPrivateChannel();
+            else if(parameters[i].getType() == Guild.class) objects[i] = slashCommandEvent.getGuild();
+            else if(parameters[i].getType() == String.class) objects[i] = slashCommandEvent.getName();
+            else if(parameters[i].getType() == SlashCommandEvent.class) objects[i] = slashCommandEvent;
             else if(parameters[i].getType() == JDA.class) objects[i] = bot.getJda();
-            else if(parameters[i].getType() == MessageChannel.class) objects[i] = message == null ? null : message.getChannel();
             else if(parameters[i].getType() == SimpleCommand.class) objects[i] = simpleCommand;
         }
         simpleCommand.getMethod().invoke(simpleCommand.getObject(), objects);
-    }
-
-    public void registerTwitchCommands(Object... objects){
-        for(Object object : objects){
-            registerTwitchCommand(object);
-        }
-    }
-
-    private void registerTwitchCommand(Object object) {
-        for(Method method : object.getClass().getDeclaredMethods()){
-            if(method.isAnnotationPresent(TwitchCommand.class)){
-                TwitchCommand command = method.getAnnotation(TwitchCommand.class);
-                method.setAccessible(true);
-                SimpleTwitchCommand simpleTwitchCommand = new SimpleTwitchCommand(command.name(), command.description(), command.help(), command.example(), command.rank(), object, method);
-                twitchCommands.put(command.name(), simpleTwitchCommand);
-            }
-        }
     }
 
     public boolean twitchCommandUser(com.github.twitch4j.helix.domain.User user, String broadcaster, String broadcasterId, TwitchCommand.ExecutorRank executorRank, String command, Set<CommandPermission> commandPermissions){
@@ -398,4 +458,5 @@ public final class CommandMap {
         if(permissions.contains(CommandPermission.SUBSCRIBER))return TwitchCommand.ExecutorRank.SUBSCRIBER;
         return TwitchCommand.ExecutorRank.EVERYONE;
     }
+
 }

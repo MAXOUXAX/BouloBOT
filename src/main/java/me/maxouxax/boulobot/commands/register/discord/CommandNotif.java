@@ -7,6 +7,8 @@ import com.github.twitch4j.helix.domain.UserList;
 import me.maxouxax.boulobot.BOT;
 import me.maxouxax.boulobot.commands.Command;
 import me.maxouxax.boulobot.commands.CommandMap;
+import me.maxouxax.boulobot.commands.ConsoleCommand;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
@@ -21,8 +23,9 @@ public class CommandNotif {
         this.bot = BOT.getInstance();
     }
 
-    @Command(name = "notif", description = "Permet de manuellement déclencher l'envoi de la notif de début de live", help = ".notif", example = ".notif", power = 100, type = Command.ExecutorType.USER)
-    public void notification(){
+    @ConsoleCommand(name = "notif", description = "Permet de manuellement déclencher l'envoi de la notification de début de live", help = "notif")
+    @Command(name = "notif", description = "Permet de manuellement déclencher l'envoi de la notifification de début de live", help = ".notif", example = ".notif", power = 100)
+    public void notification(SlashCommandEvent slashCommandEvent){
         UserList resultList = bot.getTwitchClient().getHelix().getUsers(bot.getConfigurationManager().getStringValue("oauth2Token"), null, Collections.singletonList(bot.getChannelName())).execute();
         AtomicReference<User> broadcasterUser = new AtomicReference<>();
         resultList.getUsers().stream().findFirst().ifPresent(broadcasterUser::set);
@@ -33,6 +36,7 @@ public class CommandNotif {
         String title = currentStream.get().getTitle();
         String gameId = currentStream.get().getGameId();
         bot.getSessionManager().streamStarted(title, gameId, broadcasterId);
+        slashCommandEvent.reply("Notification envoyée").setEphemeral(true).queue();
     }
 
 }

@@ -2,11 +2,14 @@ package me.maxouxax.boulobot.commands.register.discord;
 
 import me.maxouxax.boulobot.BOT;
 import me.maxouxax.boulobot.commands.Command;
-import me.maxouxax.boulobot.commands.Command.ExecutorType;
 import me.maxouxax.boulobot.commands.CommandMap;
+import me.maxouxax.boulobot.commands.ConsoleCommand;
+import me.maxouxax.boulobot.commands.slashannotations.Option;
 import me.maxouxax.boulobot.util.EmbedCrafter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import java.awt.*;
 import java.time.format.DateTimeFormatter;
@@ -23,73 +26,46 @@ public class CommandDefault {
         this.bot = BOT.getInstance();
     }
 
-    @Command(name="stop",type=ExecutorType.CONSOLE)
+    @ConsoleCommand(name="stop")
     private void stop(){
         bot.setRunning(false);
     }
 
-    @Command(name="power",power=150, description = "Permet de définir le power d'un utilisateur", example = ".power 150 @MAXOUXAX", help = ".power <power> <@user>")
-    private void power(User user, MessageChannel channel, Message message, String[] args){
-        if(args.length == 0 || message.getMentionedUsers().size() == 0){
-            channel.sendMessage(commandMap.getHelpEmbed("power")).queue();
-        }
-        int power = 0;
-        try{
-            power = Integer.parseInt(args[0]);
-        }catch(NumberFormatException nfe){
-            channel.sendMessage(commandMap.getHelpEmbed("power")).queue();
-        }
-
-        User target = message.getMentionedUsers().get(0);
-        commandMap.addUserPower(target, power);
-        channel.sendMessage("Le power de "+target.getAsMention()+" est maintenant de "+power).queue();
+    @Option(name = "power", type = OptionType.INTEGER, isRequired = true, description = "Power à attribuer")
+    @Option(name = "utilisateur", type = OptionType.USER, isRequired = true, description = "Utilisateur auquel attribuer le power")
+    @Command(name="power", power=150, description = "Permet de définir le power d'un utilisateur", example = ".power 150 @MAXOUXAX", help = ".power <power> <@user>")
+    private void power(TextChannel channel, SlashCommandEvent slashCommandEvent){
+        long power = slashCommandEvent.getOption("power").getAsLong();
+        Member member = slashCommandEvent.getOption("utilisateur").getAsMember();
+        commandMap.setUserPower(member.getUser(), power);
+        slashCommandEvent.reply("Le power de "+member.getAsMention()+" est maintenant de "+power).setEphemeral(true).queue();
     }
 
+    @Option(name = "nom du jeu", description = "Nom du jeu", type = OptionType.STRING, isRequired = true)
     @Command(name="game",power=100,description = "Permet de modifier le jeu du BOT.", help = ".game <jeu>", example = ".game planter des tomates")
-    private void game(TextChannel textChannel, JDA jda, String[] args){
-        if(args.length == 0){
-            textChannel.sendMessage(commandMap.getHelpEmbed("game")).queue();
-        }else {
-            StringBuilder builder = new StringBuilder();
-            for (String str : args) {
-                if (builder.length() > 0) builder.append(" ");
-                builder.append(str);
-            }
-
-            jda.getPresence().setActivity(Activity.playing(builder.toString()));
-        }
+    private void game(TextChannel textChannel, JDA jda, SlashCommandEvent slashCommandEvent){
+        jda.getPresence().setActivity(Activity.playing(slashCommandEvent.getOption("nom du jeu").getAsString()));
+        slashCommandEvent.reply("Jeu mis à jour avec succès !").setEphemeral(true).queue();
     }
 
+    @Option(name = "nombre de messages", description = "Nombre de messages à supprimer", type = OptionType.INTEGER, isRequired = true)
     @Command(name="delete",power=50,description = "Permet de nettoyer un nombre x de message du salon", example = ".delete 50", help = ".delete <nombre de message>")
-    private void delete(TextChannel textChannel, JDA jda, String[] args){
-        if (getInt(args[0]) <= 100) {
-            List<Message> msgs;
+    private void delete(TextChannel textChannel, JDA jda, SlashCommandEvent slashCommandEvent){
+        long messagesToDelete = slashCommandEvent.getOption("nombre de messages").getAsLong();
+        if(messagesToDelete > 100){
+            slashCommandEvent.reply("Dû à une limitation de Discord, le nombre maximum de messages pouvant être supprimés à la fois est de 100").setEphemeral(true).queue();
+        }else{
             MessageHistory history = new MessageHistory(textChannel);
-            msgs = history.retrievePast(getInt(args[0])).complete();
-            textChannel.deleteMessages(msgs).queue();
-            textChannel.sendMessage("Suppression de " + args[0] + " messages terminée !").queue();
+            List<Message> messages = history.retrievePast(Math.toIntExact(messagesToDelete)).complete();
+            textChannel.deleteMessages(messages).queue();
+            slashCommandEvent.reply("Suppression de " + messagesToDelete + " messages terminée !").queue();
         }
     }
 
-    private int getInt(String arg) {
-        try {
-            return Integer.parseInt(arg);
-        } catch (Exception e) {
-            return 0;
-        }
-
-    }
-
-    @Command(name = "info",description = "Permet d'obtenir des informations sur un membre",type = Command.ExecutorType.USER, help = ".info <@user>", example = ".info @Maxx_#2233")
-    private void info(User user, Guild guild, TextChannel textChannel, String[] args, Message message){
-        Member member;
-
-        if (args.length > 0) {
-            member = guild.getMember(message.getMentionedUsers().get(0));
-        } else {
-            member = message.getMember();
-        }
-
+    @Option(name = "utilisateur", description = "Utilisateur duquel les informations seront récupérées", type = OptionType.USER, isRequired = true)
+    @Command(name = "info",description = "Permet d'obtenir des informations sur un membre", help = ".info <@user>", example = ".info @Maxx_#2233")
+    private void info(User user, Guild guild, TextChannel textChannel, SlashCommandEvent slashCommandEvent){
+        Member member = slashCommandEvent.getOption("utilisateur").getAsMember();
         String name = member.getEffectiveName();
         String tag = member.getUser().getName() + "#" + member.getUser().getDiscriminator();
         String guildJoinDate = member.getTimeJoined().format(DateTimeFormatter.RFC_1123_DATE_TIME);
@@ -133,13 +109,11 @@ public class CommandDefault {
             embedCrafter.setThumbnailUrl(avatar);
         }
 
-        textChannel.sendMessage(
-                embedCrafter.build()
-        ).queue();
+        slashCommandEvent.replyEmbeds(embedCrafter.build()).queue();
     }
 
-    @Command(name = "ping", description = "Permet de récupérer le ping du bot", type = Command.ExecutorType.USER, example = ".ping", help = ".ping")
-    private void ping(TextChannel textChannel, User user, Guild guild){
+    @Command(name = "ping", description = "Permet de récupérer le ping du bot", example = ".ping", help = ".ping")
+    private void ping(TextChannel textChannel, User user, Guild guild, SlashCommandEvent slashCommandEvent){
         long ping = guild.getJDA().getGatewayPing();
         EmbedCrafter embedCrafter = new EmbedCrafter()
                 .setTitle("DiscordAPI ping", bot.getConfigurationManager().getStringValue("websiteUrl"))
@@ -152,10 +126,10 @@ public class CommandDefault {
             embedCrafter.setColor(Color.GREEN);
             embedCrafter.setDescription("Bon ping");
         }
-        textChannel.sendMessage(embedCrafter.build()).queue();
+        slashCommandEvent.replyEmbeds(embedCrafter.build()).queue();
     }
 
-    @Command(name = "sendrules", description = "Permet d'envoyer les règles dans le salon destiné.", type = ExecutorType.CONSOLE)
+    @ConsoleCommand(name = "sendrules", description = "Permet d'envoyer les règles dans le salon destiné.")
     private void sendRules(){
         EmbedCrafter embedCrafter = new EmbedCrafter()
                 .setImageUrl(bot.getConfigurationManager().getStringValue("rulesBanner")+"?size=1000")
@@ -204,10 +178,10 @@ public class CommandDefault {
         if(textChannel == null){
             bot.getErrorHandler().handleException(new Exception("textChannel == null (the textchannel id or the guildid (or both) may not have been set in the config file)"));
         }else {
-            textChannel.sendMessage(embedCrafter.build()).queue();
-            textChannel.sendMessage(embedCrafterRules.build()).queue();
-            textChannel.sendMessage(embedCrafterModeration.build()).queue();
-            textChannel.sendMessage(embedCrafterWarning.build()).queue();
+            textChannel.sendMessageEmbeds(embedCrafter.build()).queue();
+            textChannel.sendMessageEmbeds(embedCrafterRules.build()).queue();
+            textChannel.sendMessageEmbeds(embedCrafterModeration.build()).queue();
+            textChannel.sendMessageEmbeds(embedCrafterWarning.build()).queue();
         }
     }
 }

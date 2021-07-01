@@ -1,11 +1,8 @@
 package me.maxouxax.boulobot.commands.register.discord;
 
 import me.maxouxax.boulobot.BOT;
-import me.maxouxax.boulobot.commands.Command;
 import me.maxouxax.boulobot.commands.CommandMap;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import me.maxouxax.boulobot.commands.ConsoleCommand;
 
 public class CommandSay {
 
@@ -17,8 +14,8 @@ public class CommandSay {
         this.bot = BOT.getInstance();
     }
 
-    @Command(name = "say", description = "Permet d'envoyer un message personnalisé dans le tchat twitch", help = ".say", example = ".say", power = 100, type = Command.ExecutorType.CONSOLE)
-    public void say(User user, TextChannel textChannel, Message message, String[] args){
+    @ConsoleCommand(name = "say", description = "Permet d'envoyer un message personnalisé dans le tchat twitch", help = "say")
+    public void say(String[] args){
         StringBuilder messageStr = new StringBuilder();
         for (String arg : args) {
             messageStr.append(arg).append(" ");

@@ -17,7 +17,7 @@ public class CommandLock {
         this.bot = BOT.getInstance();
     }
 
-    @Command(name="lock", type = Command.ExecutorType.USER, power = 150, help = "lock", example = "lock")
+    @Command(name="lock", power = 150, help = "lock", example = "lock")
     public void lock(User user, TextChannel textChannel, String[] args) {
         Guild guild = textChannel.getGuild();
         List<GuildChannel> channelsList = guild.getChannels();
@@ -30,7 +30,7 @@ public class CommandLock {
         });
     }
 
-    @Command(name="unlock", type = Command.ExecutorType.USER, power = 150, help = "unlock", example = "unlock")
+    @Command(name="unlock", power = 150, help = "unlock", example = "unlock")
     public void unlock(User user, TextChannel textChannel, String[] args) {
         Guild guild = textChannel.getGuild();
         List<GuildChannel> channelsList = guild.getChannels();

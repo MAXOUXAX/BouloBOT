@@ -17,7 +17,7 @@ public class CommandSession {
         this.bot = BOT.getInstance();
     }
 
-    @Command(name = "session", description = "Permet d'accéder à toutes les sessions", help = ".session help", example = ".session info <id>", type = Command.ExecutorType.USER)
+    @Command(name = "session", description = "Permet d'accéder à toutes les sessions", help = ".session help", example = ".session info <id>")
     public void session(User user, TextChannel textChannel, Message message, String[] args){
         //TODO: Session command
     }

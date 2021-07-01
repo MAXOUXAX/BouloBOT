@@ -116,7 +116,7 @@ public class MusicCommand {
     }
 
     @Option(name = "timecode", description = "Timecode en secondes auquel vous voulez aller (90 pour à 1m30)", type = OptionType.INTEGER, isRequired = true)
-    @Command(name = "goto", description = "Permet, en indiquant un nombre de secondes, se rendre au moment donné de la musique (ex: Si je fais .goto 10, je vais me rendre à la 10ème seconde de la musique)", example = ".goto 200", help = ".goto <temps en secondes>")
+    @Command(name = "goto", description = "Permet de déplacer la musique au moment donné", example = ".goto 200", help = ".goto <temps en secondes>")
     private void gototime(TextChannel textChannel, String command, SlashCommandEvent slashCommandEvent) {
         MusicPlayer player = manager.getPlayer(textChannel.getGuild());
         long time = slashCommandEvent.getOption("timecode").getAsLong() * 1000;

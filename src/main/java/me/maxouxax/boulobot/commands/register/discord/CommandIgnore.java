@@ -5,7 +5,6 @@ import me.maxouxax.boulobot.BOT;
 import me.maxouxax.boulobot.commands.Command;
 import me.maxouxax.boulobot.commands.CommandMap;
 import me.maxouxax.boulobot.commands.slashannotations.Option;
-import me.maxouxax.boulobot.commands.slashannotations.Subcommand;
 import me.maxouxax.boulobot.util.ChatSpyManager;
 import me.maxouxax.boulobot.util.EmbedCrafter;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -26,14 +25,18 @@ public class CommandIgnore {
         this.commandMap = commandMap;
     }
 
+    /*
     @Subcommand(name = "add", description = "Ajouter un utilisateur ignoré")
     @Subcommand(name = "remove", description = "Supprimer un utilisateur ignoré")
     @Subcommand(name = "list", description = "Afficher la liste des utilisateurs ignorés")
+     */
+    @Option(name = "action", description = "add/remove/list", isRequired = true, type = OptionType.STRING)
     @Option(name = "nom-de-lutilisateur", description = "Nom de l'utilisateur à ignoré", type = OptionType.STRING, isRequired = false)
     @Command(name = "ignore", description = "Permet d'ajouter ou supprimer des utilisateurs Twitch dans la liste des utilisateurs ignorés", help = "ignore add|remove|list [<username>]", example = "ignore add BouloBOT", power = 100)
     public void ignore(User user, TextChannel textChannel, SlashCommandEvent slashCommandEvent) {
         ChatSpyManager chatSpyManager = bot.getTwitchListener().getChatSpyManager();
-        if (slashCommandEvent.getSubcommandName().equalsIgnoreCase("list")) {
+        //if (slashCommandEvent.getSubcommandName().equalsIgnoreCase("list")) {
+        if (slashCommandEvent.getOption("action").getAsString().equalsIgnoreCase("list")) {
             EmbedCrafter embedCrafter = new EmbedCrafter();
             embedCrafter.setTitle("Ignore", bot.getConfigurationManager().getStringValue("websiteUrl"))
                     .setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl() + "?size=256")
@@ -47,7 +50,8 @@ public class CommandIgnore {
             if (username.equalsIgnoreCase("")) {
                 slashCommandEvent.reply("Vous devez spécifier un nom d'utilisateur").setEphemeral(true).queue();
             } else {
-                if (slashCommandEvent.getSubcommandName().equalsIgnoreCase("add")) {
+                //if (slashCommandEvent.getSubcommandName().equalsIgnoreCase("add")) {
+                if (slashCommandEvent.getOption("action").getAsString().equalsIgnoreCase("add")) {
                     UserList resultList = bot.getTwitchClient().getHelix().getUsers(bot.getConfigurationManager().getStringValue("oauth2Token"), null, Collections.singletonList(username)).execute();
                     if (resultList.getUsers().isEmpty()) {
                         slashCommandEvent.reply("Aucun utilisateur avec le nom \"" + username + "\" trouvé").setEphemeral(true).queue();
@@ -61,7 +65,8 @@ public class CommandIgnore {
                             slashCommandEvent.reply(username + " est désormais ignoré").queue();
                         }
                     }
-                } else if (slashCommandEvent.getSubcommandName().equalsIgnoreCase("remove")) {
+                //} else if (slashCommandEvent.getSubcommandName().equalsIgnoreCase("remove")) {
+                } else if (slashCommandEvent.getOption("action").getAsString().equalsIgnoreCase("remove")) {
                     UserList resultList = bot.getTwitchClient().getHelix().getUsers(bot.getConfigurationManager().getStringValue("oauth2Token"), null, Collections.singletonList(username)).execute();
                     if (resultList.getUsers().isEmpty()) {
                         slashCommandEvent.reply("Aucun utilisateur avec le nom \"" + username + "\" trouvé").setEphemeral(true).queue();

@@ -83,10 +83,10 @@ public class BOT implements Runnable{
 
         logger.log(Level.INFO, "> Generated new BOT instance");
         logger.log(Level.INFO, "> BOT thread started, loading libraries and joining DiscordAPI channel");
-        this.commandMap = new CommandMap();
+        loadDiscord();
         logger.log(Level.INFO, "> Libraries loaded and DiscordAPI channel joined.");
 
-        loadDiscord();
+        this.commandMap = new CommandMap();
         logger.log(Level.INFO, "> DiscordBOT loaded, launching Twitch's modules!.");
 
         loadTwitch();

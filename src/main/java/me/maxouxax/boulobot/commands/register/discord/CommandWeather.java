@@ -23,11 +23,11 @@ public class CommandWeather {
         this.bot = BOT.getInstance();
     }
 
-    @Option(name = "Ville", description = "Ville depuis laquelle vous voulez récupérer la météo", type = OptionType.STRING, isRequired = true)
+    @Option(name = "ville", description = "Ville depuis laquelle vous voulez récupérer la météo", type = OptionType.STRING, isRequired = true)
     @Command(name = "météo", help = ".météo <ville>", example = ".météo Paris", description = "Permet d'obtenir la météo sur la ville spécifiée")
     private void météo(User user, TextChannel textChannel, Guild guild, SlashCommandEvent slashCommandEvent) {
         try {
-            String city = slashCommandEvent.getOption("Ville").getAsString();
+            String city = slashCommandEvent.getOption("ville").getAsString();
             OWM owm = new OWM(bot.getConfigurationManager().getStringValue("owmApiKey"));
             owm.setLanguage(OWM.Language.FRENCH);
             owm.setUnit(OWM.Unit.METRIC);

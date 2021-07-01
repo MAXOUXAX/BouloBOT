@@ -29,7 +29,7 @@ public class CommandIgnore {
     @Subcommand(name = "add", description = "Ajouter un utilisateur ignoré")
     @Subcommand(name = "remove", description = "Supprimer un utilisateur ignoré")
     @Subcommand(name = "list", description = "Afficher la liste des utilisateurs ignorés")
-    @Option(name = "Nom de l'utilisateur", description = "Nom de l'utilisateur à ignoré", type = OptionType.STRING, isRequired = false)
+    @Option(name = "nom-de-lutilisateur", description = "Nom de l'utilisateur à ignoré", type = OptionType.STRING, isRequired = false)
     @Command(name = "ignore", description = "Permet d'ajouter ou supprimer des utilisateurs Twitch dans la liste des utilisateurs ignorés", help = "ignore add|remove|list [<username>]", example = "ignore add BouloBOT", power = 100)
     public void ignore(User user, TextChannel textChannel, SlashCommandEvent slashCommandEvent) {
         ChatSpyManager chatSpyManager = bot.getTwitchListener().getChatSpyManager();
@@ -43,7 +43,7 @@ public class CommandIgnore {
             embedCrafter.setDescription(stringBuilder.toString());
             slashCommandEvent.replyEmbeds(embedCrafter.build()).queue();
         } else {
-            String username = slashCommandEvent.getOption("Nom de l'utilisateur").getAsString();
+            String username = slashCommandEvent.getOption("nom-de-lutilisateur").getAsString();
             if (username.equalsIgnoreCase("")) {
                 slashCommandEvent.reply("Vous devez spécifier un nom d'utilisateur").setEphemeral(true).queue();
             } else {

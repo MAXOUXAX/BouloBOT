@@ -27,7 +27,7 @@ public class MusicCommand {
         this.commandMap = commandMap;
     }
 
-    @Option(name = "Lien de la musique", description = "Lien de la musique que vous souhaitez jouer", type = OptionType.STRING, isRequired = true)
+    @Option(name = "lien-de-la-musique", description = "Lien de la musique que vous souhaitez jouer", type = OptionType.STRING, isRequired = true)
     @Command(name = "play", description = "Permet de jouer de la musique en indiquant un lien YouTube ou SoundCloud (autres formats acceptés)", example = "play https://www.youtube.com/watch?v=GS3GYQQUS3o", help = "play <lien>")
     private void play(Guild guild, TextChannel textChannel, User user, String command, SlashCommandEvent slashCommandEvent) {
         if (!guild.getAudioManager().isConnected() && !guild.getAudioManager().isAttemptingToConnect()) {
@@ -39,7 +39,7 @@ public class MusicCommand {
             guild.getAudioManager().openAudioConnection(voiceChannel);
         }
         manager.getPlayer(guild).getAudioPlayer().setPaused(false);
-        manager.loadTrack(textChannel, slashCommandEvent.getOption("Lien de la musique").getAsString(), user);
+        manager.loadTrack(textChannel, slashCommandEvent.getOption("lien-de-la-musique").getAsString(), user);
         if (manager.getPlayer(guild).getAudioPlayer().isPaused()) {
             manager.getPlayer(guild).getAudioPlayer().setVolume(20);
         }
@@ -115,11 +115,11 @@ public class MusicCommand {
         }
     }
 
-    @Option(name = "Timecode", description = "Timecode en secondes auquel vous voulez aller (90 pour à 1m30)", type = OptionType.INTEGER, isRequired = true)
+    @Option(name = "timecode", description = "Timecode en secondes auquel vous voulez aller (90 pour à 1m30)", type = OptionType.INTEGER, isRequired = true)
     @Command(name = "goto", description = "Permet, en indiquant un nombre de secondes, se rendre au moment donné de la musique (ex: Si je fais .goto 10, je vais me rendre à la 10ème seconde de la musique)", example = ".goto 200", help = ".goto <temps en secondes>")
     private void gototime(TextChannel textChannel, String command, SlashCommandEvent slashCommandEvent) {
         MusicPlayer player = manager.getPlayer(textChannel.getGuild());
-        long time = slashCommandEvent.getOption("Timecode").getAsLong() * 1000;
+        long time = slashCommandEvent.getOption("timecode").getAsLong() * 1000;
         player.getAudioPlayer().getPlayingTrack().setPosition(time);
         slashCommandEvent.reply("La musique est désormais à " + slashCommandEvent.getOption("Timecode").getAsLong() + " seconde(s)").queue();
     }
@@ -154,10 +154,10 @@ public class MusicCommand {
         slashCommandEvent.reply("La piste en cours a correctement été " + (player.getAudioPlayer().isPaused() ? "mise en pause" : "résumée")).queue();
     }
 
-    @Option(name = "Volume", description = "Volume en pourcentage (0 à 100)", type = OptionType.INTEGER, isRequired = true)
+    @Option(name = "volume", description = "Volume en pourcentage (0 à 100)", type = OptionType.INTEGER, isRequired = true)
     @Command(name = "volume", description = "Permet de modifier le volume de la musique", help = "volume <volume>", example = "volume 50")
     private void volume(TextChannel textChannel, User user, Guild guild, SlashCommandEvent slashCommandEvent) {
-        int volume = Math.toIntExact(slashCommandEvent.getOption("Volume").getAsLong());
+        int volume = Math.toIntExact(slashCommandEvent.getOption("volume").getAsLong());
         MusicPlayer player = manager.getPlayer(textChannel.getGuild());
         boolean tooLargeVolume = false;
         boolean tooLowVolume = false;

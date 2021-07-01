@@ -41,17 +41,17 @@ public class CommandDefault {
         slashCommandEvent.reply("Le power de "+member.getAsMention()+" est maintenant de "+power).setEphemeral(true).queue();
     }
 
-    @Option(name = "nom du jeu", description = "Nom du jeu", type = OptionType.STRING, isRequired = true)
+    @Option(name = "nom-du-jeu", description = "Nom du jeu", type = OptionType.STRING, isRequired = true)
     @Command(name="game",power=100,description = "Permet de modifier le jeu du BOT.", help = ".game <jeu>", example = ".game planter des tomates")
     private void game(TextChannel textChannel, JDA jda, SlashCommandEvent slashCommandEvent){
-        jda.getPresence().setActivity(Activity.playing(slashCommandEvent.getOption("nom du jeu").getAsString()));
+        jda.getPresence().setActivity(Activity.playing(slashCommandEvent.getOption("nom-du-jeu").getAsString()));
         slashCommandEvent.reply("Jeu mis à jour avec succès !").setEphemeral(true).queue();
     }
 
-    @Option(name = "nombre de messages", description = "Nombre de messages à supprimer", type = OptionType.INTEGER, isRequired = true)
+    @Option(name = "nombre-de-messages", description = "Nombre de messages à supprimer", type = OptionType.INTEGER, isRequired = true)
     @Command(name="delete",power=50,description = "Permet de nettoyer un nombre x de message du salon", example = ".delete 50", help = ".delete <nombre de message>")
     private void delete(TextChannel textChannel, JDA jda, SlashCommandEvent slashCommandEvent){
-        long messagesToDelete = slashCommandEvent.getOption("nombre de messages").getAsLong();
+        long messagesToDelete = slashCommandEvent.getOption("nombre-de-messages").getAsLong();
         if(messagesToDelete > 100){
             slashCommandEvent.reply("Dû à une limitation de Discord, le nombre maximum de messages pouvant être supprimés à la fois est de 100").setEphemeral(true).queue();
         }else{

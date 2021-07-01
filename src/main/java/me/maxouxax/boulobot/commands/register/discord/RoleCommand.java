@@ -21,26 +21,26 @@ public class RoleCommand {
         this.bot = BOT.getInstance();
     }
 
-    @Option(name = "Nom du rôle", description = "Nom du rôle affichée dans l'embed des rôles", type = OptionType.STRING, isRequired = true)
-    @Option(name = "Description du rôle", description = "Description du rôle affichée dans l'embed des rôles", type = OptionType.STRING, isRequired = true)
-    @Option(name = "Rôle", description = "Rôle à ajouter dans l'embed des rôles", type = OptionType.ROLE, isRequired = true)
-    @Option(name = "Réaction", description = "Réaction à ajouter sur l'embed des rôles pour recevoir le rôle", type = OptionType.STRING, isRequired = true)
+    @Option(name = "nom-du-role", description = "Nom du rôle affichée dans l'embed des rôles", type = OptionType.STRING, isRequired = true)
+    @Option(name = "description-du-role", description = "Description du rôle affichée dans l'embed des rôles", type = OptionType.STRING, isRequired = true)
+    @Option(name = "role", description = "Rôle à ajouter dans l'embed des rôles", type = OptionType.ROLE, isRequired = true)
+    @Option(name = "reaction", description = "Réaction à ajouter sur l'embed des rôles pour recevoir le rôle", type = OptionType.STRING, isRequired = true)
     @Command(name = "addrole", description = "Permet d'ajouter un rôle dans la liste des gradochats", help = ".addrole Nom du rôle ²² Description du rôle ²² @Role ²² réaction à ajouter", example = ".addrole Mangeur de pâtes ²² Pour tout les mangeur de pâtes ²² @Mangeur de pâtes ²² :clap: ", power = 100)
     public void addrole(User user, TextChannel textChannel, Message message, SlashCommandEvent slashCommandEvent) {
-        String name = slashCommandEvent.getOption("Nom du rôle").getAsString();
-        String description = slashCommandEvent.getOption("Description du rôle").getAsString();
-        Emote emote = textChannel.getGuild().getEmoteById(slashCommandEvent.getOption("Réaction").getAsString());
-        Role role = slashCommandEvent.getOption("Rôle").getAsRole();
+        String name = slashCommandEvent.getOption("nom-du-role").getAsString();
+        String description = slashCommandEvent.getOption("description-du-role").getAsString();
+        Emote emote = textChannel.getGuild().getEmoteById(slashCommandEvent.getOption("reaction").getAsString());
+        Role role = slashCommandEvent.getOption("role").getAsRole();
         Grade grade = new Grade(role, name, description, emote.getIdLong());
         bot.getRolesManager().registerGrade(grade);
         slashCommandEvent.reply("Rôle ajouté !\nNom: " + grade.getDisplayName() + "\nDescription: " + grade.getDescription() + "\nRôle: " + grade.getRole().getAsMention() + "\nRéaction: " + emote.getAsMention()).queue();
         bot.getRolesManager().reloadRoles();
     }
 
-    @Option(name = "Rôle", description = "Rôle à supprimer de l'embed des rôles", isRequired = true, type = OptionType.ROLE)
+    @Option(name = "role", description = "Rôle à supprimer de l'embed des rôles", isRequired = true, type = OptionType.ROLE)
     @Command(name = "removerole", description = "Permet de retirer un rôle dans la liste des gradochats", help = ".removerole @Role", example = ".removerole @Mangeur de pâtes", power = 100)
     public void removerole(User user, Message message, TextChannel textChannel, SlashCommandEvent slashCommandEvent) {
-        Role role = slashCommandEvent.getOption("Rôle").getAsRole();
+        Role role = slashCommandEvent.getOption("role").getAsRole();
         Optional<Grade> grade = bot.getRolesManager().getGrades().stream().filter(grade1 -> grade1.getRole() == role).findFirst();
         if (grade.isPresent()) {
             bot.getRolesManager().getGrades().remove(grade.get());

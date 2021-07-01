@@ -22,12 +22,12 @@ public class CommandEmbed {
 
     @Option(name = "titre", description = "Titre de l'embed", isRequired = true, type = OptionType.STRING)
     @Option(name = "description", description = "Description de l'embed", isRequired = true, type = OptionType.STRING)
-    @Option(name = "lien de l'image", description = "Image de l'embed", isRequired = false, type = OptionType.STRING)
+    @Option(name = "lien-de-limage", description = "Image de l'embed", isRequired = false, type = OptionType.STRING)
     @Command(name="embed",power = 100,help = ".embed <titre>-²<description>-²<image (url)>",example = ".embed Ceci est une annonce-²Juste pour vous dire que les bananes c'est assez bon mais que la raclette reste au dessus.-²https://lien-de-l-image.fr/image32.png")
     public void embed(User user, TextChannel textChannel, SlashCommandEvent slashCommandEvent) {
         String title = slashCommandEvent.getOption("titre").getAsString();
         String description = slashCommandEvent.getOption("description").getAsString();
-        String image = slashCommandEvent.getOption("lien de l'image").getAsString();
+        String image = slashCommandEvent.getOption("lien-de-limage").getAsString();
         EmbedCrafter embedCrafter = new EmbedCrafter();
         embedCrafter.setTitle(title, "https://lyor.in/twitch")
                 .setColor(15844367)

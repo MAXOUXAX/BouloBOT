@@ -73,7 +73,7 @@ public class RolesManager {
             textChannelRoles.sendMessage(embedCrafter.build()).queue();
             textChannelRoles.sendMessage(embedCrafter2.build()).queue(message -> {
                 messageForRoles = message;
-                bot.getConfigurationManager().setValue("messageRolesID", message.getId(), true);
+                bot.getConfigurationManager().setValue("messageRolesID", message.getId());
                 grades.forEach(grade -> {
                     Emote emote = textChannelRoles.getGuild().getEmoteById(grade.getEmoteId());
                     messageForRoles.addReaction(emote).queue();

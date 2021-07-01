@@ -7,6 +7,7 @@ import com.github.philippheuer.events4j.simple.SimpleEventHandler;
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.auth.providers.TwitchIdentityProvider;
+import com.github.twitch4j.helix.domain.UserList;
 import io.sentry.Sentry;
 import me.maxouxax.boulobot.commands.CommandMap;
 import me.maxouxax.boulobot.event.DiscordListener;
@@ -25,10 +26,12 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
 public class BOT implements Runnable{
@@ -44,7 +47,7 @@ public class BOT implements Runnable{
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private RolesManager rolesManager;
-    private ConfigurationManager configurationManager;
+    private final ConfigurationManager configurationManager;
     private SessionManager sessionManager;
 
     private boolean running;
@@ -53,10 +56,8 @@ public class BOT implements Runnable{
 
     public BOT() throws LoginException, IllegalArgumentException, NullPointerException, IOException, InterruptedException {
         instance = this;
-        //Loading the log system
-        this.logger = new Logger();
 
-        //Loading the error handler system
+        this.logger = new Logger();
         this.errorHandler = new ErrorHandler();
 
         String string = new File(BOT.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
@@ -65,15 +66,15 @@ public class BOT implements Runnable{
                 .replaceAll(".jar", "");
         this.version = string;
 
-        loadConfig();
-
+        this.configurationManager = new ConfigurationManager();
         channelName = configurationManager.getStringValue("channelName");
 
-        //Log the startup messages
         logger.log(Level.INFO, "--------------- STARTING ---------------");
 
         logger.log(Level.INFO, "> Initializing Sentry...");
-        Sentry.init();
+        Sentry.init(options -> {
+            options.setEnableExternalConfiguration(true);
+        });
         logger.log(Level.INFO, "> Sentry initialized !");
 
         logger.log(Level.INFO, "> Generated new BOT instance");
@@ -81,34 +82,20 @@ public class BOT implements Runnable{
         this.commandMap = new CommandMap();
         logger.log(Level.INFO, "> Libraries loaded and DiscordAPI channel joined.");
 
-        //Load the Discord modules
         loadDiscord();
         logger.log(Level.INFO, "> DiscordBOT loaded, launching Twitch's modules!.");
 
-        //Load the Twitch modules
         loadTwitch();
 
-        //Log the ending messages
         logger.log(Level.INFO, "> The BOT is now good to go !");
         logger.log(Level.INFO, "--------------- STARTING ---------------");
     }
 
-    private void loadConfig() {
-        try {
-            this.configurationManager = new ConfigurationManager("config.json");
-            configurationManager.loadData();
-        } catch (IOException e) {
-            getErrorHandler().handleException(e);
-        }
-    }
-
     private void loadTwitch() {
-        //Registering the CredentialManager
         CredentialManager credentialManager = CredentialManagerBuilder.builder().build();
         credentialManager.registerIdentityProvider(new TwitchIdentityProvider(configurationManager.getStringValue("twitchClientId"), configurationManager.getStringValue("twitchClientSecret"), ""));
         logger.log(Level.INFO, "> Credentials registered!");
 
-        //Connecting to TwitchAPI
         OAuth2Credential oAuth2Credential = new OAuth2Credential("twitch", configurationManager.getStringValue("oauth2Token"));
         twitchClient = TwitchClientBuilder.builder()
                 .withCredentialManager(credentialManager)
@@ -117,20 +104,23 @@ public class BOT implements Runnable{
                 .withChatAccount(oAuth2Credential)
                 .withEnableChat(true)
                 .withEnableTMI(true)
+                .withEnablePubSub(true)
                 .build();
         logger.log(Level.INFO, "> TwitchAPI launched.");
 
-        //Connecting to the BOT's chats
         twitchClient.getChat().connect();
         twitchClient.getChat().joinChannel(channelName);
         twitchClient.getClientHelper().enableFollowEventListener(channelName);
+        UserList resultList = twitchClient.getHelix().getUsers(null, null, Collections.singletonList(channelName)).execute();
+        AtomicReference<String> channelId = new AtomicReference<>("");
+        resultList.getUsers().stream().findFirst().ifPresent(user -> channelId.set(user.getId()));
+        twitchClient.getPubSub().listenForChannelPointsRedemptionEvents(new OAuth2Credential("twitch", configurationManager.getStringValue("lyorineChannelToken")), channelId.get());
+
         logger.log(Level.INFO, "> "+channelName+"'s channel joined!");
 
-        //Registering SessionManager and loading all passed sessions
         this.sessionManager = new SessionManager();
         sessionManager.loadSessions();
 
-        //Registering the listener in order to make the events work
         this.twitchListener = new TwitchListener(commandMap);
         twitchClient.getEventManager().getEventHandler(SimpleEventHandler.class).registerListener(twitchListener);
     }

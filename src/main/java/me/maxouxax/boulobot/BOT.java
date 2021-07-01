@@ -10,6 +10,7 @@ import com.github.twitch4j.auth.providers.TwitchIdentityProvider;
 import com.github.twitch4j.helix.domain.UserList;
 import io.sentry.Sentry;
 import me.maxouxax.boulobot.commands.CommandMap;
+import me.maxouxax.boulobot.database.DatabaseManager;
 import me.maxouxax.boulobot.event.DiscordListener;
 import me.maxouxax.boulobot.event.TwitchListener;
 import me.maxouxax.boulobot.roles.RolesManager;
@@ -26,6 +27,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Scanner;
@@ -54,11 +56,13 @@ public class BOT implements Runnable{
     private final String version;
     private final String channelName;
 
-    public BOT() throws LoginException, IllegalArgumentException, NullPointerException, IOException, InterruptedException {
+    public BOT() throws LoginException, IllegalArgumentException, NullPointerException, IOException, InterruptedException, SQLException {
         instance = this;
 
         this.logger = new Logger();
         this.errorHandler = new ErrorHandler();
+
+        DatabaseManager.initDatabaseConnection();
 
         String string = new File(BOT.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
         string = string.replaceAll("BouloBOT-", "")
@@ -211,7 +215,7 @@ public class BOT implements Runnable{
         try {
             BOT bot = new BOT();
             new Thread(bot, "bot").start();
-        } catch (LoginException | IllegalArgumentException | NullPointerException | IOException | InterruptedException e) {
+        } catch (LoginException | IllegalArgumentException | NullPointerException | IOException | InterruptedException | SQLException e) {
             e.printStackTrace();
         }
     }

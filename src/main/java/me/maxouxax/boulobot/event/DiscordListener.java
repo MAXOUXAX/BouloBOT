@@ -50,9 +50,9 @@ public class DiscordListener implements EventListener {
         }else if(event.getTextChannel().getId().equalsIgnoreCase(bot.getConfigurationManager().getStringValue("rolesTextChannelId"))){
             Emote emote = event.getReactionEmote().getEmote();
             Member member = event.getMember();
-            if(bot.getRolesManager().getGrades().stream().anyMatch(grade -> grade.getEmoteId() == emote.getIdLong())){
+            if(bot.getRolesManager().getGrades().stream().anyMatch(grade -> grade.getEmoteId().equals(emote.getId()))){
                 List<Grade> grades = new ArrayList<>();
-                bot.getRolesManager().getGrades().stream().filter(grade -> grade.getEmoteId() == emote.getIdLong()).forEach(grades::add);
+                bot.getRolesManager().getGrades().stream().filter(grade -> grade.getEmoteId().equals(emote.getId())).forEach(grades::add);
                 grades.forEach(grade -> event.getGuild().addRoleToMember(Objects.requireNonNull(member), grade.getRole()).queue());
             }
         }
@@ -69,9 +69,9 @@ public class DiscordListener implements EventListener {
         }else if(event.getTextChannel().getId().equalsIgnoreCase(bot.getConfigurationManager().getStringValue("rolesTextChannelId"))){
             Emote emote = event.getReactionEmote().getEmote();
             Member member = event.getMember();
-            if(bot.getRolesManager().getGrades().stream().anyMatch(grade -> grade.getEmoteId() == emote.getIdLong())){
+            if(bot.getRolesManager().getGrades().stream().anyMatch(grade -> grade.getEmoteId().equals(emote.getId()))){
                 List<Grade> grades = new ArrayList<>();
-                bot.getRolesManager().getGrades().stream().filter(grade -> grade.getEmoteId() == emote.getIdLong()).forEach(grades::add);
+                bot.getRolesManager().getGrades().stream().filter(grade -> grade.getEmoteId().equals(emote.getId())).forEach(grades::add);
                 grades.forEach(grade -> event.getGuild().removeRoleFromMember(Objects.requireNonNull(member), grade.getRole()).queue());
             }
         }

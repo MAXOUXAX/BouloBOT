@@ -2,6 +2,7 @@ package me.maxouxax.boulobot.commands;
 
 import com.github.twitch4j.common.enums.CommandPermission;
 import me.maxouxax.boulobot.BOT;
+import me.maxouxax.boulobot.commands.register.console.ConsoleMigrate;
 import me.maxouxax.boulobot.commands.register.discord.*;
 import me.maxouxax.boulobot.commands.register.twitch.*;
 import me.maxouxax.boulobot.database.DatabaseManager;
@@ -34,7 +35,7 @@ public final class CommandMap {
 
     private final Map<String, Long> powers = new HashMap<>();
 
-    private final List<String> userIds = new ArrayList<>();
+    private final Map<String, java.util.Date> userIds = new HashMap<>();
     private final List<String> giveawayUsersIds = new ArrayList<>();
 
     private final Map<String, SimpleCommand> discordCommands = new HashMap<>();
@@ -46,7 +47,9 @@ public final class CommandMap {
     public CommandMap() {
         this.bot = BOT.getInstance();
 
-        registerCommands(new CommandDefault(this),
+        registerCommands(
+                new ConsoleMigrate(this),
+                new CommandDefault(this),
                 new RoleCommand(this),
                 new HelpCommand(this),
                 new MusicCommand(this),
@@ -69,11 +72,10 @@ public final class CommandMap {
                 new TwitchSCP(this),
                 new TwitchJeparticipe(this));
 
-        loadPower();
         load();
     }
 
-    private void loadPower()
+    private void load()
     {
         try {
             Connection connection = DatabaseManager.getDatabaseAccess().getConnection();
@@ -86,9 +88,38 @@ public final class CommandMap {
                 long power = resultSet.getLong("power");
                 powers.put(id, power);
             }
+
+            PreparedStatement preparedStatementKnownUsers = connection.prepareStatement("SELECT * FROM known_users");
+
+            final ResultSet resultSetKnownUsers = preparedStatementKnownUsers.executeQuery();
+
+            while(resultSetKnownUsers.next()){
+                int userId = resultSetKnownUsers.getInt("user_id");
+                java.util.Date date = resultSetKnownUsers.getDate("updated_at");
+                userIds.put(String.valueOf(userId), date);
+            }
             connection.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+        }
+        //Loading giveaway ids
+
+        File file4 = new File("giveaway.json");
+        if(!file4.exists()) return;
+
+        try{
+            JSONReader reader = new JSONReader(file4);
+            JSONArray array = reader.toJSONArray();
+
+            for(int i = 0; i < array.length(); i++)
+            {
+                JSONObject object = array.getJSONObject(i);
+                String id = object.getString("id");
+                giveawayUsersIds.add(id);
+            }
+
+        }catch(IOException e){
+            bot.getErrorHandler().handleException(e);
         }
     }
 
@@ -118,73 +149,8 @@ public final class CommandMap {
         connection.close();
     }
 
-    private void load()
-    {
-
-        //Loading users ids
-
-        File file3 = new File("userids.json");
-        if(!file3.exists()) return;
-
-        try{
-            JSONReader reader = new JSONReader(file3);
-            JSONArray array = reader.toJSONArray();
-
-            for(int i = 0; i < array.length(); i++)
-            {
-                JSONObject object = array.getJSONObject(i);
-                String id = object.getString("id");
-                userIds.add(id);
-            }
-
-        }catch(IOException e){
-            bot.getErrorHandler().handleException(e);
-        }
-
-        //Loading giveaway ids
-
-        File file4 = new File("giveaway.json");
-        if(!file4.exists()) return;
-
-        try{
-            JSONReader reader = new JSONReader(file4);
-            JSONArray array = reader.toJSONArray();
-
-            for(int i = 0; i < array.length(); i++)
-            {
-                JSONObject object = array.getJSONObject(i);
-                String id = object.getString("id");
-                giveawayUsersIds.add(id);
-            }
-
-        }catch(IOException e){
-            bot.getErrorHandler().handleException(e);
-        }
-    }
-
     public void save()
     {
-
-        //FILE IDS
-
-        JSONArray array3 = new JSONArray();
-
-        for(String userId : userIds)
-        {
-            JSONObject object = new JSONObject();
-            object.accumulate("id", userId);
-            array3.put(object);
-        }
-
-        try(JSONWriter writter = new JSONWriter("userids.json")){
-
-            writter.write(array3);
-            writter.flush();
-
-        }catch(IOException e){
-            bot.getErrorHandler().handleException(e);
-        }
-
         //GIVEAWAY
 
         JSONArray array4 = new JSONArray();
@@ -232,11 +198,23 @@ public final class CommandMap {
     }
 
     public void addKnownUser(String id){
-        if(!userIds.contains(id)) userIds.add(id);
+        if(!userIds.containsKey(id)){
+            try {
+                userIds.put(id, new java.util.Date());
+                Connection connection = DatabaseManager.getDatabaseAccess().getConnection();
+                PreparedStatement insertPreparedStatement = connection.prepareStatement("INSERT INTO known_users (user_id, updated_at) VALUES (?, ?)");
+                insertPreparedStatement.setInt(1, Integer.parseInt(id));
+                insertPreparedStatement.setDate(2, new Date(System.currentTimeMillis()));
+                insertPreparedStatement.execute();
+                connection.close();
+            }catch (SQLException e){
+                bot.getErrorHandler().handleException(e);
+            }
+        }
     }
 
     public boolean isKnown(String id){
-        return userIds.contains(id);
+        return userIds.containsKey(id);
     }
 
     public void addGiveawayUser(String id){
@@ -428,7 +406,7 @@ public final class CommandMap {
         simpleTwitchCommand.getMethod().invoke(simpleTwitchCommand.getObject(), objects);
     }
 
-    public List<String> getUserIds() {
+    public Map<String, java.util.Date> getUserIds() {
         return userIds;
     }
 

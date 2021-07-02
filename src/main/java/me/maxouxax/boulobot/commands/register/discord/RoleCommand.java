@@ -31,7 +31,7 @@ public class RoleCommand {
         String description = slashCommandEvent.getOption("description-du-role").getAsString();
         Emote emote = textChannel.getGuild().getEmoteById(slashCommandEvent.getOption("reaction").getAsString());
         Role role = slashCommandEvent.getOption("role").getAsRole();
-        Grade grade = new Grade(role, name, description, emote.getIdLong());
+        Grade grade = new Grade(role, name, description, emote.getId());
         bot.getRolesManager().registerGrade(grade);
         slashCommandEvent.reply("Rôle ajouté !\nNom: " + grade.getDisplayName() + "\nDescription: " + grade.getDescription() + "\nRôle: " + grade.getRole().getAsMention() + "\nRéaction: " + emote.getAsMention()).queue();
         bot.getRolesManager().reloadRoles();

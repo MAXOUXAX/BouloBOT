@@ -7,7 +7,7 @@ public class Grade {
     private final String name;
     private final String displayName;
     private final String description;
-    private final Long emoteId;
+    private final String emoteId;
     private final Role role;
 
     public String getDescription() {
@@ -22,7 +22,7 @@ public class Grade {
         return displayName;
     }
 
-    public Long getEmoteId() {
+    public String getEmoteId() {
         return emoteId;
     }
 
@@ -30,7 +30,7 @@ public class Grade {
         return role;
     }
 
-    public Grade(Role role, String displayName, String description, Long emoteId) {
+    public Grade(Role role, String displayName, String description, String emoteId) {
         this.role = role;
         this.name = role.getName();
         this.displayName = displayName;

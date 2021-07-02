@@ -43,7 +43,7 @@ public class RolesManager {
             for(int i = 0; i < array.length(); i++)
             {
                 JSONObject object = array.getJSONObject(i);
-                Grade gradeToAdd = new Grade(textChannelRoles.getGuild().getRoleById(object.getLong("id")), object.getString("displayname"), object.getString("description"), object.getLong("emoteId"));
+                Grade gradeToAdd = new Grade(textChannelRoles.getGuild().getRoleById(object.getString("id")), object.getString("displayname"), object.getString("description"), object.getString("emoteId"));
                 grades.add(gradeToAdd);
             }
 
@@ -112,7 +112,7 @@ public class RolesManager {
         JSONArray array = new JSONArray();
         for (Grade grade : grades) {
             JSONObject object = new JSONObject();
-            object.accumulate("id", grade.getRole().getIdLong());
+            object.accumulate("id", grade.getRole().getId());
             object.accumulate("displayname", grade.getDisplayName());
             object.accumulate("description", grade.getDescription());
             object.accumulate("emoteId", grade.getEmoteId());

@@ -69,17 +69,6 @@ public final class CommandMap {
                 new TwitchSCP(this),
                 new TwitchJeparticipe(this));
 
-        List<CommandData> commands = new ArrayList<>();
-        discordCommands.forEach((s, simpleCommand) -> {
-            CommandData commandData = new CommandData(simpleCommand.getName(), simpleCommand.getDescription());
-            if(simpleCommand.getOptionsData().length != 0)commandData.addOptions(simpleCommand.getOptionsData());
-            if(simpleCommand.getSubcommandsData().length != 0)commandData.addSubcommands(simpleCommand.getSubcommandsData());
-            if(simpleCommand.getSubcommandsGroups().length != 0)commandData.addSubcommandGroups(simpleCommand.getSubcommandsGroups());
-
-            commands.add(commandData);
-        });
-        bot.getJda().updateCommands().addCommands(commands).queue();
-
         loadPower();
         load();
     }
@@ -457,6 +446,19 @@ public final class CommandMap {
         if(permissions.contains(CommandPermission.VIP))return TwitchCommand.ExecutorRank.VIP;
         if(permissions.contains(CommandPermission.SUBSCRIBER))return TwitchCommand.ExecutorRank.SUBSCRIBER;
         return TwitchCommand.ExecutorRank.EVERYONE;
+    }
+
+    public void updateCommands() {
+        List<CommandData> commands = new ArrayList<>();
+        discordCommands.forEach((s, simpleCommand) -> {
+            CommandData commandData = new CommandData(simpleCommand.getName(), simpleCommand.getDescription());
+            if(simpleCommand.getOptionsData().length != 0)commandData.addOptions(simpleCommand.getOptionsData());
+            if(simpleCommand.getSubcommandsData().length != 0)commandData.addSubcommands(simpleCommand.getSubcommandsData());
+            if(simpleCommand.getSubcommandsGroups().length != 0)commandData.addSubcommandGroups(simpleCommand.getSubcommandsGroups());
+
+            commands.add(commandData);
+        });
+        bot.getJda().updateCommands().addCommands(commands).queue();
     }
 
 }

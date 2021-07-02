@@ -33,10 +33,14 @@ public class CommandNotif {
         StreamList streamResultList = bot.getTwitchClient().getHelix().getStreams(bot.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, null, Collections.singletonList(broadcasterId), null).execute();
         AtomicReference<Stream> currentStream = new AtomicReference<>();
         streamResultList.getStreams().stream().findFirst().ifPresent(currentStream::set);
-        String title = currentStream.get().getTitle();
-        String gameId = currentStream.get().getGameId();
-        bot.getSessionManager().streamStarted(title, gameId, broadcasterId);
-        slashCommandEvent.reply("Notification envoyée").setEphemeral(true).queue();
+        if(currentStream.get() == null) {
+            slashCommandEvent.reply("Aucun stream est en cours").setEphemeral(true).queue();
+        }else {
+            String title = currentStream.get().getTitle();
+            String gameId = currentStream.get().getGameId();
+            bot.getSessionManager().streamStarted(title, gameId, broadcasterId);
+            slashCommandEvent.reply("Notification envoyée").setEphemeral(true).queue();
+        }
     }
 
 }

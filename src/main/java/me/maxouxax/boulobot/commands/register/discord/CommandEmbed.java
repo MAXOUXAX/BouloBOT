@@ -27,7 +27,8 @@ public class CommandEmbed {
     public void embed(User user, TextChannel textChannel, SlashCommandEvent slashCommandEvent) {
         String title = slashCommandEvent.getOption("titre").getAsString();
         String description = slashCommandEvent.getOption("description").getAsString();
-        String image = slashCommandEvent.getOption("lien-de-limage").getAsString();
+        String image = "";
+        if(slashCommandEvent.getOption("lien-de-limage") != null)image = slashCommandEvent.getOption("lien-de-limage").getAsString();
         EmbedCrafter embedCrafter = new EmbedCrafter();
         embedCrafter.setTitle(title, "https://lyor.in/twitch")
                 .setColor(15844367)

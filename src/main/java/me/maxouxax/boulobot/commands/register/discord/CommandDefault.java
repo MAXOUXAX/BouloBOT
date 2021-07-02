@@ -52,8 +52,8 @@ public class CommandDefault {
     @Command(name="delete",power=50,description = "Permet de nettoyer un nombre x de message du salon", example = ".delete 50", help = ".delete <nombre de message>")
     private void delete(TextChannel textChannel, JDA jda, SlashCommandEvent slashCommandEvent){
         long messagesToDelete = slashCommandEvent.getOption("nombre-de-messages").getAsLong();
-        if(messagesToDelete > 100){
-            slashCommandEvent.reply("Dû à une limitation de Discord, le nombre maximum de messages pouvant être supprimés à la fois est de 100").setEphemeral(true).queue();
+        if(messagesToDelete > 100 || messagesToDelete < 2){
+            slashCommandEvent.reply("Dû à une limitation de Discord, le nombre de messages à supprimer doit être compris entre 2 et 100").setEphemeral(true).queue();
         }else{
             MessageHistory history = new MessageHistory(textChannel);
             List<Message> messages = history.retrievePast(Math.toIntExact(messagesToDelete)).complete();

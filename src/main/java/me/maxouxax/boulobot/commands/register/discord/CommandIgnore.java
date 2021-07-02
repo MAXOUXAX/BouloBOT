@@ -46,10 +46,10 @@ public class CommandIgnore {
             embedCrafter.setDescription(stringBuilder.toString());
             slashCommandEvent.replyEmbeds(embedCrafter.build()).queue();
         } else {
-            String username = slashCommandEvent.getOption("nom-de-lutilisateur").getAsString();
-            if (username.equalsIgnoreCase("")) {
+            if (slashCommandEvent.getOption("nom-de-lutilisateur") == null) {
                 slashCommandEvent.reply("Vous devez spécifier un nom d'utilisateur").setEphemeral(true).queue();
             } else {
+                String username = slashCommandEvent.getOption("nom-de-lutilisateur").getAsString();
                 //if (slashCommandEvent.getSubcommandName().equalsIgnoreCase("add")) {
                 if (slashCommandEvent.getOption("action").getAsString().equalsIgnoreCase("add")) {
                     UserList resultList = bot.getTwitchClient().getHelix().getUsers(bot.getConfigurationManager().getStringValue("oauth2Token"), null, Collections.singletonList(username)).execute();
@@ -65,7 +65,7 @@ public class CommandIgnore {
                             slashCommandEvent.reply(username + " est désormais ignoré").queue();
                         }
                     }
-                //} else if (slashCommandEvent.getSubcommandName().equalsIgnoreCase("remove")) {
+                    //} else if (slashCommandEvent.getSubcommandName().equalsIgnoreCase("remove")) {
                 } else if (slashCommandEvent.getOption("action").getAsString().equalsIgnoreCase("remove")) {
                     UserList resultList = bot.getTwitchClient().getHelix().getUsers(bot.getConfigurationManager().getStringValue("oauth2Token"), null, Collections.singletonList(username)).execute();
                     if (resultList.getUsers().isEmpty()) {

@@ -39,7 +39,7 @@ public class MusicCommand {
             guild.getAudioManager().openAudioConnection(voiceChannel);
         }
         manager.getPlayer(guild).getAudioPlayer().setPaused(false);
-        manager.loadTrack(textChannel, slashCommandEvent.getOption("lien-de-la-musique").getAsString(), user);
+        manager.loadTrack(slashCommandEvent, slashCommandEvent.getOption("lien-de-la-musique").getAsString(), user);
         if (manager.getPlayer(guild).getAudioPlayer().isPaused()) {
             manager.getPlayer(guild).getAudioPlayer().setVolume(20);
         }
@@ -121,7 +121,7 @@ public class MusicCommand {
         MusicPlayer player = manager.getPlayer(textChannel.getGuild());
         long time = slashCommandEvent.getOption("timecode").getAsLong() * 1000;
         player.getAudioPlayer().getPlayingTrack().setPosition(time);
-        slashCommandEvent.reply("La musique est désormais à " + slashCommandEvent.getOption("Timecode").getAsLong() + " seconde(s)").queue();
+        slashCommandEvent.reply("La musique est désormais à " + slashCommandEvent.getOption("timecode").getAsLong() + " seconde(s)").queue();
     }
 
     @Command(name = "track", description = "Permet d'obtenir les informations sur la musique en cours de lecture", help = "track", example = "track")
@@ -174,6 +174,6 @@ public class MusicCommand {
         } catch (Exception e) {
             slashCommandEvent.reply("Erreur...\n" + e.getMessage()).queue();
         }
-        slashCommandEvent.reply("Le volume a été défini à " + volume + (tooLargeVolume ? " (» Volume trop haut | Diminution de " + slashCommandEvent.getOption("Volume").getAsLong() + " à 100)" : "") + (tooLowVolume ? " (» Volume trop bas | Augmentation de " + slashCommandEvent.getOption("Volume").getAsLong() + " à 1)" : "")).queue();
+        slashCommandEvent.reply("Le volume a été défini à " + volume + (tooLargeVolume ? " (» Volume trop haut | Diminution de " + slashCommandEvent.getOption("volume").getAsLong() + " à 100)" : "") + (tooLowVolume ? " (» Volume trop bas | Augmentation de " + slashCommandEvent.getOption("Volume").getAsLong() + " à 1)" : "")).queue();
     }
 }

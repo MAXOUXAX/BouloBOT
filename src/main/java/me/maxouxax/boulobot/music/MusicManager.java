@@ -11,8 +11,8 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import me.maxouxax.boulobot.BOT;
 import me.maxouxax.boulobot.util.EmbedCrafter;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -36,10 +36,10 @@ public class MusicManager {
         return players.get(guild.getId());
     }
 
-    public void loadTrack(final TextChannel channel, final String source, final User user){
-        MusicPlayer player = getPlayer(channel.getGuild());
+    public void loadTrack(final SlashCommandEvent slashCommandEvent, final String source, final User user){
+        MusicPlayer player = getPlayer(slashCommandEvent.getGuild());
 
-        channel.getGuild().getAudioManager().setSendingHandler(player.getAudioHandler());
+        slashCommandEvent.getGuild().getAudioManager().setSendingHandler(player.getAudioHandler());
 
         manager.loadItemOrdered(player, source, new AudioLoadResultHandler(){
 
@@ -60,7 +60,7 @@ public class MusicManager {
                     .setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256")
                     .setDescription("Titre: **"+info.title+"**\nAuteur: "+info.author+"\nDurée: "+durationfinal+"\nURL: "+info.uri+"");
 
-                channel.sendMessage(builder.build()).queue();
+                slashCommandEvent.replyEmbeds(builder.build()).queue();
             }
 
             @Override
@@ -94,7 +94,7 @@ public class MusicManager {
                     sbuilder.append("\n\n*et ").append(b).append(" autre(s) !*");
                 }
                 embedCrafter.setDescription(sbuilder.toString());
-                channel.sendMessage(embedCrafter.build()).queue();
+                slashCommandEvent.replyEmbeds(embedCrafter.build()).queue();
 
             }
 
@@ -106,7 +106,7 @@ public class MusicManager {
                     .setTitle("Musique")
                     .setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256")
                     .setDescription("La piste " + source + " n'a pas été trouvée.");
-                channel.sendMessage(embedCrafter.build()).queue();
+                slashCommandEvent.replyEmbeds(embedCrafter.build()).queue();
             }
 
             @Override
@@ -116,7 +116,7 @@ public class MusicManager {
                     .setTitle("Musique")
                     .setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256")
                     .setDescription("Impossible de jouer la piste (raison:" + exception.getMessage()+")");
-                channel.sendMessage(embedCrafter.build()).queue();
+                slashCommandEvent.replyEmbeds(embedCrafter.build()).queue();
             }
         });
     }

@@ -70,12 +70,16 @@ public class SessionManager {
     public void startNewSession(String channelId, String gameId, String title) {
         currentSession = new Session(System.currentTimeMillis(), channelId);
         sessions.add(currentSession);
-        scheduleViewerCheck = bot.getScheduler().scheduleAtFixedRate(new TaskUpdateSessionMessage(channelId), 2, 2, TimeUnit.MINUTES);
+        taskUpdateSessionMessage();
         currentSession.newGame(gameId);
         currentSession.setTitle(title);
         if(!currentSession.updateMessage()){
             startRetrying();
         }
+    }
+
+    public void taskUpdateSessionMessage(){
+        scheduleViewerCheck = bot.getScheduler().scheduleAtFixedRate(new TaskUpdateSessionMessage(currentSession.getChannelId()), 2, 2, TimeUnit.MINUTES);
     }
 
     private void startRetrying() {
@@ -88,9 +92,15 @@ public class SessionManager {
 
     public void endSession() {
         scheduleViewerCheck.cancel(false);
-        currentSession.endSession();
-        saveSession(currentSession);
-        deleteCurrentSession();
+        if((new Date().getTime() - currentSession.getStartDate()) > 1000*60*15) {
+            //Si la session a duré plus de 15 minutes, alors on l'arrête normalement
+            currentSession.endSession();
+            saveSession(currentSession);
+            deleteCurrentSession();
+        }else {
+            //Si la session a duré moins de 15 minutes, alors on essaie de la relancer pendant 10 minutes
+            startRetrying();
+        }
     }
 
     public void deleteCurrentSession(){

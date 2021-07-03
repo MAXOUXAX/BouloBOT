@@ -47,7 +47,7 @@ public class MusicCommand {
             guild.getAudioManager().openAudioConnection(voiceChannel);
         }
         manager.getPlayer(guild).getAudioPlayer().setPaused(false);
-        String query = slashCommandEvent.getOption("lien-de-la-musique").getAsString();
+        String query = slashCommandEvent.getOption("lien-ou-recherche").getAsString();
         String lowercaseQuery = query.toLowerCase();
         if(lowercaseQuery.startsWith("http://") || lowercaseQuery.startsWith("https://")){
             manager.loadTrack(slashCommandEvent, query, user);
@@ -66,6 +66,11 @@ public class MusicCommand {
         String query = slashCommandEvent.getOption("recherche").getAsString();
         List<SearchResult> resultList = bot.getYoutubeSearch().search(query, 10, "id", "snippet");
         EmbedCrafter embedCrafter = new EmbedCrafter();
+
+        resultList.forEach(searchResult -> {
+            embedCrafter.addField("`" + searchResult.getSnippet().getTitle() + "` • **" + searchResult.getSnippet().getChannelTitle() + "**", "https://youtube.com/watch?v=" + searchResult.getId().getVideoId(), true);
+        });
+
         ReplyAction replyAction = slashCommandEvent.replyEmbeds(embedCrafter.build());
         ArrayList<Component> components = new ArrayList<>();
         AtomicInteger resultIndex = new AtomicInteger(1);
@@ -74,7 +79,10 @@ public class MusicCommand {
             resultIndex.addAndGet(1);
         });
         components.add(Button.danger("music-search-cancel", "Annuler"));
-        replyAction.addActionRows(ActionRow.of(components)).queue();
+        replyAction.addActionRows(ActionRow.of(components.subList(0, 5)));
+        replyAction.addActionRows(ActionRow.of(components.subList(5, 10)));
+        replyAction.addActionRows(ActionRow.of(components.get(10)));
+        replyAction.queue();
     }
 
     @Command(name = "skip", description = "Permet de passer la musique actuellement en lecture", help = "skip", example = "skip")

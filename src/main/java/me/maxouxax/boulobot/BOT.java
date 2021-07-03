@@ -201,10 +201,6 @@ public class BOT implements Runnable{
         logger.log(Level.INFO, "> JDA shutdowned");
         twitchListener.closeListener();
         logger.log(Level.INFO, "> TwitchListener closed");
-        rolesManager.saveRoles();
-        logger.log(Level.INFO, "> Roles saved");
-        commandMap.save();
-        logger.log(Level.INFO, "> CommandMap saved");
         logger.save();
         logger.log(Level.INFO, "> Logger saved");
         logger.log(Level.INFO, "--------------- STOPPING ---------------");

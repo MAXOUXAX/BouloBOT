@@ -1,17 +1,16 @@
 package me.maxouxax.boulobot.roles;
 
 import me.maxouxax.boulobot.BOT;
+import me.maxouxax.boulobot.database.DatabaseManager;
 import me.maxouxax.boulobot.util.EmbedCrafter;
-import me.maxouxax.boulobot.util.JSONReader;
-import me.maxouxax.boulobot.util.JSONWriter;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import java.io.File;
-import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class RolesManager {
@@ -27,27 +26,27 @@ public class RolesManager {
     }
 
     public void reloadRoles(){
-        saveRoles();
         grades.clear();
         loadRoles();
     }
 
     public void loadRoles(){
-        File file = new File("roles.json");
-        if(!file.exists()) return;
+        try {
+            Connection connection = DatabaseManager.getDatabaseAccess().getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM roles");
 
-        try{
-            JSONReader reader = new JSONReader(file);
-            JSONArray array = reader.toJSONArray();
+            final ResultSet resultSet = preparedStatement.executeQuery();
 
-            for(int i = 0; i < array.length(); i++)
-            {
-                JSONObject object = array.getJSONObject(i);
-                Grade gradeToAdd = new Grade(textChannelRoles.getGuild().getRoleById(object.getString("id")), object.getString("displayname"), object.getString("description"), object.getString("emoteId"));
+            while (resultSet.next()) {
+                String displayName = resultSet.getString("displayname");
+                String description = resultSet.getString("description");
+                String roleId = resultSet.getString("role_id");
+                String emoteId = resultSet.getString("emote_id");
+                Grade gradeToAdd = new Grade(textChannelRoles.getGuild().getRoleById(roleId), displayName, description, emoteId);
                 grades.add(gradeToAdd);
             }
-
-        }catch(IOException e){
+            connection.close();
+        }catch (SQLException e){
             bot.getErrorHandler().handleException(e);
         }
         loadMessage();
@@ -108,24 +107,6 @@ public class RolesManager {
         return embedCrafter;
     }
 
-    public void saveRoles() {
-        JSONArray array = new JSONArray();
-        for (Grade grade : grades) {
-            JSONObject object = new JSONObject();
-            object.accumulate("id", grade.getRole().getId());
-            object.accumulate("displayname", grade.getDisplayName());
-            object.accumulate("description", grade.getDescription());
-            object.accumulate("emoteId", grade.getEmoteId());
-            array.put(object);
-        }
-        try (JSONWriter writter = new JSONWriter("roles.json")) {
-            writter.write(array);
-            writter.flush();
-        } catch (IOException e) {
-            bot.getErrorHandler().handleException(e);
-        }
-    }
-
     public Message getMessageForRoles() {
         return messageForRoles;
     }
@@ -139,6 +120,17 @@ public class RolesManager {
     }
 
     public void registerGrade(Grade grade) {
-        this.grades.add(grade);
+        try {
+            this.grades.add(grade);
+            Connection connection = DatabaseManager.getDatabaseAccess().getConnection();
+            PreparedStatement insertPreparedStatement = connection.prepareStatement("INSERT INTO roles (displayname, description, role_id, emote_id) VALUES (?, ?, ?, ?)");
+            insertPreparedStatement.setString(1, grade.getDisplayName());
+            insertPreparedStatement.setString(2, grade.getDescription());
+            insertPreparedStatement.setString(3, grade.getRole().getId());
+            insertPreparedStatement.setString(4, grade.getEmoteId());
+            insertPreparedStatement.execute();
+        }catch (SQLException e) {
+            bot.getErrorHandler().handleException(e);
+        }
     }
 }

@@ -8,8 +8,6 @@ import me.maxouxax.boulobot.commands.register.twitch.*;
 import me.maxouxax.boulobot.database.DatabaseManager;
 import me.maxouxax.boulobot.music.MusicCommand;
 import me.maxouxax.boulobot.util.EmbedCrafter;
-import me.maxouxax.boulobot.util.JSONReader;
-import me.maxouxax.boulobot.util.JSONWriter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -17,11 +15,7 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.sql.Date;
@@ -98,28 +92,18 @@ public final class CommandMap {
                 java.util.Date date = resultSetKnownUsers.getDate("updated_at");
                 userIds.put(String.valueOf(userId), date);
             }
+
+            PreparedStatement preparedStatementGiveaways = connection.prepareStatement("SELECT * FROM giveaway");
+
+            final ResultSet resultSetGiveaways = preparedStatementGiveaways.executeQuery();
+
+            while(resultSetGiveaways.next()){
+                int userId = resultSetGiveaways.getInt("user_id");
+                giveawayUsersIds.add(String.valueOf(userId));
+            }
             connection.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        }
-        //Loading giveaway ids
-
-        File file4 = new File("giveaway.json");
-        if(!file4.exists()) return;
-
-        try{
-            JSONReader reader = new JSONReader(file4);
-            JSONArray array = reader.toJSONArray();
-
-            for(int i = 0; i < array.length(); i++)
-            {
-                JSONObject object = array.getJSONObject(i);
-                String id = object.getString("id");
-                giveawayUsersIds.add(id);
-            }
-
-        }catch(IOException e){
-            bot.getErrorHandler().handleException(e);
         }
     }
 
@@ -147,29 +131,6 @@ public final class CommandMap {
             preparedStatement.execute();
         }
         connection.close();
-    }
-
-    public void save()
-    {
-        //GIVEAWAY
-
-        JSONArray array4 = new JSONArray();
-
-        for(String userId : giveawayUsersIds)
-        {
-            JSONObject object = new JSONObject();
-            object.accumulate("id", userId);
-            array4.put(object);
-        }
-
-        try(JSONWriter writter = new JSONWriter("giveaway.json")){
-
-            writter.write(array4);
-            writter.flush();
-
-        }catch(IOException e){
-            bot.getErrorHandler().handleException(e);
-        }
     }
 
     public MessageEmbed getHelpEmbed(String command) {
@@ -218,7 +179,19 @@ public final class CommandMap {
     }
 
     public void addGiveawayUser(String id){
-        if(!giveawayUsersIds.contains(id)) giveawayUsersIds.add(id);
+        if(!giveawayUsersIds.contains(id)){
+            try {
+                giveawayUsersIds.add(id);
+                Connection connection = DatabaseManager.getDatabaseAccess().getConnection();
+                PreparedStatement insertPreparedStatement = connection.prepareStatement("INSERT INTO giveaway (user_id, updated_at) VALUES (?, ?)");
+                insertPreparedStatement.setInt(1, Integer.parseInt(id));
+                insertPreparedStatement.setDate(2, new Date(System.currentTimeMillis()));
+                insertPreparedStatement.execute();
+                connection.close();
+            }catch (SQLException e){
+                bot.getErrorHandler().handleException(e);
+            }
+        }
     }
 
     public boolean isGiveawayKnown(String id){
@@ -414,8 +387,16 @@ public final class CommandMap {
         return giveawayUsersIds;
     }
 
-    public void clearGiveaway(){
-        giveawayUsersIds.clear();
+    public void clearGiveaway() {
+        try {
+            giveawayUsersIds.clear();
+            Connection connection = DatabaseManager.getDatabaseAccess().getConnection();
+            PreparedStatement insertPreparedStatement = connection.prepareStatement("TRUNCATE TABLE known_users");
+            insertPreparedStatement.execute();
+            connection.close();
+        } catch (SQLException e) {
+            bot.getErrorHandler().handleException(e);
+        }
     }
 
     public TwitchCommand.ExecutorRank getRank(Set<CommandPermission> permissions) {

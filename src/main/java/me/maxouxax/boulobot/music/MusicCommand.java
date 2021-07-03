@@ -1,5 +1,6 @@
 package me.maxouxax.boulobot.music;
 
+import com.google.api.services.youtube.model.SearchResult;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import me.maxouxax.boulobot.BOT;
@@ -13,12 +14,19 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.Component;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MusicCommand {
 
-    private final MusicManager manager = new MusicManager();
+    private static final MusicManager manager = new MusicManager();
     private final BOT bot;
     private final CommandMap commandMap;
 
@@ -27,8 +35,8 @@ public class MusicCommand {
         this.commandMap = commandMap;
     }
 
-    @Option(name = "lien-de-la-musique", description = "Lien de la musique que vous souhaitez jouer", type = OptionType.STRING, isRequired = true)
-    @Command(name = "play", description = "Permet de jouer de la musique en indiquant un lien YouTube ou SoundCloud (autres formats acceptés)", example = "play https://www.youtube.com/watch?v=GS3GYQQUS3o", help = "play <lien>")
+    @Option(name = "lien-ou-recherche", description = "Lien de la musique ou recherche YouTube que vous souhaitez jouer", type = OptionType.STRING, isRequired = true)
+    @Command(name = "play", description = "Permet de jouer de la musique en indiquant un lien YouTube / SoundCloud ou une recherche", example = "play https://www.youtube.com/watch?v=GS3GYQQUS3o", help = "play <lien>")
     private void play(Guild guild, TextChannel textChannel, User user, String command, SlashCommandEvent slashCommandEvent) {
         if (!guild.getAudioManager().isConnected() && !guild.getAudioManager().isAttemptingToConnect()) {
             VoiceChannel voiceChannel = guild.getMember(user).getVoiceState().getChannel();
@@ -39,10 +47,34 @@ public class MusicCommand {
             guild.getAudioManager().openAudioConnection(voiceChannel);
         }
         manager.getPlayer(guild).getAudioPlayer().setPaused(false);
-        manager.loadTrack(slashCommandEvent, slashCommandEvent.getOption("lien-de-la-musique").getAsString(), user);
+        String query = slashCommandEvent.getOption("lien-de-la-musique").getAsString();
+        String lowercaseQuery = query.toLowerCase();
+        if(lowercaseQuery.startsWith("http://") || lowercaseQuery.startsWith("https://")){
+            manager.loadTrack(slashCommandEvent, query, user);
+        }else{
+            List<SearchResult> resultList = bot.getYoutubeSearch().search(query, 1, "id");
+            manager.loadTrack(slashCommandEvent, "https://youtube.com/watch?v="+resultList.get(0).getId().getVideoId(), user);
+        }
         if (manager.getPlayer(guild).getAudioPlayer().isPaused()) {
             manager.getPlayer(guild).getAudioPlayer().setVolume(20);
         }
+    }
+
+    @Option(name = "recherche", description = "Recherche à effectuer sur YouTube", type = OptionType.STRING, isRequired = true)
+    @Command(name = "search", description = "Permet d'afficher les 10 premiers résultats d'une recherche YouTube", help = "search <recherche>", example = "search seth hills calling out")
+    private void search(Guild guild, SlashCommandEvent slashCommandEvent){
+        String query = slashCommandEvent.getOption("recherche").getAsString();
+        List<SearchResult> resultList = bot.getYoutubeSearch().search(query, 10, "id", "snippet");
+        EmbedCrafter embedCrafter = new EmbedCrafter();
+        ReplyAction replyAction = slashCommandEvent.replyEmbeds(embedCrafter.build());
+        ArrayList<Component> components = new ArrayList<>();
+        AtomicInteger resultIndex = new AtomicInteger(1);
+        resultList.forEach(searchResult -> {
+            components.add(Button.secondary("music-search-choose", resultIndex.get()+""));
+            resultIndex.addAndGet(1);
+        });
+        components.add(Button.danger("music-search-cancel", "Annuler"));
+        replyAction.addActionRows(ActionRow.of(components)).queue();
     }
 
     @Command(name = "skip", description = "Permet de passer la musique actuellement en lecture", help = "skip", example = "skip")
@@ -175,5 +207,9 @@ public class MusicCommand {
             slashCommandEvent.reply("Erreur...\n" + e.getMessage()).queue();
         }
         slashCommandEvent.reply("Le volume a été défini à " + volume + (tooLargeVolume ? " (» Volume trop haut | Diminution de " + slashCommandEvent.getOption("volume").getAsLong() + " à 100)" : "") + (tooLowVolume ? " (» Volume trop bas | Augmentation de " + slashCommandEvent.getOption("Volume").getAsLong() + " à 1)" : "")).queue();
+    }
+
+    public static MusicManager getManager() {
+        return manager;
     }
 }

@@ -11,6 +11,7 @@ import me.maxouxax.boulobot.BOT;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,15 +27,19 @@ public class YoutubeSearch {
                 .build();
     }
 
-    public List<SearchResult> search(String query, long maxResults)
-            throws IOException {
-        YouTube.Search.List request = youTube.search()
-                .list(Collections.singletonList("id,title"));
-        SearchListResponse response = request
-                .setMaxResults(maxResults)
-                .setQ(query)
-                .setType(Collections.singletonList("video"))
-                .execute();
-        return response.getItems();
+    public List<SearchResult> search(String query, long maxResults, String... options){
+        try {
+            YouTube.Search.List request = youTube.search()
+                    .list(Arrays.asList(options));
+            SearchListResponse response = request
+                    .setMaxResults(maxResults)
+                    .setQ(query)
+                    .setType(Collections.singletonList("video"))
+                    .execute();
+            return response.getItems();
+        }catch (IOException e){
+            BOT.getInstance().getErrorHandler().handleException(e);
+        }
+        return null;
     }
 }

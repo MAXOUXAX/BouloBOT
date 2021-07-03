@@ -6,6 +6,7 @@ import me.maxouxax.boulobot.roles.Grade;
 import me.maxouxax.boulobot.util.EmbedCrafter;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.GenericEvent;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
@@ -80,6 +81,11 @@ public class DiscordListener implements EventListener {
     private void onCommand(SlashCommandEvent event) {
         //TODO: event.deferReply(true).queue();
         commandMap.discordCommandUser(event.getName(), event);
+    }
+
+    private void onInteraction(ButtonClickEvent event) {
+        //TODO: event.deferReply(true).queue();
+        commandMap.discordInteraction(event.getId(), event);
     }
 
     private void onMessage(MessageReceivedEvent event){

@@ -146,7 +146,7 @@ public class MusicManager {
                         .setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256")
                         .setDescription("Titre: **"+info.title+"**\nAuteur: "+info.author+"\nDurée: "+durationfinal+"\nURL: "+info.uri+"");
 
-                buttonClickEvent.editMessageEmbeds(builder.build()).queue();
+                buttonClickEvent.getHook().editOriginalEmbeds(builder.build()).queue();
             }
 
             @Override
@@ -180,7 +180,7 @@ public class MusicManager {
                     sbuilder.append("\n\n*et ").append(b).append(" autre(s) !*");
                 }
                 embedCrafter.setDescription(sbuilder.toString());
-                buttonClickEvent.editMessageEmbeds(embedCrafter.build()).queue();
+                buttonClickEvent.getHook().editOriginalEmbeds(embedCrafter.build()).queue();
 
             }
 
@@ -192,7 +192,7 @@ public class MusicManager {
                         .setTitle("Musique")
                         .setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256")
                         .setDescription("La piste " + source + " n'a pas été trouvée.");
-                buttonClickEvent.editMessageEmbeds(embedCrafter.build()).queue();
+                buttonClickEvent.getHook().editOriginalEmbeds(embedCrafter.build()).queue();
             }
 
             @Override
@@ -202,7 +202,7 @@ public class MusicManager {
                         .setTitle("Musique")
                         .setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256")
                         .setDescription("Impossible de jouer la piste (raison:" + exception.getMessage()+")");
-                buttonClickEvent.editMessageEmbeds(embedCrafter.build()).queue();
+                buttonClickEvent.getHook().editOriginalEmbeds(embedCrafter.build()).queue();
             }
         });
     }

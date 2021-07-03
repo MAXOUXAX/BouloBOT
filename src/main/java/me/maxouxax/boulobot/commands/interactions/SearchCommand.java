@@ -19,12 +19,14 @@ public class SearchCommand {
         int index = Integer.parseInt(buttonClickEvent.getButton().getLabel());
         MessageEmbed messageEmbed = buttonClickEvent.getMessage().getEmbeds().get(0);
         String url = messageEmbed.getFields().get(index-1).getValue();
+        buttonClickEvent.deferEdit().queue();
         MusicCommand.getManager().loadTrack(buttonClickEvent, url, buttonClickEvent.getUser());
     }
 
     @InteractionListener(id = "music-search-cancel")
     private void cancel(ButtonClickEvent buttonClickEvent){
-        buttonClickEvent.editMessage("Recherche annulée !").queue();
+        buttonClickEvent.getMessage().delete().queue();
+        buttonClickEvent.reply("Recherche annulée !").setEphemeral(true).queue();
     }
 
 }

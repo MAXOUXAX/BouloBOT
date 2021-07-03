@@ -63,6 +63,15 @@ public class MusicCommand {
     @Option(name = "recherche", description = "Recherche à effectuer sur YouTube", type = OptionType.STRING, isRequired = true)
     @Command(name = "search", description = "Permet d'afficher les 10 premiers résultats d'une recherche YouTube", help = "search <recherche>", example = "search seth hills calling out")
     private void search(Guild guild, SlashCommandEvent slashCommandEvent){
+        if (!guild.getAudioManager().isConnected() && !guild.getAudioManager().isAttemptingToConnect()) {
+            VoiceChannel voiceChannel = guild.getMember(slashCommandEvent.getUser()).getVoiceState().getChannel();
+            if (voiceChannel == null) {
+                slashCommandEvent.reply("Vous devez être connecté à un salon vocal.").setEphemeral(true).queue();
+                return;
+            }
+            guild.getAudioManager().openAudioConnection(voiceChannel);
+        }
+        manager.getPlayer(guild).getAudioPlayer().setPaused(false);
         String query = slashCommandEvent.getOption("recherche").getAsString();
         List<SearchResult> resultList = bot.getYoutubeSearch().search(query, 10, "id", "snippet");
         EmbedCrafter embedCrafter = new EmbedCrafter();

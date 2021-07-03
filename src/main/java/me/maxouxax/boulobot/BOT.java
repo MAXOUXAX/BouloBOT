@@ -18,6 +18,7 @@ import me.maxouxax.boulobot.sessions.SessionManager;
 import me.maxouxax.boulobot.util.ConfigurationManager;
 import me.maxouxax.boulobot.util.ErrorHandler;
 import me.maxouxax.boulobot.util.Logger;
+import me.maxouxax.boulobot.util.YoutubeSearch;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -27,6 +28,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Objects;
@@ -51,12 +53,13 @@ public class BOT implements Runnable{
     private RolesManager rolesManager;
     private final ConfigurationManager configurationManager;
     private SessionManager sessionManager;
+    private final YoutubeSearch youtubeSearch;
 
     private boolean running;
     private final String version;
     private final String channelName;
 
-    public BOT() throws LoginException, IllegalArgumentException, NullPointerException, IOException, InterruptedException, SQLException {
+    public BOT() throws GeneralSecurityException, IllegalArgumentException, NullPointerException, IOException, InterruptedException, SQLException {
         instance = this;
 
         this.logger = new Logger();
@@ -91,6 +94,10 @@ public class BOT implements Runnable{
         logger.log(Level.INFO, "> DiscordBOT loaded, launching Twitch's modules!.");
 
         loadTwitch();
+
+        logger.log(Level.INFO, "> Loading YouTube API...");
+        this.youtubeSearch = new YoutubeSearch();
+        logger.log(Level.INFO, "> YouTube API loaded!");
 
         logger.log(Level.INFO, "> The BOT is now good to go !");
         logger.log(Level.INFO, "--------------- STARTING ---------------");
@@ -212,7 +219,7 @@ public class BOT implements Runnable{
         try {
             BOT bot = new BOT();
             new Thread(bot, "bot").start();
-        } catch (LoginException | IllegalArgumentException | NullPointerException | IOException | InterruptedException | SQLException e) {
+        } catch (IllegalArgumentException | NullPointerException | IOException | InterruptedException | SQLException | GeneralSecurityException e) {
             e.printStackTrace();
         }
     }
@@ -243,6 +250,10 @@ public class BOT implements Runnable{
 
     public TwitchListener getTwitchListener() {
         return twitchListener;
+    }
+
+    public YoutubeSearch getYoutubeSearch() {
+        return youtubeSearch;
     }
 
     public static BOT getInstance(){

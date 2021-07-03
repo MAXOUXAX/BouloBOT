@@ -133,4 +133,17 @@ public class RolesManager {
             bot.getErrorHandler().handleException(e);
         }
     }
+
+    public void unregisterGrade(Grade grade) {
+        try {
+            this.grades.remove(grade);
+            Connection connection = DatabaseManager.getDatabaseAccess().getConnection();
+            PreparedStatement insertPreparedStatement = connection.prepareStatement("DELETE FROM roles WHERE role_id = ?");
+            insertPreparedStatement.setString(1, grade.getRole().getId());
+            insertPreparedStatement.execute();
+        }catch (SQLException e) {
+            bot.getErrorHandler().handleException(e);
+        }
+    }
+
 }

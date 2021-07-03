@@ -10,10 +10,13 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import me.maxouxax.boulobot.BOT;
 import me.maxouxax.boulobot.util.EmbedCrafter;
+import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -126,6 +129,7 @@ public class MusicManager {
         MusicPlayer player = getPlayer(buttonClickEvent.getGuild());
 
         buttonClickEvent.getGuild().getAudioManager().setSendingHandler(player.getAudioHandler());
+        buttonClickEvent.getHook().editOriginalComponents(ActionRow.of(Button.link(source, Emoji.fromEmote(buttonClickEvent.getGuild().getEmoteById("530393425762320419"))))).queue();
 
         manager.loadItemOrdered(player, source, new AudioLoadResultHandler(){
 

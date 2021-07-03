@@ -43,7 +43,7 @@ public class RoleCommand {
         Role role = slashCommandEvent.getOption("role").getAsRole();
         Optional<Grade> grade = bot.getRolesManager().getGrades().stream().filter(grade1 -> grade1.getRole() == role).findFirst();
         if (grade.isPresent()) {
-            bot.getRolesManager().getGrades().remove(grade.get());
+            bot.getRolesManager().unregisterGrade(grade.get());
             slashCommandEvent.reply("» Le gradochat " + role.getAsMention() + " a bien été suprimé !").queue();
             bot.getRolesManager().reloadRoles();
         } else {

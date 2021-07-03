@@ -86,7 +86,7 @@ public class DiscordListener implements EventListener {
 
     private void onInteraction(ButtonClickEvent event) {
         //TODO: event.deferReply(true).queue();
-        commandMap.discordInteraction(event.getId(), event);
+        commandMap.discordInteraction(event.getComponentId(), event);
     }
 
     private void onMessage(MessageReceivedEvent event){

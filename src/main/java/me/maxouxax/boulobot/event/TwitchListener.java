@@ -1,6 +1,6 @@
 package me.maxouxax.boulobot.event;
 
-import com.github.philippheuer.events4j.simple.SimpleEventHandler;
+import com.github.philippheuer.events4j.simple.domain.EventSubscriber;
 import com.github.twitch4j.chat.events.channel.*;
 import com.github.twitch4j.common.events.channel.ChannelChangeGameEvent;
 import com.github.twitch4j.common.events.domain.EventUser;
@@ -23,26 +23,19 @@ public class TwitchListener {
         this.commandMap = commandMap;
         this.bot = BOT.getInstance();
         this.chatSpyManager = new ChatSpyManager();
-
-        SimpleEventHandler eventHandler = bot.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class);
-        eventHandler.onEvent(ChannelMessageEvent.class, this::onMessageEvent);
-        eventHandler.onEvent(ChannelChangeGameEvent.class, this::onGameUpdate);
-        eventHandler.onEvent(UserTimeoutEvent.class, this::onTimeOut);
-        eventHandler.onEvent(UserBanEvent.class, this::onBan);
-        eventHandler.onEvent(IRCMessageEvent.class, this::ircMessage);
-        eventHandler.onEvent(FollowEvent.class, this::followEvent);
-        eventHandler.onEvent(ChannelJoinEvent.class, this::channelJoinEvent);
-        eventHandler.onEvent(ChannelLeaveEvent.class, this::channelLeaveEvent);
     }
 
+    @EventSubscriber
     private void channelJoinEvent(ChannelJoinEvent event) {
         chatSpyManager.addMessage(event.getUser().getName(), "✅ `" + event.getUser().getName() + "` a rejoint le chat");
     }
 
+    @EventSubscriber
     private void channelLeaveEvent(ChannelLeaveEvent event) {
         chatSpyManager.addMessage(event.getUser().getName(), "❌ `" + event.getUser().getName() + "` a quitté le chat");
     }
 
+    @EventSubscriber
     private void followEvent(FollowEvent event) {
         if (bot.getSessionManager().isSessionStarted()) {
             bot.getSessionManager().getCurrentSession().addFollower();
@@ -51,12 +44,14 @@ public class TwitchListener {
         bot.getLogger().log(Level.INFO, event.getUser().getName() + " vient de follow !");
     }
 
+    @EventSubscriber
     private void ircMessage(IRCMessageEvent event) {
         if (!event.getMessage().isPresent()) {
             bot.getLogger().log(Level.INFO, event.getRawMessage());
         }
     }
 
+    @EventSubscriber
     private void onBan(UserBanEvent event) {
         if (bot.getSessionManager().isSessionStarted()) {
             bot.getSessionManager().getCurrentSession().addBanOrTimeout();
@@ -65,6 +60,7 @@ public class TwitchListener {
         bot.getLogger().log(Level.INFO, event.getUser().getName() + " vient d'être banni");
     }
 
+    @EventSubscriber
     private void onTimeOut(UserTimeoutEvent event) {
         if (bot.getSessionManager().isSessionStarted()) {
             bot.getSessionManager().getCurrentSession().addBanOrTimeout();
@@ -73,12 +69,14 @@ public class TwitchListener {
         bot.getLogger().log(Level.INFO, event.getUser().getName() + " vient d'être timeout");
     }
 
+    @EventSubscriber
     private void onGameUpdate(ChannelChangeGameEvent event) {
         if(bot.getSessionManager().isSessionStarted()) {
             bot.getSessionManager().updateGame(event.getGameId());
         }
     }
 
+    @EventSubscriber
     private void onMessageEvent(ChannelMessageEvent event) {
         String message = event.getMessage();
         String username = event.getUser().getName();

@@ -1,11 +1,15 @@
 package me.maxouxax.boulobot.util;
 
 import me.maxouxax.boulobot.BOT;
+import me.maxouxax.boulobot.database.DatabaseManager;
 import net.dv8tion.jda.api.entities.TextChannel;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.ScheduledFuture;
@@ -22,8 +26,44 @@ public class ChatSpyManager {
     public ChatSpyManager() {
         this.bot = BOT.getInstance();
         this.scheduleChatSpy = bot.getScheduler().scheduleAtFixedRate(this::postMessages, 30, 30, TimeUnit.SECONDS);
-        String ignoredUsersString = bot.getConfigurationManager().getStringValue("ignoredUsers");
-        ignoredUsers.addAll(Arrays.asList(ignoredUsersString.split(" ²² ")));
+        try {
+            loadData();
+        } catch (SQLException e) {
+            bot.getErrorHandler().handleException(e);
+        }
+    }
+
+    public void loadData() throws SQLException {
+        Connection connection = DatabaseManager.getDatabaseAccess().getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM ignored_users");
+
+        final ResultSet resultSet = preparedStatement.executeQuery();
+
+        while(resultSet.next()){
+            String username = resultSet.getString("username");
+            ignoredUsers.add(username);
+        }
+        connection.close();
+    }
+
+    public void editIgnoredUsers(String username, boolean add) {
+        try {
+            Connection connection = DatabaseManager.getDatabaseAccess().getConnection();
+            if (add) {
+                ignoredUsers.add(username);
+                PreparedStatement insertPreparedStatement = connection.prepareStatement("INSERT INTO ignored_users (username) VALUES (?)");
+                insertPreparedStatement.setString(1, username);
+                insertPreparedStatement.execute();
+            } else {
+                ignoredUsers.remove(username);
+                PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM ignored_users WHERE username = ?");
+                preparedStatement.setString(1, username);
+                preparedStatement.execute();
+            }
+            connection.close();
+        } catch (SQLException e) {
+            BOT.getInstance().getErrorHandler().handleException(e);
+        }
     }
 
     private void postMessages() {
@@ -71,11 +111,5 @@ public class ChatSpyManager {
 
     public ArrayList<String> getIgnoredUsers() {
         return ignoredUsers;
-    }
-
-    public void saveIgnoredUsers(){
-        StringBuilder stringBuilder = new StringBuilder();
-        ignoredUsers.forEach(s -> stringBuilder.append(s).append(" ²² "));
-        bot.getConfigurationManager().setValue("ignoredUsers", stringBuilder.toString(), true);
     }
 }

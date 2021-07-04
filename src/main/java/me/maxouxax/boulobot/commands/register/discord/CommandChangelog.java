@@ -26,7 +26,7 @@ public class CommandChangelog {
         this.bot = BOT.getInstance();
     }
 
-    @Command(name = "changelog",help = ".changelog",example = ".changelog", description = "Permet d'avoir de l'aide sur les commandes de changelogs", type = Command.ExecutorType.USER, power = 100)
+    @Command(name = "changelog",help = ".changelog",example = ".changelog", description = "Permet d'avoir de l'aide sur les commandes de changelogs", power = 100)
     public void changelog(TextChannel textChannel, String[] args, SimpleCommand simpleCommand) {
         if(args.length == 0) {
             EmbedCrafter embedCrafter = new EmbedCrafter();

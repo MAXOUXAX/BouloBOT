@@ -4,7 +4,8 @@ import me.maxouxax.boulobot.BOT;
 import me.maxouxax.boulobot.commands.Command;
 import me.maxouxax.boulobot.commands.CommandMap;
 import me.maxouxax.boulobot.util.EmbedCrafter;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 public class CommandVersion {
 
@@ -16,8 +17,8 @@ public class CommandVersion {
         this.bot = BOT.getInstance();
     }
 
-    @Command(name="version",type= Command.ExecutorType.USER,description="Affiche les informations sur la version du BOT", help = ".version", example = ".version")
-    private void version(MessageChannel channel){
+    @Command(name="version",description="Affiche les informations sur la version du BOT", help = ".version", example = ".version", guildOnly = false)
+    private void version(TextChannel channel, SlashCommandEvent slashCommandEvent){
         try{
             EmbedCrafter embedCrafter = new EmbedCrafter();
             embedCrafter.setTitle("BouloBOT by MAXOUXAX • Amazingly powerful.", bot.getConfigurationManager().getStringValue("websiteUrl"))
@@ -26,10 +27,10 @@ public class CommandVersion {
                 .addField("Je gère", commandMap.getDiscordCommands().size()+" commandes Discord", true)
                 .addField("Je gère", commandMap.getTwitchCommands().size()+" commandes Twitch", true)
                 .addField("J'ai souhaité la bienvenue à", commandMap.getUserIds().size()+" viewers", true);
-            channel.sendMessage(embedCrafter.build()).queue();
+            slashCommandEvent.replyEmbeds(embedCrafter.build()).queue();
         }catch (Exception e) {
             bot.getErrorHandler().handleException(e);
-            channel.sendMessage("An error occured. > " + e.getMessage()).queue();
+            slashCommandEvent.reply("An error occured. > " + e.getMessage()).queue();
         }
     }
 

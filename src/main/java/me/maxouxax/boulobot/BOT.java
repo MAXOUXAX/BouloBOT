@@ -7,16 +7,18 @@ import com.github.philippheuer.events4j.simple.SimpleEventHandler;
 import com.github.twitch4j.TwitchClient;
 import com.github.twitch4j.TwitchClientBuilder;
 import com.github.twitch4j.auth.providers.TwitchIdentityProvider;
-import com.github.twitch4j.common.events.channel.ChannelGoLiveEvent;
-import com.github.twitch4j.common.events.channel.ChannelGoOfflineEvent;
-import com.github.twitch4j.helix.domain.Stream;
-import com.github.twitch4j.helix.domain.StreamList;
+import com.github.twitch4j.helix.domain.UserList;
 import io.sentry.Sentry;
 import me.maxouxax.boulobot.commands.CommandMap;
+import me.maxouxax.boulobot.database.DatabaseManager;
 import me.maxouxax.boulobot.event.DiscordListener;
 import me.maxouxax.boulobot.event.TwitchListener;
 import me.maxouxax.boulobot.roles.RolesManager;
-import me.maxouxax.boulobot.util.*;
+import me.maxouxax.boulobot.sessions.SessionManager;
+import me.maxouxax.boulobot.util.ConfigurationManager;
+import me.maxouxax.boulobot.util.ErrorHandler;
+import me.maxouxax.boulobot.util.Logger;
+import me.maxouxax.boulobot.util.YoutubeSearch;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -26,11 +28,9 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.security.GeneralSecurityException;
+import java.sql.SQLException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
@@ -51,20 +51,21 @@ public class BOT implements Runnable{
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private RolesManager rolesManager;
-    private ConfigurationManager configurationManager;
+    private final ConfigurationManager configurationManager;
     private SessionManager sessionManager;
+    private final YoutubeSearch youtubeSearch;
 
     private boolean running;
     private final String version;
     private final String channelName;
 
-    public BOT() throws LoginException, IllegalArgumentException, NullPointerException, IOException, InterruptedException {
+    public BOT() throws GeneralSecurityException, IllegalArgumentException, NullPointerException, IOException, InterruptedException, SQLException {
         instance = this;
-        //Loading the log system
-        this.logger = new Logger();
 
-        //Loading the error handler system
+        this.logger = new Logger();
         this.errorHandler = new ErrorHandler();
+
+        DatabaseManager.initDatabaseConnection();
 
         String string = new File(BOT.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
         string = string.replaceAll("BouloBOT-", "")
@@ -72,15 +73,15 @@ public class BOT implements Runnable{
                 .replaceAll(".jar", "");
         this.version = string;
 
-        loadConfig();
-
+        this.configurationManager = new ConfigurationManager();
         channelName = configurationManager.getStringValue("channelName");
 
-        //Log the startup messages
         logger.log(Level.INFO, "--------------- STARTING ---------------");
 
         logger.log(Level.INFO, "> Initializing Sentry...");
-        Sentry.init();
+        Sentry.init(options -> {
+            options.setEnableExternalConfiguration(true);
+        });
         logger.log(Level.INFO, "> Sentry initialized !");
 
         logger.log(Level.INFO, "> Generated new BOT instance");
@@ -88,34 +89,25 @@ public class BOT implements Runnable{
         this.commandMap = new CommandMap();
         logger.log(Level.INFO, "> Libraries loaded and DiscordAPI channel joined.");
 
-        //Load the Discord modules
         loadDiscord();
+        commandMap.updateCommands();
         logger.log(Level.INFO, "> DiscordBOT loaded, launching Twitch's modules!.");
 
-        //Load the Twitch modules
         loadTwitch();
 
-        //Log the ending messages
+        logger.log(Level.INFO, "> Loading YouTube API...");
+        this.youtubeSearch = new YoutubeSearch();
+        logger.log(Level.INFO, "> YouTube API loaded!");
+
         logger.log(Level.INFO, "> The BOT is now good to go !");
         logger.log(Level.INFO, "--------------- STARTING ---------------");
     }
 
-    private void loadConfig() {
-        try {
-            this.configurationManager = new ConfigurationManager("config.json");
-            configurationManager.loadData();
-        } catch (IOException e) {
-            getErrorHandler().handleException(e);
-        }
-    }
-
     private void loadTwitch() {
-        //Registering the CredentialManager
         CredentialManager credentialManager = CredentialManagerBuilder.builder().build();
         credentialManager.registerIdentityProvider(new TwitchIdentityProvider(configurationManager.getStringValue("twitchClientId"), configurationManager.getStringValue("twitchClientSecret"), ""));
         logger.log(Level.INFO, "> Credentials registered!");
 
-        //Connecting to TwitchAPI
         OAuth2Credential oAuth2Credential = new OAuth2Credential("twitch", configurationManager.getStringValue("oauth2Token"));
         twitchClient = TwitchClientBuilder.builder()
                 .withCredentialManager(credentialManager)
@@ -124,102 +116,31 @@ public class BOT implements Runnable{
                 .withChatAccount(oAuth2Credential)
                 .withEnableChat(true)
                 .withEnableTMI(true)
+                .withEnablePubSub(true)
                 .build();
         logger.log(Level.INFO, "> TwitchAPI launched.");
 
-        //Connecting to the BOT's chats
         twitchClient.getChat().connect();
         twitchClient.getChat().joinChannel(channelName);
         twitchClient.getClientHelper().enableFollowEventListener(channelName);
+        UserList resultList = twitchClient.getHelix().getUsers(null, null, Collections.singletonList(channelName)).execute();
+        AtomicReference<String> channelId = new AtomicReference<>("");
+        resultList.getUsers().stream().findFirst().ifPresent(user -> channelId.set(user.getId()));
+        twitchClient.getPubSub().listenForChannelPointsRedemptionEvents(new OAuth2Credential("twitch", configurationManager.getStringValue("lyorineChannelToken")), channelId.get());
+
         logger.log(Level.INFO, "> "+channelName+"'s channel joined!");
 
-        //Registering SessionManager and loading all passed sessions
         this.sessionManager = new SessionManager();
         sessionManager.loadSessions();
 
-        //Notification system
-        loadNotifications();
-
-        //Registering the listener in order to make the events work
         this.twitchListener = new TwitchListener(commandMap);
         twitchClient.getEventManager().getEventHandler(SimpleEventHandler.class).registerListener(twitchListener);
     }
 
-    private void loadNotifications() {
-        twitchClient.getClientHelper().enableStreamEventListener(channelName);
-        twitchClient.getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(ChannelGoLiveEvent.class, channelGoLiveEvent -> {
-            sendGoLiveNotif(channelGoLiveEvent.getTitle(), channelGoLiveEvent.getGameId(), channelGoLiveEvent.getChannel().getId());
-        });
-        twitchClient.getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(ChannelGoOfflineEvent.class, channelGoOfflineEvent -> {
-            sendGoOfflineNotif();
-        });
-    }
-
-    public void sendGoLiveNotif(String title, String gameId, String channelId){
-        try {
-
-            if (sessionManager.getCurrentSession() != null) {
-                logger.log(Level.SEVERE, "Gosh! We're in trouble... Session wasn't null, it means that a session was already started! We need to fix that!");
-                return;
-            }
-            StreamList streamResultList = twitchClient.getHelix().getStreams(configurationManager.getStringValue("oauth2Token"), "", "", 1, null, null, Collections.singletonList(channelId), null).execute();
-            AtomicReference<Stream> currentStream = new AtomicReference<>();
-            streamResultList.getStreams().stream().findFirst().ifPresent(currentStream::set);
-            if(currentStream.get() == null){
-                errorHandler.handleException(new Exception("currentStream[0] == null"));
-                return;
-            }
-
-            Session session = sessionManager.startNewSession(channelId);
-            session.newGame(gameId);
-            session.setTitle(title);
-            session.updateMessage();
-        }catch (Exception e){
-            getErrorHandler().handleException(e);
-        }
-    }
-
-    public void sendGoOfflineNotif() {
-        try {
-            if (sessionManager.getCurrentSession() == null) {
-                logger.log(Level.SEVERE, "Hmmm... There's a problem, a GoOffline has been sended, but no session was running... Erhm.");
-                return;
-            }
-
-            Session session = sessionManager.getCurrentSession();
-            sessionManager.endSession();
-            logger.log(Level.INFO, "> Le stream est OFFLINE!");
-            EmbedCrafter embedCrafter = new EmbedCrafter();
-            embedCrafter.setTitle("Live terminé \uD83D\uDD14", "https://twitch.tv/" + channelName.toUpperCase())
-                    .setColor(15158332)
-                    .setDescription("Oh dommage...\nLe live est désormais terminé !\nVous pourrez retrouver " + channelName.toUpperCase() + " une prochaine fois, à l'adresse suivante !\n» https://twitch.tv/" + channelName.toUpperCase())
-                    .addField("Nombre de viewer maximum", session.getMaxViewers() + "", true)
-                    .addField("Nombre de viewer moyen", session.getAvgViewers() + "", true)
-                    .addField("Titre", session.getTitle(), true)
-                    .addField("Nombre de ban & timeout", session.getBansAndTimeouts() + "", true)
-                    .addField("Nombre de commandes utilisées", session.getCommandUsed() + "", true)
-                    .addField("Nombre de messages envoyés", session.getMessageSended() + "", true)
-                    .addField("Nombre de followers", session.getNewFollowers() + "", true)
-                    .addField("Nombre de nouveaux viewers", session.getNewViewers() + "", true);
-            LocalDateTime start = new Date(session.getStartDate()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-            LocalDateTime end = new Date(session.getEndDate()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-            int minutesC = Math.toIntExact(Duration.between(start, end).toMinutes());
-            int hours = minutesC / 60;
-            int minutes = minutesC % 60;
-
-            embedCrafter.addField("Durée", hours + "h" + (minutes < 10 ? "0" : "") + minutes, true);
-            jda.getPresence().setActivity(Activity.playing("Amazingly powerful"));
-            session.getSessionMessage().editMessage(" ").embed(embedCrafter.build()).queue();
-            logger.log(Level.INFO, "> Updated!");
-            sessionManager.deleteCurrentSession();
-        } catch (Exception e) {
-            getErrorHandler().handleException(e);
-        }
-    }
-
     private void loadDiscord() throws LoginException, InterruptedException {
         //Creating the credentials, adding the listeners, and load the roles
-        jda = JDABuilder.create(configurationManager.getStringValue("botToken"), GatewayIntent.GUILD_MESSAGES,
+        jda = JDABuilder.create(configurationManager.getStringValue("botToken"),
+                GatewayIntent.GUILD_MESSAGES,
                 GatewayIntent.DIRECT_MESSAGE_REACTIONS,
                 GatewayIntent.DIRECT_MESSAGE_TYPING,
                 GatewayIntent.DIRECT_MESSAGES,
@@ -274,7 +195,7 @@ public class BOT implements Runnable{
             if (scanner.hasNextLine()) {
                 //Scanning for console commands
                 String nextLine = scanner.nextLine();
-                commandMap.discordCommandConsole(nextLine);
+                commandMap.consoleCommand(nextLine);
             }
         }
 
@@ -288,14 +209,8 @@ public class BOT implements Runnable{
         logger.log(Level.INFO, "> JDA shutdowned");
         twitchListener.closeListener();
         logger.log(Level.INFO, "> TwitchListener closed");
-        rolesManager.saveRoles();
-        logger.log(Level.INFO, "> Roles saved");
-        commandMap.save();
-        logger.log(Level.INFO, "> CommandMap saved");
         logger.save();
         logger.log(Level.INFO, "> Logger saved");
-        sessionManager.saveSessions();
-        logger.log(Level.INFO, "> Sessions saved");
         logger.log(Level.INFO, "--------------- STOPPING ---------------");
         logger.log(Level.INFO, "Arrêt du BOT réussi");
         System.exit(0);
@@ -305,7 +220,7 @@ public class BOT implements Runnable{
         try {
             BOT bot = new BOT();
             new Thread(bot, "bot").start();
-        } catch (LoginException | IllegalArgumentException | NullPointerException | IOException | InterruptedException e) {
+        } catch (IllegalArgumentException | NullPointerException | IOException | InterruptedException | SQLException | GeneralSecurityException e) {
             e.printStackTrace();
         }
     }
@@ -336,6 +251,10 @@ public class BOT implements Runnable{
 
     public TwitchListener getTwitchListener() {
         return twitchListener;
+    }
+
+    public YoutubeSearch getYoutubeSearch() {
+        return youtubeSearch;
     }
 
     public static BOT getInstance(){

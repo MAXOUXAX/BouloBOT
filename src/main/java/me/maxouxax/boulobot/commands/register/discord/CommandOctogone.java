@@ -22,7 +22,7 @@ public class CommandOctogone {
         this.bot = BOT.getInstance();
     }
 
-    @Command(name = "octogone", description = "Vous voulez vous battre ? Bah battez vous !", help = ".octogone @<participants...>", example = ".octogone @LYORINE @MAXOUXAX @DJOXX", type = Command.ExecutorType.USER)
+    @Command(name = "octogone", description = "Vous voulez vous battre ? Bah battez vous !", help = ".octogone @<participants...>", example = ".octogone @LYORINE @MAXOUXAX @DJOXX")
     public void octogone(User user, TextChannel textChannel, Message message, String[] args){
         textChannel.sendTyping().queue();
         List<Member> participants = message.getMentionedMembers();

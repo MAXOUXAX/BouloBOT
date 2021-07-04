@@ -1,7 +1,12 @@
-package me.maxouxax.boulobot.util;
+package me.maxouxax.boulobot.sessions;
 
+import com.github.philippheuer.events4j.simple.SimpleEventHandler;
+import com.github.twitch4j.common.events.channel.ChannelGoLiveEvent;
+import com.github.twitch4j.common.events.channel.ChannelGoOfflineEvent;
 import me.maxouxax.boulobot.BOT;
-import me.maxouxax.boulobot.tasks.TaskViewerCheck;
+import me.maxouxax.boulobot.tasks.TaskUpdateSessionMessage;
+import me.maxouxax.boulobot.util.JSONReader;
+import me.maxouxax.boulobot.util.JSONWriter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -10,6 +15,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 public class SessionManager {
 
@@ -22,18 +28,79 @@ public class SessionManager {
     public SessionManager() {
         this.bot = BOT.getInstance();
         SESSIONS_FOLDER = new File("sessions" + File.separator);
+        loadNotifications();
     }
 
-    public Session startNewSession(String channelId) {
+    private void loadNotifications() {
+        bot.getTwitchClient().getClientHelper().enableStreamEventListener(bot.getChannelName());
+        bot.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(ChannelGoLiveEvent.class, channelGoLiveEvent -> {
+            streamStarted(channelGoLiveEvent.getTitle(), channelGoLiveEvent.getGameId(), channelGoLiveEvent.getChannel().getId());
+        });
+        bot.getTwitchClient().getEventManager().getEventHandler(SimpleEventHandler.class).onEvent(ChannelGoOfflineEvent.class, channelGoOfflineEvent -> {
+            streamEnded();
+        });
+    }
+
+    public void streamStarted(String title, String gameId, String channelId) {
+        try {
+            if (getCurrentSession() != null) {
+                bot.getErrorHandler().handleException(new Exception("A session is already running! Aborting!"));
+            } else {
+                bot.getLogger().log(Level.INFO, "> Stream started!");
+                startNewSession(channelId, gameId, title);
+            }
+        } catch (Exception e) {
+            bot.getErrorHandler().handleException(e);
+        }
+    }
+
+    public void streamEnded() {
+        try {
+            if (getCurrentSession() == null) {
+                bot.getErrorHandler().handleException(new Exception("No sessions were running! Aborting!"));
+            }else {
+                bot.getLogger().log(Level.INFO, "> Stream ended!");
+                endSession();
+            }
+        } catch (Exception e) {
+            bot.getErrorHandler().handleException(e);
+        }
+    }
+
+    public void startNewSession(String channelId, String gameId, String title) {
         currentSession = new Session(System.currentTimeMillis(), channelId);
         sessions.add(currentSession);
-        scheduleViewerCheck = bot.getScheduler().scheduleAtFixedRate(new TaskViewerCheck(channelId), 5, 5, TimeUnit.MINUTES);
-        return currentSession;
+        taskUpdateSessionMessage();
+        currentSession.newGame(gameId);
+        currentSession.setTitle(title);
+        if(!currentSession.updateMessage()){
+            startRetrying();
+        }
+    }
+
+    public void taskUpdateSessionMessage(){
+        scheduleViewerCheck = bot.getScheduler().scheduleAtFixedRate(new TaskUpdateSessionMessage(currentSession.getChannelId()), 2, 2, TimeUnit.MINUTES);
+    }
+
+    private void startRetrying() {
+        RetryTask retryTask = new RetryTask(currentSession);
+        retryTask.setCallbackOnEachTry(session -> {
+            retryTask.success(session.updateMessage());
+        });
+        retryTask.retryIn(10, TimeUnit.SECONDS);
     }
 
     public void endSession() {
-        currentSession.endSession();
         scheduleViewerCheck.cancel(false);
+        if((new Date().getTime() - currentSession.getStartDate()) > 1000*60*15) {
+            //Si la session a duré plus de 15 minutes, alors on l'arrête normalement
+            currentSession.endSession();
+            saveSession(currentSession);
+            deleteCurrentSession();
+        }else {
+            //Si la session a duré moins de 15 minutes, alors on essaie de la relancer pendant 10 minutes
+            startRetrying();
+        }
     }
 
     public void deleteCurrentSession(){
@@ -102,41 +169,39 @@ public class SessionManager {
 
 
 
-    public void saveSessions() {
+    public void saveSession(Session session) {
         if (!SESSIONS_FOLDER.exists()) {
             SESSIONS_FOLDER.mkdirs();
         }
 
-        for (Session session : sessions) {
-            File file = new File(SESSIONS_FOLDER, session.getUuid().toString() + ".json");
-            JSONArray array = new JSONArray();
+        File file = new File(SESSIONS_FOLDER, session.getUuid().toString() + ".json");
+        JSONArray array = new JSONArray();
 
-            JSONObject object = new JSONObject();
-            object.accumulate("uuid", session.getUuid().toString());
-            object.accumulate("channelId", session.getChannelId());
-            object.accumulate("maxViewers", session.getMaxViewers());
-            object.accumulate("avgViewers", session.getAvgViewers());
-            object.accumulate("bansAndTimeouts", session.getBansAndTimeouts());
-            object.accumulate("commandUsed", session.getCommandUsed());
-            object.accumulate("startDate", session.getStartDate());
-            object.accumulate("endDate", session.getEndDate());
-            object.accumulate("messageSended", session.getMessageSended());
-            object.accumulate("newViewers", session.getNewViewers());
-            object.accumulate("newFollowers", session.getNewFollowers());
-            object.accumulate("commandsUsed", crushMap(session.getCommandsUsed()));
-            object.accumulate("gameIds", crushList(session.getGameIds()));
-            object.accumulate("title", session.getTitle());
+        JSONObject object = new JSONObject();
+        object.accumulate("uuid", session.getUuid().toString());
+        object.accumulate("channelId", session.getChannelId());
+        object.accumulate("maxViewers", session.getMaxViewers());
+        object.accumulate("avgViewers", session.getAvgViewers());
+        object.accumulate("bansAndTimeouts", session.getBansAndTimeouts());
+        object.accumulate("commandUsed", session.getCommandUsed());
+        object.accumulate("startDate", session.getStartDate());
+        object.accumulate("endDate", session.getEndDate());
+        object.accumulate("messageSended", session.getMessageSended());
+        object.accumulate("newViewers", session.getNewViewers());
+        object.accumulate("newFollowers", session.getNewFollowers());
+        object.accumulate("commandsUsed", crushMap(session.getCommandsUsed()));
+        object.accumulate("gameIds", crushList(session.getGameIds()));
+        object.accumulate("title", session.getTitle());
 
-            array.put(object);
+        array.put(object);
 
-            try(JSONWriter writter = new JSONWriter(file)){
+        try (JSONWriter writter = new JSONWriter(file)) {
 
-                writter.write(array);
-                writter.flush();
+            writter.write(array);
+            writter.flush();
 
-            }catch(IOException e){
-                bot.getErrorHandler().handleException(e);
-            }
+        } catch (IOException e) {
+            bot.getErrorHandler().handleException(e);
         }
     }
 
@@ -190,6 +255,15 @@ public class SessionManager {
 
     public void addViewerCount(int viewerCount){
         currentSession.getViewerCountList().add(viewerCount);
+    }
+
+    public void cancelCurrentSession() {
+        sessions.remove(currentSession);
+        deleteCurrentSession();
+    }
+
+    public void retryStartingSession() {
+
     }
 
 }

@@ -21,9 +21,9 @@ public class TwitchNotif {
     }
 
     @TwitchCommand(name = "notif", example = "&notif", help = "&notif", description = "Permet de manuellement déclencher l'envoi de la notif de début de live", rank = TwitchCommand.ExecutorRank.MOD)
-    private void notif(User user, Long broadcasterIdLong, String broadcaster, String[] args){
+    private void notification(User user, Long broadcasterIdLong, String broadcaster, String[] args){
         String broadcasterId = broadcasterIdLong.toString();
-        StreamList streamResultList = bot.getTwitchClient().getHelix().getStreams(bot.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, null, Collections.singletonList(broadcasterId), null).execute();
+        StreamList streamResultList = bot.getTwitchClient().getHelix().getStreams(bot.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, Collections.singletonList(broadcasterId), null).execute();
         AtomicReference<Stream> currentStream = new AtomicReference<>();
         streamResultList.getStreams().forEach(currentStream::set);
         if(currentStream.get() == null){
@@ -32,7 +32,7 @@ public class TwitchNotif {
         }
         String title = currentStream.get().getTitle();
         String gameId = currentStream.get().getGameId();
-        bot.sendGoLiveNotif(title, gameId, broadcasterId);
+        bot.getSessionManager().streamStarted(title, gameId, broadcasterId);
     }
 
 }

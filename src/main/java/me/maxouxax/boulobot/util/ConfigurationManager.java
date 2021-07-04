@@ -1,64 +1,60 @@
 package me.maxouxax.boulobot.util;
 
 import me.maxouxax.boulobot.BOT;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import me.maxouxax.boulobot.database.DatabaseManager;
 
-import java.io.File;
-import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ConfigurationManager {
 
-    private final File configFile;
     private final Map<String, String> configKeys = new HashMap<>();
-    private final BOT bot;
 
-    public ConfigurationManager(String fileName) {
-        this.bot = BOT.getInstance();
-        this.configFile = new File(fileName);
+    public ConfigurationManager() {
+        try {
+            loadData();
+        } catch (SQLException sqlException) {
+            sqlException.printStackTrace();
+        }
     }
 
-    public void loadData() throws IOException {
-        if(!configFile.exists()){
-            configFile.getParentFile().mkdirs();
-            configFile.createNewFile();
+    public void loadData() throws SQLException {
+        Connection connection = DatabaseManager.getDatabaseAccess().getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM settings");
+
+        final ResultSet resultSet = preparedStatement.executeQuery();
+
+        while(resultSet.next()){
+            String key = resultSet.getString("key");
+            String value = resultSet.getString("value");
+            configKeys.put(key, value);
         }
+        connection.close();
+    }
 
-        try{
-            JSONReader reader = new JSONReader(configFile);
-            JSONArray array = reader.toJSONArray();
+    public void setValue(String key, String value) {
+        try {
+            configKeys.put(key, value);
+            Connection connection = DatabaseManager.getDatabaseAccess().getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE settings SET value = ? WHERE key = ?");
+            preparedStatement.setString(1, value);
+            preparedStatement.setString(2, key);
 
-            for(int i = 0; i < array.length(); i++)
-            {
-                JSONObject object = array.getJSONObject(i);
-                configKeys.put(object.getString("key"), object.getString("value"));
+            final int updateCount = preparedStatement.executeUpdate();
+
+            if (updateCount < 1) {
+                PreparedStatement insertPreparedStatement = connection.prepareStatement("INSERT INTO settings (key, value) VALUES (?, ?)");
+                insertPreparedStatement.setString(1, value);
+                insertPreparedStatement.setString(2, key);
+                insertPreparedStatement.execute();
             }
-
-        }catch(IOException e){
-            bot.getErrorHandler().handleException(e);
-        }
-    }
-
-    public void saveData(){
-        JSONArray array = new JSONArray();
-
-        for(Map.Entry<String, String> configKeys : configKeys.entrySet())
-        {
-            JSONObject object = new JSONObject();
-            object.accumulate("key", configKeys.getKey());
-            object.accumulate("value", configKeys.getValue());
-            array.put(object);
-        }
-
-        try(JSONWriter writter = new JSONWriter(configFile)){
-
-            writter.write(array);
-            writter.flush();
-
-        }catch(IOException ioe){
-            bot.getErrorHandler().handleException(ioe);
+            connection.close();
+        } catch (SQLException e) {
+            BOT.getInstance().getErrorHandler().handleException(e);
         }
     }
 
@@ -68,13 +64,6 @@ public class ConfigurationManager {
 
     public Long getLongValue(String key){
         return Long.valueOf(configKeys.getOrDefault(key, "0"));
-    }
-
-    public void setValue(String key, String value, boolean save){
-        configKeys.put(key, value);
-        if(save){
-            saveData();
-        }
     }
 
 }

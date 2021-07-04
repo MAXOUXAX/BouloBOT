@@ -1,14 +1,11 @@
 package me.maxouxax.boulobot.commands.register.discord;
 
-import me.maxouxax.boulobot.commands.Command;
-import me.maxouxax.boulobot.commands.Command.ExecutorType;
+import me.maxouxax.boulobot.BOT;
 import me.maxouxax.boulobot.commands.CommandMap;
-import me.maxouxax.boulobot.commands.SimpleCommand;
-import me.maxouxax.boulobot.util.EmbedCrafter;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.internal.entities.UserImpl;
+import me.maxouxax.boulobot.commands.ConsoleCommand;
+import me.maxouxax.boulobot.commands.SimpleConsoleCommand;
+
+import java.util.logging.Level;
 
 public class HelpCommand {
 
@@ -18,15 +15,13 @@ public class HelpCommand {
         this.commandMap = commandMap;
     }
 
-    @Command(name="help",type=ExecutorType.USER,description="Affiche l'entièreté des commandes disponibles", help = ".help", example = ".help")
+    /*@Command(name="help", description="Affiche l'entièreté des commandes disponibles", help = ".help", example = ".help")
     private void help(User user, MessageChannel channel, Guild guild){
         EmbedCrafter embedCrafter = new EmbedCrafter();
         embedCrafter.setTitle("Aide » Liste des commandes")
             .setColor(3447003);
 
         for(SimpleCommand command : commandMap.getDiscordCommands()){
-            if(command.getExecutorType() == ExecutorType.CONSOLE) continue;
-
             if(guild != null && command.getPower() > commandMap.getPowerUser(guild, user)) continue;
 
             embedCrafter.addField(command.getName(), command.getDescription(), true);
@@ -37,6 +32,13 @@ public class HelpCommand {
 
         channel.sendMessage(user.getAsMention()+", veuillez regarder vos message privés.").queue();
 
+    }*/
+
+    @ConsoleCommand(name="help", description="Affiche l'entièreté des commandes disponibles", help = "help")
+    private void help(){
+        for(SimpleConsoleCommand command : commandMap.getConsoleCommands()){
+            BOT.getInstance().getLogger().log(Level.INFO, command.getName() + " - " + command.getDescription() + " - " + command.getHelp(), true);
+        }
     }
 
 }

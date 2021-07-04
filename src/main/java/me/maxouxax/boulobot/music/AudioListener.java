@@ -26,6 +26,7 @@ public class AudioListener extends AudioEventAdapter{
     }
 
     public void nextTrack(){
+        MusicCommand.cancelSkipDemand();
         if(tracks.isEmpty()){
             if(player.getGuild().getAudioManager().getConnectedChannel() != null) {
                 player.getGuild().getAudioManager().closeAudioConnection();

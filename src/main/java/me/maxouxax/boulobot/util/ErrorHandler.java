@@ -18,7 +18,7 @@ public class ErrorHandler {
         bot.getLogger().log(Level.SEVERE, "Une erreur est survenue !\n"+exception.getMessage());
         exception.printStackTrace();
         bot.getLogger().log(Level.SEVERE, exception.getMessage()+"\n"+Arrays.toString(exception.getStackTrace()), false);
-        Sentry.capture(exception);
+        Sentry.captureException(exception);
     }
 
 

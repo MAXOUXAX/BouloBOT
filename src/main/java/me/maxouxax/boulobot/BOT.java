@@ -139,7 +139,8 @@ public class BOT implements Runnable{
 
     private void loadDiscord() throws LoginException, InterruptedException {
         //Creating the credentials, adding the listeners, and load the roles
-        jda = JDABuilder.create(configurationManager.getStringValue("botToken"), GatewayIntent.GUILD_MESSAGES,
+        jda = JDABuilder.create(configurationManager.getStringValue("botToken"),
+                GatewayIntent.GUILD_MESSAGES,
                 GatewayIntent.DIRECT_MESSAGE_REACTIONS,
                 GatewayIntent.DIRECT_MESSAGE_TYPING,
                 GatewayIntent.DIRECT_MESSAGES,

@@ -345,9 +345,9 @@ public final class CommandMap {
         for (int i = 0; i < parameters.length; i++) {
             if (parameters[i].getType() == List[].class) objects[i] = args;
             else if (parameters[i].getType() == User.class) objects[i] = slashCommandEvent.getUser();
+            else if (parameters[i].getType() == Member.class) objects[i] = slashCommandEvent.getMember();
             else if (parameters[i].getType() == TextChannel.class) objects[i] = slashCommandEvent.getTextChannel();
-            else if (parameters[i].getType() == PrivateChannel.class)
-                objects[i] = slashCommandEvent.getPrivateChannel();
+            else if (parameters[i].getType() == PrivateChannel.class)objects[i] = slashCommandEvent.getPrivateChannel();
             else if (parameters[i].getType() == Guild.class) objects[i] = slashCommandEvent.getGuild();
             else if (parameters[i].getType() == String.class) objects[i] = slashCommandEvent.getName();
             else if (parameters[i].getType() == SlashCommandEvent.class) objects[i] = slashCommandEvent;

@@ -27,6 +27,7 @@ public class CommandWeather {
     @Command(name = "météo", help = ".météo <ville>", example = ".météo Paris", description = "Permet d'obtenir la météo sur la ville spécifiée")
     private void météo(User user, TextChannel textChannel, Guild guild, SlashCommandEvent slashCommandEvent) {
         try {
+            slashCommandEvent.deferReply().queue();
             String city = slashCommandEvent.getOption("ville").getAsString();
             OWM owm = new OWM(bot.getConfigurationManager().getStringValue("owmApiKey"));
             owm.setLanguage(OWM.Language.FRENCH);
@@ -52,7 +53,7 @@ public class CommandWeather {
             } else {
                 weatherEmbed.addField("Vent", "Aucune donnée", true);
             }
-            slashCommandEvent.replyEmbeds(weatherEmbed.build()).queue();
+            slashCommandEvent.getHook().editOriginalEmbeds(weatherEmbed.build()).queue();
 
         } catch (Exception e) {
             EmbedCrafter errorEmbed = new EmbedCrafter();
@@ -60,7 +61,7 @@ public class CommandWeather {
             errorEmbed.setTitle("Une erreur est survenue", "https://openweathermap.org")
                     .addField("Message d'erreur", "» " + e.getMessage(), true)
                     .setColor(15158332);
-            slashCommandEvent.replyEmbeds(errorEmbed.build()).queue();
+            slashCommandEvent.getHook().editOriginalEmbeds(errorEmbed.build()).queue();
             bot.getErrorHandler().handleException(e);
         }
     }

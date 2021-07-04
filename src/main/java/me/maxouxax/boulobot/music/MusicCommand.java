@@ -8,10 +8,7 @@ import me.maxouxax.boulobot.commands.Command;
 import me.maxouxax.boulobot.commands.CommandMap;
 import me.maxouxax.boulobot.commands.slashannotations.Option;
 import me.maxouxax.boulobot.util.EmbedCrafter;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -46,6 +43,7 @@ public class MusicCommand {
             }
             guild.getAudioManager().openAudioConnection(voiceChannel);
         }
+        slashCommandEvent.deferReply().queue();
         manager.getPlayer(guild).getAudioPlayer().setPaused(false);
         String query = slashCommandEvent.getOption("lien-ou-recherche").getAsString();
         String lowercaseQuery = query.toLowerCase();
@@ -94,15 +92,50 @@ public class MusicCommand {
         replyAction.queue();
     }
 
+    private static SkipDemand skipDemand;
+
+    public static void cancelSkipDemand(){
+        if(skipDemand != null) {
+            skipDemand.cancelDemand();
+            skipDemand = null;
+        }
+    }
+
+    public void updateSkipDemand() {
+        if(skipDemand != null)skipDemand.updateDemand();
+    }
+
     @Command(name = "skip", description = "Permet de passer la musique actuellement en lecture", help = "skip", example = "skip")
-    private void skip(Guild guild, TextChannel textChannel, SlashCommandEvent slashCommandEvent) {
+    private void skip(User user, Member member, Guild guild, TextChannel textChannel, SlashCommandEvent slashCommandEvent) {
         if (!guild.getAudioManager().isConnected() && !guild.getAudioManager().isAttemptingToConnect()) {
             slashCommandEvent.reply("Aucune piste n'est en cours de lecture").queue();
             return;
         }
-
-        manager.getPlayer(guild).skipTrack();
-        slashCommandEvent.reply("La piste actuelle a bien été passée.").queue();
+        if (member.getVoiceState().inVoiceChannel() && member.getVoiceState().getChannel().equals(guild.getAudioManager().getConnectedChannel())) {
+            VoiceChannel voiceChannel = guild.getAudioManager().getConnectedChannel();
+            int currentMembers = voiceChannel.getMembers().size() - 1;
+            if (currentMembers <= 2) {
+                manager.getPlayer(guild).skipTrack();
+                slashCommandEvent.reply("La piste actuelle a bien été passée.").queue();
+            } else {
+                if (skipDemand == null) {
+                    slashCommandEvent.deferReply().queue();
+                    skipDemand = new SkipDemand(voiceChannel, slashCommandEvent.getHook(), member);
+                    skipDemand.getListenersWishingToSkip().add(member);
+                    updateSkipDemand();
+                }else{
+                    if (skipDemand.getListenersWishingToSkip().contains(member)) {
+                        slashCommandEvent.reply("Vous avez déjà demandé à skip cette musique").setEphemeral(true).queue();
+                    }else{
+                        skipDemand.getListenersWishingToSkip().add(member);
+                        slashCommandEvent.reply("Vous avez voté oui à la demande de skip de "+skipDemand.getRequester().getUser().getName()+ " !").setEphemeral(true).queue();
+                        updateSkipDemand();
+                    }
+                }
+            }
+        }else{
+            slashCommandEvent.reply("Vous n'êtes pas dans le salon où la musique est jouée !").setEphemeral(true).queue();
+        }
     }
 
     @Command(name = "clear", description = "Permet de vider la liste d'attente", example = "clear", help = "clear")

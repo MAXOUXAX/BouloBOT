@@ -1,9 +1,7 @@
-# BouloBOT
+# 🤖 BouloBOT
 
-» BouloBOT • An awesome BOT for Lyorine made by MAXOUXAX
+Custom Discord bot for [Lyorine](https://twitch.tv/lyorine)
 
-If you're facing a problem, please go in "Tickets" category, and if the bug isn't already reported, please create a new ticket in order to notify me.
+If you're facing a problem, please create a new issue after checking if an existing one exists.
 
-Thanks for the support.
-
-MAXOUXAX © 2019 - 2020
+MAXOUXAX © 2019 - 2022

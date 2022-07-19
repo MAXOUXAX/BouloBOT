@@ -26,17 +26,17 @@ public class TwitchListener {
     }
 
     @EventSubscriber
-    private void channelJoinEvent(ChannelJoinEvent event) {
+    public void channelJoinEvent(ChannelJoinEvent event) {
         chatSpyManager.addMessage(event.getUser().getName(), "✅ `" + event.getUser().getName() + "` a rejoint le chat");
     }
 
     @EventSubscriber
-    private void channelLeaveEvent(ChannelLeaveEvent event) {
+    public void channelLeaveEvent(ChannelLeaveEvent event) {
         chatSpyManager.addMessage(event.getUser().getName(), "❌ `" + event.getUser().getName() + "` a quitté le chat");
     }
 
     @EventSubscriber
-    private void followEvent(FollowEvent event) {
+    public void followEvent(FollowEvent event) {
         if (bot.getSessionManager().isSessionStarted()) {
             bot.getSessionManager().getCurrentSession().addFollower();
         }
@@ -45,14 +45,13 @@ public class TwitchListener {
     }
 
     @EventSubscriber
-    private void ircMessage(IRCMessageEvent event) {
-        if (!event.getMessage().isPresent()) {
-            bot.getLogger().log(Level.INFO, event.getRawMessage());
-        }
+    public void ircMessage(IRCMessageEvent event) {
+        if (event.getMessage().isEmpty()) return;
+        bot.getLogger().log(Level.INFO, event.getRawMessage());
     }
 
     @EventSubscriber
-    private void onBan(UserBanEvent event) {
+    public void onBan(UserBanEvent event) {
         if (bot.getSessionManager().isSessionStarted()) {
             bot.getSessionManager().getCurrentSession().addBanOrTimeout();
         }
@@ -61,7 +60,7 @@ public class TwitchListener {
     }
 
     @EventSubscriber
-    private void onTimeOut(UserTimeoutEvent event) {
+    public void onTimeOut(UserTimeoutEvent event) {
         if (bot.getSessionManager().isSessionStarted()) {
             bot.getSessionManager().getCurrentSession().addBanOrTimeout();
         }
@@ -70,14 +69,14 @@ public class TwitchListener {
     }
 
     @EventSubscriber
-    private void onGameUpdate(ChannelChangeGameEvent event) {
-        if(bot.getSessionManager().isSessionStarted()) {
+    public void onGameUpdate(ChannelChangeGameEvent event) {
+        if (bot.getSessionManager().isSessionStarted()) {
             bot.getSessionManager().updateGame(event.getGameId());
         }
     }
 
     @EventSubscriber
-    private void onMessageEvent(ChannelMessageEvent event) {
+    public void onMessageEvent(ChannelMessageEvent event) {
         String message = event.getMessage();
         String username = event.getUser().getName();
         String id = event.getUser().getId();

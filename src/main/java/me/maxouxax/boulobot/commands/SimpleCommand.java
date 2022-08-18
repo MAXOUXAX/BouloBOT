@@ -24,7 +24,7 @@ public final class SimpleCommand {
     private final List<SubcommandData> subcommandData = new ArrayList<>();
     private final List<SubcommandGroupData> subcommandGroupData = new ArrayList<>();
 
-    public SimpleCommand(String name, String description, String help, String exemple, Object object, Method method, int power, boolean guildOnly){
+    public SimpleCommand(String name, String description, String help, String exemple, Object object, Method method, int power, boolean guildOnly) {
         super();
         this.name = name;
         this.description = description;

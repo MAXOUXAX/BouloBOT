@@ -19,19 +19,19 @@ public class TwitchHelp {
         this.bot = BOT.getInstance();
     }
 
-    @TwitchCommand(name="help",rank = TwitchCommand.ExecutorRank.EVERYONE,description="Affiche l'entièreté des commandes disponibles", help = "&help", example = "&help")
-    private void help(User user, String broadcaster, Set<CommandPermission> commandPermissions, String[] args){
+    @TwitchCommand(name = "help", rank = TwitchCommand.ExecutorRank.EVERYONE, description = "Affiche l'entièreté des commandes disponibles", help = "&help", example = "&help")
+    private void help(User user, String broadcaster, Set<CommandPermission> commandPermissions, String[] args) {
         StringBuilder builder = new StringBuilder();
         builder.append("Aide » Liste des commandes");
 
-        for(SimpleTwitchCommand command : commandMap.getTwitchCommands()){
-            if(command.getExecutorRank().getPower() <= commandMap.getRank(commandPermissions).getPower()) {
+        for (SimpleTwitchCommand command : commandMap.getTwitchCommands()) {
+            if (command.getExecutorRank().getPower() <= commandMap.getRank(commandPermissions).getPower()) {
                 builder.append("\n | » ").append(command.getName()).append(" • ").append(command.getDescription());
             }
         }
 
         bot.getTwitchClient().getChat().sendPrivateMessage(user.getDisplayName().toLowerCase(), builder.toString());
-        bot.getTwitchClient().getChat().sendMessage(broadcaster, user.getDisplayName()+", veuillez regarder vos message privés.");
+        bot.getTwitchClient().getChat().sendMessage(broadcaster, user.getDisplayName() + ", veuillez regarder vos message privés.");
 
     }
 

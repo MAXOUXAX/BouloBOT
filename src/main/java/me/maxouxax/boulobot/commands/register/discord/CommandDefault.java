@@ -21,40 +21,40 @@ public class CommandDefault {
     private final BOT bot;
     private final CommandMap commandMap;
 
-    public CommandDefault(CommandMap commandMap){
+    public CommandDefault(CommandMap commandMap) {
         this.commandMap = commandMap;
         this.bot = BOT.getInstance();
     }
 
-    @ConsoleCommand(name="stop")
-    private void stop(){
+    @ConsoleCommand(name = "stop")
+    private void stop() {
         bot.setRunning(false);
     }
 
     @Option(name = "power", type = OptionType.INTEGER, isRequired = true, description = "Power à attribuer")
     @Option(name = "utilisateur", type = OptionType.USER, isRequired = true, description = "Utilisateur auquel attribuer le power")
-    @Command(name="power", power=150, description = "Permet de définir le power d'un utilisateur", example = ".power 150 @MAXOUXAX", help = ".power <power> <@user>")
-    private void power(TextChannel channel, SlashCommandEvent slashCommandEvent){
+    @Command(name = "power", power = 150, description = "Permet de définir le power d'un utilisateur", example = ".power 150 @MAXOUXAX", help = ".power <power> <@user>")
+    private void power(TextChannel channel, SlashCommandEvent slashCommandEvent) {
         long power = slashCommandEvent.getOption("power").getAsLong();
         Member member = slashCommandEvent.getOption("utilisateur").getAsMember();
         commandMap.setUserPower(member.getUser(), power);
-        slashCommandEvent.reply("Le power de "+member.getAsMention()+" est maintenant de "+power).setEphemeral(true).queue();
+        slashCommandEvent.reply("Le power de " + member.getAsMention() + " est maintenant de " + power).setEphemeral(true).queue();
     }
 
     @Option(name = "nom-du-jeu", description = "Nom du jeu", type = OptionType.STRING, isRequired = true)
-    @Command(name="game",power=100,description = "Permet de modifier le jeu du BOT.", help = ".game <jeu>", example = ".game planter des tomates")
-    private void game(TextChannel textChannel, JDA jda, SlashCommandEvent slashCommandEvent){
+    @Command(name = "game", power = 100, description = "Permet de modifier le jeu du BOT.", help = ".game <jeu>", example = ".game planter des tomates")
+    private void game(TextChannel textChannel, JDA jda, SlashCommandEvent slashCommandEvent) {
         jda.getPresence().setActivity(Activity.playing(slashCommandEvent.getOption("nom-du-jeu").getAsString()));
         slashCommandEvent.reply("Jeu mis à jour avec succès !").setEphemeral(true).queue();
     }
 
     @Option(name = "nombre-de-messages", description = "Nombre de messages à supprimer", type = OptionType.INTEGER, isRequired = true)
-    @Command(name="delete",power=50,description = "Permet de nettoyer un nombre x de message du salon", example = ".delete 50", help = ".delete <nombre de message>")
-    private void delete(TextChannel textChannel, JDA jda, SlashCommandEvent slashCommandEvent){
+    @Command(name = "delete", power = 50, description = "Permet de nettoyer un nombre x de message du salon", example = ".delete 50", help = ".delete <nombre de message>")
+    private void delete(TextChannel textChannel, JDA jda, SlashCommandEvent slashCommandEvent) {
         long messagesToDelete = slashCommandEvent.getOption("nombre-de-messages").getAsLong();
-        if(messagesToDelete > 100 || messagesToDelete < 2){
+        if (messagesToDelete > 100 || messagesToDelete < 2) {
             slashCommandEvent.reply("Dû à une limitation de Discord, le nombre de messages à supprimer doit être compris entre 2 et 100").setEphemeral(true).queue();
-        }else{
+        } else {
             MessageHistory history = new MessageHistory(textChannel);
             List<Message> messages = history.retrievePast(Math.toIntExact(messagesToDelete)).complete();
             textChannel.deleteMessages(messages).queue();
@@ -63,8 +63,8 @@ public class CommandDefault {
     }
 
     @Option(name = "utilisateur", description = "Utilisateur duquel les informations seront récupérées", type = OptionType.USER, isRequired = true)
-    @Command(name = "info",description = "Permet d'obtenir des informations sur un membre", help = ".info <@user>", example = ".info @Maxx_#2233")
-    private void info(User user, Guild guild, TextChannel textChannel, SlashCommandEvent slashCommandEvent){
+    @Command(name = "info", description = "Permet d'obtenir des informations sur un membre", help = ".info <@user>", example = ".info @Maxx_#2233")
+    private void info(User user, Guild guild, TextChannel textChannel, SlashCommandEvent slashCommandEvent) {
         Member member = slashCommandEvent.getOption("utilisateur").getAsMember();
         String name = member.getEffectiveName();
         String tag = member.getUser().getName() + "#" + member.getUser().getDiscriminator();
@@ -82,11 +82,11 @@ public class CommandDefault {
             game = "-/-";
         }
 
-        for ( Role r : member.getRoles() ) {
+        for (Role r : member.getRoles()) {
             roles += r.getName() + ", ";
         }
         if (roles.length() > 0)
-            roles = roles.substring(0, roles.length()-2);
+            roles = roles.substring(0, roles.length() - 2);
         else
             roles = "Aucun rôle.";
 
@@ -113,16 +113,16 @@ public class CommandDefault {
     }
 
     @Command(name = "ping", description = "Permet de récupérer le ping du bot", example = ".ping", help = ".ping")
-    private void ping(TextChannel textChannel, User user, Guild guild, SlashCommandEvent slashCommandEvent){
+    private void ping(TextChannel textChannel, User user, Guild guild, SlashCommandEvent slashCommandEvent) {
         long ping = guild.getJDA().getGatewayPing();
         EmbedCrafter embedCrafter = new EmbedCrafter()
                 .setTitle("DiscordAPI ping", bot.getConfigurationManager().getStringValue("websiteUrl"))
-                .setThumbnailUrl(user.getAvatarUrl()+"?size=256")
-                .addField(new MessageEmbed.Field("Ping", ping+"ms", true));
-        if(ping > 300) {
+                .setThumbnailUrl(user.getAvatarUrl() + "?size=256")
+                .addField(new MessageEmbed.Field("Ping", ping + "ms", true));
+        if (ping > 300) {
             embedCrafter.setColor(Color.RED);
             embedCrafter.setDescription("Mauvais ping");
-        }else{
+        } else {
             embedCrafter.setColor(Color.GREEN);
             embedCrafter.setDescription("Bon ping");
         }
@@ -130,9 +130,9 @@ public class CommandDefault {
     }
 
     @ConsoleCommand(name = "sendrules", description = "Permet d'envoyer les règles dans le salon destiné.")
-    private void sendRules(){
+    private void sendRules() {
         EmbedCrafter embedCrafter = new EmbedCrafter()
-                .setImageUrl(bot.getConfigurationManager().getStringValue("rulesBanner")+"?size=1000")
+                .setImageUrl(bot.getConfigurationManager().getStringValue("rulesBanner") + "?size=1000")
                 .setColor(2895667)
                 .noFooter();
         EmbedCrafter embedCrafterRules = new EmbedCrafter()
@@ -173,11 +173,11 @@ public class CommandDefault {
                 .setDescription("Si vous ne respectez pas une des règles précédemment citées, vous recevrez un avertissement.\n\nAu bout de 3 avertissements, vous serez banni définitivement du serveur par notre équipe de modération.\n\n**DE PLUS**, si vous commettez une sanction très grave, l'équipe de modération se réserve le droit de vous bannir sans avertissement.")
                 .forceFooter("Dernière mise à jour des règles");
         TextChannel textChannel = Objects.requireNonNull(bot.getJda()
-                .getGuildById(bot.getConfigurationManager().getStringValue("guildId")))
+                        .getGuildById(bot.getConfigurationManager().getStringValue("guildId")))
                 .getTextChannelById(bot.getConfigurationManager().getStringValue("rulesTextChannelId"));
-        if(textChannel == null){
+        if (textChannel == null) {
             bot.getErrorHandler().handleException(new Exception("textChannel == null (the textchannel id or the guildid (or both) may not have been set in the config file)"));
-        }else {
+        } else {
             textChannel.sendMessageEmbeds(embedCrafter.build()).queue();
             textChannel.sendMessageEmbeds(embedCrafterRules.build()).queue();
             textChannel.sendMessageEmbeds(embedCrafterModeration.build()).queue();

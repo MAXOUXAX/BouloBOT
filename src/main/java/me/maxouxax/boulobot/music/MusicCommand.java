@@ -24,12 +24,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MusicCommand {
 
     private static final MusicManager manager = new MusicManager();
+    private static SkipDemand skipDemand;
     private final BOT bot;
     private final CommandMap commandMap;
 
     public MusicCommand(CommandMap commandMap) {
         this.bot = BOT.getInstance();
         this.commandMap = commandMap;
+    }
+
+    public static void cancelSkipDemand() {
+        if (skipDemand != null) {
+            skipDemand.cancelDemand();
+            skipDemand = null;
+        }
+    }
+
+    public static MusicManager getManager() {
+        return manager;
     }
 
     @Option(name = "lien-ou-recherche", description = "Lien de la musique ou recherche YouTube que vous souhaitez jouer", type = OptionType.STRING, isRequired = true)
@@ -47,11 +59,11 @@ public class MusicCommand {
         manager.getPlayer(guild).getAudioPlayer().setPaused(false);
         String query = slashCommandEvent.getOption("lien-ou-recherche").getAsString();
         String lowercaseQuery = query.toLowerCase();
-        if(lowercaseQuery.startsWith("http://") || lowercaseQuery.startsWith("https://")){
+        if (lowercaseQuery.startsWith("http://") || lowercaseQuery.startsWith("https://")) {
             manager.loadTrack(slashCommandEvent, query, user);
-        }else{
+        } else {
             List<SearchResult> resultList = bot.getYoutubeSearch().search(query, 1, "id");
-            manager.loadTrack(slashCommandEvent, "https://youtube.com/watch?v="+resultList.get(0).getId().getVideoId(), user);
+            manager.loadTrack(slashCommandEvent, "https://youtube.com/watch?v=" + resultList.get(0).getId().getVideoId(), user);
         }
         if (manager.getPlayer(guild).getAudioPlayer().isPaused()) {
             manager.getPlayer(guild).getAudioPlayer().setVolume(20);
@@ -60,7 +72,7 @@ public class MusicCommand {
 
     @Option(name = "recherche", description = "Recherche à effectuer sur YouTube", type = OptionType.STRING, isRequired = true)
     @Command(name = "search", description = "Permet d'afficher les 10 premiers résultats d'une recherche YouTube", help = "search <recherche>", example = "search seth hills calling out")
-    private void search(Guild guild, SlashCommandEvent slashCommandEvent){
+    private void search(Guild guild, SlashCommandEvent slashCommandEvent) {
         if (!guild.getAudioManager().isConnected() && !guild.getAudioManager().isAttemptingToConnect()) {
             VoiceChannel voiceChannel = guild.getMember(slashCommandEvent.getUser()).getVoiceState().getChannel();
             if (voiceChannel == null) {
@@ -82,7 +94,7 @@ public class MusicCommand {
         ArrayList<Component> components = new ArrayList<>();
         AtomicInteger resultIndex = new AtomicInteger(1);
         resultList.forEach(searchResult -> {
-            components.add(Button.secondary("music-search-choose", resultIndex.get()+""));
+            components.add(Button.secondary("music-search-choose", resultIndex.get() + ""));
             resultIndex.addAndGet(1);
         });
         components.add(Button.danger("music-search-cancel", "Annuler"));
@@ -92,17 +104,8 @@ public class MusicCommand {
         replyAction.queue();
     }
 
-    private static SkipDemand skipDemand;
-
-    public static void cancelSkipDemand(){
-        if(skipDemand != null) {
-            skipDemand.cancelDemand();
-            skipDemand = null;
-        }
-    }
-
     public void updateSkipDemand() {
-        if(skipDemand != null)skipDemand.updateDemand();
+        if (skipDemand != null) skipDemand.updateDemand();
     }
 
     @Command(name = "skip", description = "Permet de passer la musique actuellement en lecture", help = "skip", example = "skip")
@@ -123,17 +126,17 @@ public class MusicCommand {
                     skipDemand = new SkipDemand(voiceChannel, slashCommandEvent.getHook(), member);
                     skipDemand.getListenersWishingToSkip().add(member);
                     updateSkipDemand();
-                }else{
+                } else {
                     if (skipDemand.getListenersWishingToSkip().contains(member)) {
                         slashCommandEvent.reply("Vous avez déjà demandé à skip cette musique").setEphemeral(true).queue();
-                    }else{
+                    } else {
                         skipDemand.getListenersWishingToSkip().add(member);
-                        slashCommandEvent.reply("Vous avez voté oui à la demande de skip de "+skipDemand.getRequester().getUser().getName()+ " !").setEphemeral(true).queue();
+                        slashCommandEvent.reply("Vous avez voté oui à la demande de skip de " + skipDemand.getRequester().getUser().getName() + " !").setEphemeral(true).queue();
                         updateSkipDemand();
                     }
                 }
             }
-        }else{
+        } else {
             slashCommandEvent.reply("Vous n'êtes pas dans le salon où la musique est jouée !").setEphemeral(true).queue();
         }
     }
@@ -257,9 +260,5 @@ public class MusicCommand {
             slashCommandEvent.reply("Erreur...\n" + e.getMessage()).queue();
         }
         slashCommandEvent.reply("Le volume a été défini à " + volume + (tooLargeVolume ? " (» Volume trop haut | Diminution de " + slashCommandEvent.getOption("volume").getAsLong() + " à 100)" : "") + (tooLowVolume ? " (» Volume trop bas | Augmentation de " + slashCommandEvent.getOption("Volume").getAsLong() + " à 1)" : "")).queue();
-    }
-
-    public static MusicManager getManager() {
-        return manager;
     }
 }

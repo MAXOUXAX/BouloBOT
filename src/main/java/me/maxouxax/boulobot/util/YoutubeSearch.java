@@ -21,13 +21,14 @@ public class YoutubeSearch {
     private final YouTube youTube;
 
     public YoutubeSearch() throws GeneralSecurityException, IOException {
-        this.youTube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, httpRequest -> {})
+        this.youTube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, httpRequest -> {
+        })
                 .setApplicationName(BOT.getInstance().getConfigurationManager().getStringValue("googleApplicationName"))
                 .setYouTubeRequestInitializer(new YouTubeRequestInitializer(BOT.getInstance().getConfigurationManager().getStringValue("googleApiYoutubeToken")))
                 .build();
     }
 
-    public List<SearchResult> search(String query, long maxResults, String... options){
+    public List<SearchResult> search(String query, long maxResults, String... options) {
         try {
             YouTube.Search.List request = youTube.search()
                     .list(Arrays.asList(options));
@@ -37,7 +38,7 @@ public class YoutubeSearch {
                     .setType(Collections.singletonList("video"))
                     .execute();
             return response.getItems();
-        }catch (IOException e){
+        } catch (IOException e) {
             BOT.getInstance().getErrorHandler().handleException(e);
         }
         return null;

@@ -10,7 +10,7 @@ public class MusicPlayer {
     private final AudioListener listener;
     private final Guild guild;
 
-    public MusicPlayer(AudioPlayer audioPlayer, Guild guild){
+    public MusicPlayer(AudioPlayer audioPlayer, Guild guild) {
         this.audioPlayer = audioPlayer;
         this.guild = guild;
         listener = new AudioListener(this);
@@ -29,15 +29,15 @@ public class MusicPlayer {
         return listener;
     }
 
-    public AudioHandler getAudioHandler(){
+    public AudioHandler getAudioHandler() {
         return new AudioHandler(audioPlayer);
     }
 
-    public synchronized void playTrack(AudioTrack track){
+    public synchronized void playTrack(AudioTrack track) {
         listener.queue(track);
     }
 
-    public synchronized void skipTrack(){
+    public synchronized void skipTrack() {
         listener.nextTrack();
     }
 }

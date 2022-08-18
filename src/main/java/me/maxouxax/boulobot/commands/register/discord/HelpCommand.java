@@ -34,9 +34,9 @@ public class HelpCommand {
 
     }*/
 
-    @ConsoleCommand(name="help", description="Affiche l'entièreté des commandes disponibles", help = "help")
-    private void help(){
-        for(SimpleConsoleCommand command : commandMap.getConsoleCommands()){
+    @ConsoleCommand(name = "help", description = "Affiche l'entièreté des commandes disponibles", help = "help")
+    private void help() {
+        for (SimpleConsoleCommand command : commandMap.getConsoleCommands()) {
             BOT.getInstance().getLogger().log(Level.INFO, command.getName() + " - " + command.getDescription() + " - " + command.getHelp(), true);
         }
     }

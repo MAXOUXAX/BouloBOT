@@ -14,11 +14,11 @@ import java.util.List;
 public class SkipDemand {
 
     private final VoiceChannel voiceChannel;
+    private final String musique;
+    private final DecimalFormat format = new DecimalFormat("##.##");
     private InteractionHook interactionHook;
     private Member requester;
     private List<Member> listenersWishingToSkip;
-    private final String musique;
-    private final DecimalFormat format = new DecimalFormat("##.##");
     private boolean completed = false;
 
     public SkipDemand(VoiceChannel voiceChannel, InteractionHook interactionHook, Member requester) {
@@ -29,7 +29,7 @@ public class SkipDemand {
         this.musique = MusicCommand.getManager().getPlayer(voiceChannel.getGuild()).getAudioPlayer().getPlayingTrack().getInfo().title;
     }
 
-    public void updateDemand(){
+    public void updateDemand() {
         int numberOfListenersWishingToSkip = listenersWishingToSkip.size();
         double percent = (double) numberOfListenersWishingToSkip / getNumberOfMembersInChannel() * 100;
         User user = requester.getUser();
@@ -42,11 +42,11 @@ public class SkipDemand {
                     .setAuthor(user.getName(), BOT.getInstance().getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl() + "?size=256")
                     .setColor(3066993)
                     .setDescription("La demande pour skip la musique `" + musique + "` a été acceptée !\n\n" +
-                            members+" ont accepté la demande !")
+                            members + " ont accepté la demande !")
                     .addField("Avancée de la demande", numberOfListenersWishingToSkip + "/" + getNumberOfMembersInChannel() + " - " + format.format(percent) + "%", true);
             interactionHook.editOriginalEmbeds(embedCrafter.build()).queue();
             MusicCommand.getManager().getPlayer(requester.getGuild()).skipTrack();
-        }else{
+        } else {
             EmbedCrafter embedCrafter = new EmbedCrafter()
                     .setTitle("⏳ • Demande de skip")
                     .setColor(15844367)
@@ -59,8 +59,8 @@ public class SkipDemand {
         }
     }
 
-    public void cancelDemand(){
-        if(completed)return;
+    public void cancelDemand() {
+        if (completed) return;
         interactionHook.deleteOriginal().queue();
         int numberOfListenersWishingToSkip = listenersWishingToSkip.size();
         double percent = (double) numberOfListenersWishingToSkip / getNumberOfMembersInChannel() * 100;
@@ -74,8 +74,8 @@ public class SkipDemand {
         interactionHook.getInteraction().getTextChannel().sendMessageEmbeds(embedCrafter.build()).queue();
     }
 
-    public int getNumberOfMembersInChannel(){
-        return voiceChannel.getMembers().size()-1;
+    public int getNumberOfMembersInChannel() {
+        return voiceChannel.getMembers().size() - 1;
     }
 
     public InteractionHook getInteractionHook() {

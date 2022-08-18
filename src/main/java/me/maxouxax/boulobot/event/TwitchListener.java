@@ -55,7 +55,7 @@ public class TwitchListener {
         if (bot.getSessionManager().isSessionStarted()) {
             bot.getSessionManager().getCurrentSession().addBanOrTimeout();
         }
-        chatSpyManager.addMessage(event.getUser().getName(), "⛔ `" + event.getUser().getName() + "` vient d'être banni pour " + event.getReason());
+        chatSpyManager.addMessage(event.getUser().getName(), "⛔ `" + event.getUser().getName() + "` vient d'être banni pour `" + event.getReason() + "`");
         bot.getLogger().log(Level.INFO, event.getUser().getName() + " vient d'être banni");
     }
 
@@ -64,7 +64,7 @@ public class TwitchListener {
         if (bot.getSessionManager().isSessionStarted()) {
             bot.getSessionManager().getCurrentSession().addBanOrTimeout();
         }
-        chatSpyManager.addMessage(event.getUser().getName(), "\uD83D\uDCDB `" + event.getUser().getName() + "` vient d'être timeout pour " + event.getReason());
+        chatSpyManager.addMessage(event.getUser().getName(), "\uD83D\uDCDB `" + event.getUser().getName() + "` vient d'être timeout pour `" + event.getReason() + "`");
         bot.getLogger().log(Level.INFO, event.getUser().getName() + " vient d'être timeout");
     }
 
@@ -81,7 +81,7 @@ public class TwitchListener {
         String username = event.getUser().getName();
         String id = event.getUser().getId();
         bot.getLogger().log(Level.INFO, "LiveChat > " + username + " > " + message);
-        chatSpyManager.addMessage(event.getUser().getName(), "\uD83D\uDCAC `" + username + "` » " + message);
+        chatSpyManager.addMessage(event.getUser().getName(), "\uD83D\uDCAC `" + username + "` » `" + message + "`");
         if (!commandMap.isKnown(id)) {
             commandMap.addKnownUser(id);
             event.getTwitchChat().sendMessage(bot.getChannelName().toLowerCase(), "Coucou @" + username + " ! Passe un bon moment sur le stream, et pose toi avec ton PopCorn !");

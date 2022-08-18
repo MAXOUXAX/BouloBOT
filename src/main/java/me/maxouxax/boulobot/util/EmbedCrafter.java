@@ -12,11 +12,11 @@ import java.util.List;
 
 public class EmbedCrafter {
 
+    private final List<MessageEmbed.Field> fields = new ArrayList<>();
     private String title;
     private String url;
     private int color = 15528177;
     private String description;
-    private final List<MessageEmbed.Field> fields = new ArrayList<>();
     private String thumbnailUrl;
     private String imageUrl;
     private String authorName, authorUrl, authorIconUrl;
@@ -26,13 +26,13 @@ public class EmbedCrafter {
         return title;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
     public EmbedCrafter setTitle(String title) {
         this.title = title;
         return this;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public EmbedCrafter setTitle(String title, String url) {
@@ -131,44 +131,44 @@ public class EmbedCrafter {
         return footerIconUrl;
     }
 
-    public MessageEmbed build(){
+    public MessageEmbed build() {
         BOT bot = BOT.getInstance();
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setColor(color);
-        if(footerText == null || !footerText.equals("noFooter")) {
+        if (footerText == null || !footerText.equals("noFooter")) {
             embedBuilder
                     .setFooter(bot.getConfigurationManager().getStringValue("embedFooter"), bot.getConfigurationManager().getStringValue("embedIconUrl"))
                     .setTimestamp(OffsetDateTime.now(ZoneId.of("Europe/Paris")));
         }
         fields.forEach(embedBuilder::addField);
-        if(footerText != null && !footerText.equals("noFooter")){
-            if(footerIconUrl != null){
+        if (footerText != null && !footerText.equals("noFooter")) {
+            if (footerIconUrl != null) {
                 embedBuilder.setFooter(footerText, footerIconUrl);
-            }else {
+            } else {
                 embedBuilder.setFooter(footerText);
             }
         }
-        if(title != null){
-            if(url != null){
+        if (title != null) {
+            if (url != null) {
                 embedBuilder.setTitle(title, url);
-            }else {
+            } else {
                 embedBuilder.setTitle(title);
             }
         }
-        if(authorName != null){
-            if(authorUrl != null) {
+        if (authorName != null) {
+            if (authorUrl != null) {
                 if (authorIconUrl != null) {
                     embedBuilder.setAuthor(authorName, authorUrl, authorIconUrl);
-                }else{
+                } else {
                     embedBuilder.setAuthor(authorName, authorUrl);
                 }
-            }else {
+            } else {
                 embedBuilder.setAuthor(authorName);
             }
         }
-        if(description != null) embedBuilder.setDescription(description);
-        if(thumbnailUrl != null) embedBuilder.setThumbnail(thumbnailUrl);
-        if(imageUrl != null) embedBuilder.setImage(imageUrl);
+        if (description != null) embedBuilder.setDescription(description);
+        if (thumbnailUrl != null) embedBuilder.setThumbnail(thumbnailUrl);
+        if (imageUrl != null) embedBuilder.setImage(imageUrl);
         return embedBuilder.build();
     }
 

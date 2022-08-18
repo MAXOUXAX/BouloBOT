@@ -20,9 +20,9 @@ import java.util.logging.Level;
 public class SessionManager {
 
     private final BOT bot;
-    private Session currentSession;
     private final File SESSIONS_FOLDER;
     private final ArrayList<Session> sessions = new ArrayList<>();
+    private Session currentSession;
     private ScheduledFuture scheduleViewerCheck;
 
     public SessionManager() {
@@ -58,7 +58,7 @@ public class SessionManager {
         try {
             if (getCurrentSession() == null) {
                 bot.getErrorHandler().handleException(new Exception("No sessions were running! Aborting!"));
-            }else {
+            } else {
                 bot.getLogger().log(Level.INFO, "> Stream ended!");
                 endSession();
             }
@@ -73,12 +73,12 @@ public class SessionManager {
         taskUpdateSessionMessage();
         currentSession.newGame(gameId);
         currentSession.setTitle(title);
-        if(!currentSession.updateMessage()){
+        if (!currentSession.updateMessage()) {
             startRetrying();
         }
     }
 
-    public void taskUpdateSessionMessage(){
+    public void taskUpdateSessionMessage() {
         scheduleViewerCheck = bot.getScheduler().scheduleAtFixedRate(new TaskUpdateSessionMessage(currentSession.getChannelId()), 2, 2, TimeUnit.MINUTES);
     }
 
@@ -92,18 +92,18 @@ public class SessionManager {
 
     public void endSession() {
         scheduleViewerCheck.cancel(false);
-        if((new Date().getTime() - currentSession.getStartDate()) > 1000*60*15) {
+        if ((new Date().getTime() - currentSession.getStartDate()) > 1000 * 60 * 15) {
             //Si la session a duré plus de 15 minutes, alors on l'arrête normalement
             currentSession.endSession();
             saveSession(currentSession);
             deleteCurrentSession();
-        }else {
+        } else {
             //Si la session a duré moins de 15 minutes, alors on essaie de la relancer pendant 10 minutes
             startRetrying();
         }
     }
 
-    public void deleteCurrentSession(){
+    public void deleteCurrentSession() {
         this.currentSession = null;
     }
 
@@ -119,7 +119,7 @@ public class SessionManager {
         return sessions.stream().filter(session -> session.getUuid().toString().equalsIgnoreCase(uuid)).findFirst();
     }
 
-    public boolean isSessionStarted(){
+    public boolean isSessionStarted() {
         return currentSession != null;
     }
 
@@ -166,7 +166,6 @@ public class SessionManager {
             }
         }
     }
-
 
 
     public void saveSession(Session session) {
@@ -217,7 +216,7 @@ public class SessionManager {
         try {
             ArrayList<String> decrushedList = new ArrayList<>(Arrays.asList(crushedList.split("&&&")));
             return decrushedList;
-        }catch (Exception e){
+        } catch (Exception e) {
             bot.getErrorHandler().handleException(e);
         }
         return new ArrayList<>();
@@ -237,12 +236,12 @@ public class SessionManager {
             List<String> cuttedStrings = Arrays.asList(crushedMap.split("&&&"));
             cuttedStrings.forEach(s -> {
                 String[] values = s.split("::");
-                if(values.length > 1) {
+                if (values.length > 1) {
                     decrushedMap.put(values[0], Integer.valueOf(values[1]));
                 }
             });
             return decrushedMap;
-        }catch (Exception e){
+        } catch (Exception e) {
             bot.getErrorHandler().handleException(e);
         }
         return new HashMap<>();
@@ -253,7 +252,7 @@ public class SessionManager {
         this.currentSession.updateMessage();
     }
 
-    public void addViewerCount(int viewerCount){
+    public void addViewerCount(int viewerCount) {
         currentSession.getViewerCountList().add(viewerCount);
     }
 

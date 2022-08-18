@@ -8,9 +8,9 @@ import java.util.function.Consumer;
 
 public class RetryTask {
 
+    private final Date startDate;
     private Consumer<Session> sessionConsumer;
     private Session currentSession;
-    private final Date startDate;
 
     public RetryTask(Session currentSession) {
         this.currentSession = currentSession;
@@ -26,14 +26,14 @@ public class RetryTask {
     }
 
     public void success(boolean successful) {
-        if(!successful){
-            if((new Date().getTime() - startDate.getTime()) > 1000*60*10) {
+        if (!successful) {
+            if ((new Date().getTime() - startDate.getTime()) > 1000 * 60 * 10) {
                 //Si on réessaie depuis plus de 10 minutes, alors on cancel la session
                 BOT.getInstance().getSessionManager().cancelCurrentSession();
-            }else {
+            } else {
                 retryIn(10, TimeUnit.SECONDS);
             }
-        }else{
+        } else {
             //La session a redémarrée
             BOT.getInstance().getSessionManager().taskUpdateSessionMessage();
         }

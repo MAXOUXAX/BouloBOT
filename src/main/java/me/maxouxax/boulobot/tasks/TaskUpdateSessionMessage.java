@@ -7,9 +7,9 @@ import me.maxouxax.boulobot.sessions.Session;
 public class TaskUpdateSessionMessage implements Runnable {
 
     private final BOT bot;
-    private Stream stream;
     private final Session session;
     private final String channelId;
+    private Stream stream;
 
     public TaskUpdateSessionMessage(String channelId) {
         this.bot = BOT.getInstance();
@@ -21,7 +21,7 @@ public class TaskUpdateSessionMessage implements Runnable {
     public void run() {
         refreshStreamObject();
         int viewerCount = stream.getViewerCount();
-        if(viewerCount > session.getMaxViewers()){
+        if (viewerCount > session.getMaxViewers()) {
             session.setMaxViewers(viewerCount);
         }
         bot.getSessionManager().addViewerCount(viewerCount);

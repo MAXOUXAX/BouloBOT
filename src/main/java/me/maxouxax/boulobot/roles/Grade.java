@@ -10,6 +10,14 @@ public class Grade {
     private final String emoteId;
     private final Role role;
 
+    public Grade(Role role, String displayName, String description, String emoteId) {
+        this.role = role;
+        this.name = role.getName();
+        this.displayName = displayName;
+        this.emoteId = emoteId;
+        this.description = description;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -28,13 +36,5 @@ public class Grade {
 
     public Role getRole() {
         return role;
-    }
-
-    public Grade(Role role, String displayName, String description, String emoteId) {
-        this.role = role;
-        this.name = role.getName();
-        this.displayName = displayName;
-        this.emoteId = emoteId;
-        this.description = description;
     }
 }

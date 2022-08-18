@@ -38,7 +38,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
-public class BOT implements Runnable{
+public class BOT implements Runnable {
 
     private static BOT instance;
     private static JDA jda;
@@ -46,18 +46,16 @@ public class BOT implements Runnable{
     private final Scanner scanner = new Scanner(System.in);
     private final Logger logger;
     private final ErrorHandler errorHandler;
-    private TwitchClient twitchClient;
-    private TwitchListener twitchListener;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-    private RolesManager rolesManager;
     private final ConfigurationManager configurationManager;
-    private SessionManager sessionManager;
     private final YoutubeSearch youtubeSearch;
-
-    private boolean running;
     private final String version;
     private final String channelName;
+    private TwitchClient twitchClient;
+    private TwitchListener twitchListener;
+    private RolesManager rolesManager;
+    private SessionManager sessionManager;
+    private boolean running;
 
     public BOT() throws GeneralSecurityException, IllegalArgumentException, NullPointerException, IOException, InterruptedException, SQLException {
         instance = this;
@@ -103,6 +101,20 @@ public class BOT implements Runnable{
         logger.log(Level.INFO, "--------------- STARTING ---------------");
     }
 
+    public static void main(String[] args) {
+        try {
+            BOT bot = new BOT();
+            new Thread(bot, "bot").start();
+        } catch (IllegalArgumentException | NullPointerException | IOException | InterruptedException | SQLException |
+                 GeneralSecurityException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static BOT getInstance() {
+        return instance;
+    }
+
     private void loadTwitch() {
         CredentialManager credentialManager = CredentialManagerBuilder.builder().build();
         credentialManager.registerIdentityProvider(new TwitchIdentityProvider(configurationManager.getStringValue("twitchClientId"), configurationManager.getStringValue("twitchClientSecret"), ""));
@@ -120,38 +132,40 @@ public class BOT implements Runnable{
                 .build();
         logger.log(Level.INFO, "> TwitchAPI launched.");
 
+        SimpleEventHandler eventHandler = twitchClient.getEventManager().getEventHandler(SimpleEventHandler.class);
+        this.twitchListener = new TwitchListener(commandMap);
+        eventHandler.registerListener(twitchListener);
+
         twitchClient.getChat().connect();
         twitchClient.getChat().joinChannel(channelName);
+        System.out.println("twitchClient.getChat().getState() = " + twitchClient.getChat().getState());
         twitchClient.getClientHelper().enableFollowEventListener(channelName);
         UserList resultList = twitchClient.getHelix().getUsers(null, null, Collections.singletonList(channelName)).execute();
         AtomicReference<String> channelId = new AtomicReference<>("");
         resultList.getUsers().stream().findFirst().ifPresent(user -> channelId.set(user.getId()));
         twitchClient.getPubSub().listenForChannelPointsRedemptionEvents(new OAuth2Credential("twitch", configurationManager.getStringValue("lyorineChannelToken")), channelId.get());
 
-        logger.log(Level.INFO, "> "+channelName+"'s channel joined!");
+        logger.log(Level.INFO, "> " + channelName + "'s channel joined!");
 
         this.sessionManager = new SessionManager();
         sessionManager.loadSessions();
-
-        this.twitchListener = new TwitchListener(commandMap);
-        twitchClient.getEventManager().getEventHandler(SimpleEventHandler.class).registerListener(twitchListener);
     }
 
     private void loadDiscord() throws LoginException, InterruptedException {
         //Creating the credentials, adding the listeners, and load the roles
         jda = JDABuilder.create(configurationManager.getStringValue("botToken"),
-                GatewayIntent.GUILD_MESSAGES,
-                GatewayIntent.DIRECT_MESSAGE_REACTIONS,
-                GatewayIntent.DIRECT_MESSAGE_TYPING,
-                GatewayIntent.DIRECT_MESSAGES,
-                GatewayIntent.GUILD_BANS,
-                GatewayIntent.GUILD_EMOJIS,
-                GatewayIntent.GUILD_MEMBERS,
-                GatewayIntent.GUILD_INVITES,
-                GatewayIntent.GUILD_MESSAGE_REACTIONS,
-                GatewayIntent.GUILD_MESSAGE_TYPING,
-                GatewayIntent.GUILD_PRESENCES,
-                GatewayIntent.GUILD_VOICE_STATES)
+                        GatewayIntent.GUILD_MESSAGES,
+                        GatewayIntent.DIRECT_MESSAGE_REACTIONS,
+                        GatewayIntent.DIRECT_MESSAGE_TYPING,
+                        GatewayIntent.DIRECT_MESSAGES,
+                        GatewayIntent.GUILD_BANS,
+                        GatewayIntent.GUILD_EMOJIS,
+                        GatewayIntent.GUILD_MEMBERS,
+                        GatewayIntent.GUILD_INVITES,
+                        GatewayIntent.GUILD_MESSAGE_REACTIONS,
+                        GatewayIntent.GUILD_MESSAGE_TYPING,
+                        GatewayIntent.GUILD_PRESENCES,
+                        GatewayIntent.GUILD_VOICE_STATES)
                 .build();
         jda.addEventListener(new DiscordListener(commandMap));
         jda.getPresence().setActivity(Activity.playing("Amazingly powerful"));
@@ -195,6 +209,7 @@ public class BOT implements Runnable{
             if (scanner.hasNextLine()) {
                 //Scanning for console commands
                 String nextLine = scanner.nextLine();
+                logger.log(Level.INFO, "> Executing " + nextLine + " command...");
                 commandMap.consoleCommand(nextLine);
             }
         }
@@ -214,15 +229,6 @@ public class BOT implements Runnable{
         logger.log(Level.INFO, "--------------- STOPPING ---------------");
         logger.log(Level.INFO, "Arrêt du BOT réussi");
         System.exit(0);
-    }
-
-    public static void main(String[] args) {
-        try {
-            BOT bot = new BOT();
-            new Thread(bot, "bot").start();
-        } catch (IllegalArgumentException | NullPointerException | IOException | InterruptedException | SQLException | GeneralSecurityException e) {
-            e.printStackTrace();
-        }
     }
 
     public Logger getLogger() {
@@ -255,9 +261,5 @@ public class BOT implements Runnable{
 
     public YoutubeSearch getYoutubeSearch() {
         return youtubeSearch;
-    }
-
-    public static BOT getInstance(){
-        return instance;
     }
 }

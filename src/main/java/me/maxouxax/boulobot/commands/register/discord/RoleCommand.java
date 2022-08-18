@@ -16,7 +16,7 @@ public class RoleCommand {
     private final BOT bot;
     private final CommandMap commandMap;
 
-    public RoleCommand(CommandMap commandMap){
+    public RoleCommand(CommandMap commandMap) {
         this.commandMap = commandMap;
         this.bot = BOT.getInstance();
     }

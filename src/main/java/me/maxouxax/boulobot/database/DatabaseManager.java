@@ -18,23 +18,23 @@ public class DatabaseManager {
 
     public static void initDatabaseConnection() throws SQLException {
         DatabaseCredentials databaseCredentials;
-        try(final Reader reader = Files.newBufferedReader(Paths.get("database.yml"), StandardCharsets.UTF_8)) {
+        try (final Reader reader = Files.newBufferedReader(Paths.get("database.yml"), StandardCharsets.UTF_8)) {
             Yaml yaml = new Yaml(new CustomClassLoaderConstructor(ClassLoader.getSystemClassLoader()));
             yaml.setBeanAccess(BeanAccess.FIELD);
 
             databaseCredentials = yaml.loadAs(reader, DatabaseCredentials.class);
-            if(databaseCredentials.getHost().equalsIgnoreCase("none")){
+            if (databaseCredentials.getHost().equalsIgnoreCase("none")) {
                 throw new SQLException("Database is not configured in database.yml");
             }
             databaseAccess = new DatabaseAccess(databaseCredentials);
             databaseAccess.initPool();
-        }catch (IOException e){
+        } catch (IOException e) {
             BOT.getInstance().getErrorHandler().handleException(e);
         }
 
     }
 
-    public static void closeDatabaseConnection(){
+    public static void closeDatabaseConnection() {
         databaseAccess.closePool();
     }
 

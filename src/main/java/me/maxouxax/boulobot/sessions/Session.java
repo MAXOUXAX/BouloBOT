@@ -20,6 +20,7 @@ import java.util.logging.Level;
 public class Session {
 
     private final BOT bot;
+    private final ArrayList<Integer> viewerCountList = new ArrayList<>();
     private UUID uuid;
     private String channelId;
     private long startDate;
@@ -33,8 +34,6 @@ public class Session {
     private HashMap<String, Integer> commandsUsed = new HashMap<>();
     private int bansAndTimeouts;
     private Message sessionMessage;
-    private final ArrayList<Integer> viewerCountList = new ArrayList<>();
-
     private String title;
     private String currentGameId;
     private ArrayList<String> gameIds = new ArrayList<>();
@@ -57,88 +56,95 @@ public class Session {
         this.bansAndTimeouts = 0;
     }
 
+    public static Stream getStream(BOT bot, String channelId) {
+        StreamList streamResultList = bot.getTwitchClient().getHelix().getStreams(bot.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, Collections.singletonList(channelId), null).execute();
+        final AtomicReference<Stream> currentStream = new AtomicReference<>();
+        streamResultList.getStreams().forEach(currentStream::set);
+        return currentStream.get();
+    }
+
     public UUID getUuid() {
         return uuid;
-    }
-
-    public String getChannelId() {
-        return channelId;
-    }
-
-    public int getMaxViewers() {
-        return maxViewers;
-    }
-
-    public int getAvgViewers() {
-        return avgViewers;
-    }
-
-    public int getCommandUsed() {
-        return commandUsed;
-    }
-
-    public int getMessageSended() {
-        return messageSended;
-    }
-
-    public int getNewViewers() {
-        return newViewers;
-    }
-
-    public long getStartDate() {
-        return startDate;
-    }
-
-    public long getEndDate() {
-        return endDate;
-    }
-
-    public HashMap<String, Integer> getCommandsUsed() {
-        return commandsUsed;
-    }
-
-    public int getBansAndTimeouts() {
-        return bansAndTimeouts;
     }
 
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
     }
 
-    public void setStartDate(long startDate) {
-        this.startDate = startDate;
-    }
-
-    public void setEndDate(long endDate) {
-        this.endDate = endDate;
-    }
-
-    public void setMaxViewers(int maxViewers) {
-        this.maxViewers = maxViewers;
-    }
-
-    public void setAvgViewers(int avgViewers) {
-        this.avgViewers = avgViewers;
-    }
-
-    public void setCommandUsed(int commandUsed) {
-        this.commandUsed = commandUsed;
-    }
-
-    public void setMessageSended(int messageSended) {
-        this.messageSended = messageSended;
-    }
-
-    public void setNewViewers(int newViewers) {
-        this.newViewers = newViewers;
+    public String getChannelId() {
+        return channelId;
     }
 
     public void setChannelId(String channelId) {
         this.channelId = channelId;
     }
 
+    public int getMaxViewers() {
+        return maxViewers;
+    }
+
+    public void setMaxViewers(int maxViewers) {
+        this.maxViewers = maxViewers;
+    }
+
+    public int getAvgViewers() {
+        return avgViewers;
+    }
+
+    public void setAvgViewers(int avgViewers) {
+        this.avgViewers = avgViewers;
+    }
+
+    public int getCommandUsed() {
+        return commandUsed;
+    }
+
+    public void setCommandUsed(int commandUsed) {
+        this.commandUsed = commandUsed;
+    }
+
+    public int getMessageSended() {
+        return messageSended;
+    }
+
+    public void setMessageSended(int messageSended) {
+        this.messageSended = messageSended;
+    }
+
+    public int getNewViewers() {
+        return newViewers;
+    }
+
+    public void setNewViewers(int newViewers) {
+        this.newViewers = newViewers;
+    }
+
+    public long getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(long startDate) {
+        this.startDate = startDate;
+    }
+
+    public long getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(long endDate) {
+        this.endDate = endDate;
+    }
+
+    public HashMap<String, Integer> getCommandsUsed() {
+        return commandsUsed;
+    }
+
     public void setCommandsUsed(HashMap<String, Integer> commandsUsed) {
         this.commandsUsed = commandsUsed;
+    }
+
+    public int getBansAndTimeouts() {
+        return bansAndTimeouts;
     }
 
     public void setBansAndTimeouts(int bansAndTimeouts) {
@@ -161,7 +167,7 @@ public class Session {
         this.sessionMessage = sessionMessage;
     }
 
-    public void newGame(String newGameId){
+    public void newGame(String newGameId) {
         this.gameIds.add(newGameId);
         this.currentGameId = newGameId;
     }
@@ -224,10 +230,10 @@ public class Session {
         String channelName = bot.getChannelName();
         bot.getLogger().log(Level.INFO, "> Updating session message!");
         EmbedCrafter embedCrafter = new EmbedCrafter();
-        embedCrafter.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/"+channelName.toUpperCase())
-                    .setColor(3066993)
-                    .setDescription("Coucou les "+ Objects.requireNonNull(notif).getAsMention()+" !\n**"+ Objects.requireNonNull(lyorine).getAsMention()+"** est en live, rejoignez là !\n» https://lyor.in/twitch")
-                    .addField(new MessageEmbed.Field("Titre", title, true));
+        embedCrafter.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/" + channelName.toUpperCase())
+                .setColor(3066993)
+                .setDescription("Coucou les " + Objects.requireNonNull(notif).getAsMention() + " !\n**" + Objects.requireNonNull(lyorine).getAsMention() + "** est en live, rejoignez là !\n» https://lyor.in/twitch")
+                .addField(new MessageEmbed.Field("Titre", title, true));
         GameList resultList = bot.getTwitchClient().getHelix().getGames(bot.getConfigurationManager().getStringValue("oauth2Token"), Collections.singletonList(currentGameId), null).execute();
         final AtomicReference<String> gameName = new AtomicReference<>("Aucun jeu");
         resultList.getGames().forEach(game -> {
@@ -239,7 +245,7 @@ public class Session {
 
         Stream currentStream = getStream(bot, channelId);
 
-        if(currentStream != null) {
+        if (currentStream != null) {
             embedCrafter.setImageUrl(currentStream.getThumbnailUrl(1280, 720) + "?r=" + CryptoUtils.generateNonce(4));
             Message message = new MessageBuilder(notif.getAsMention()).setEmbed(embedCrafter.build()).build();
             bot.getJda().getPresence().setActivity(Activity.streaming("avec sa reine à " + gameName.get(), "https://twitch.tv/" + channelName.toUpperCase()));
@@ -249,17 +255,10 @@ public class Session {
             } else {
                 this.sessionMessage.editMessage(message).queue();
             }
-        }else{
+        } else {
             return false;
         }
         return true;
-    }
-
-    public static Stream getStream(BOT bot, String channelId) {
-        StreamList streamResultList = bot.getTwitchClient().getHelix().getStreams(bot.getConfigurationManager().getStringValue("oauth2Token"), "", "", null, null, null, Collections.singletonList(channelId), null).execute();
-        final AtomicReference<Stream> currentStream = new AtomicReference<>();
-        streamResultList.getStreams().forEach(currentStream::set);
-        return currentStream.get();
     }
 
     private void cancelSession() {
@@ -268,15 +267,15 @@ public class Session {
 
     public void endSession() {
         endDate = System.currentTimeMillis();
-        if(viewerCountList.size() != 0) {
+        if (viewerCountList.size() != 0) {
             int sum = viewerCountList.stream().mapToInt(integer -> integer).sum();
             avgViewers = sum / viewerCountList.size();
         }
         EmbedCrafter embedCrafter = new EmbedCrafter();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        embedCrafter.setTitle("\uD83D\uDD39 Résumé du live du "+simpleDateFormat.format(new Date(getStartDate())), "https://twitch.tv/" + bot.getChannelName().toUpperCase())
+        embedCrafter.setTitle("\uD83D\uDD39 Résumé du live du " + simpleDateFormat.format(new Date(getStartDate())), "https://twitch.tv/" + bot.getChannelName().toUpperCase())
                 .setColor(15158332)
-                .setDescription("Voici quelques statistiques à propos du live du "+simpleDateFormat.format(new Date(getStartDate())))
+                .setDescription("Voici quelques statistiques à propos du live du " + simpleDateFormat.format(new Date(getStartDate())))
                 .addField("Pic de spectateurs", getMaxViewers() + "", true)
                 .addField("Moyenne de spectateurs", getAvgViewers() + "", true)
                 .addField("Titre", getTitle(), true)

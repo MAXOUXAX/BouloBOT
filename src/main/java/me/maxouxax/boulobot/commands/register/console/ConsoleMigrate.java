@@ -49,7 +49,7 @@ public class ConsoleMigrate {
                 connection.close();
                 bot.getLogger().log(Level.WARNING, "Migration terminée, connexion à la base de données fermée!");
                 bot.getLogger().log(Level.INFO, "Récapitulatif...\n(" + success.get() + "/" + knownUsers.size() + ")");
-            }else if(arg1.equalsIgnoreCase("roles")){
+            } else if (arg1.equalsIgnoreCase("roles")) {
                 Connection connection = DatabaseManager.getDatabaseAccess().getConnection();
                 AtomicInteger success = new AtomicInteger();
                 List<Grade> grades = bot.getRolesManager().getGrades();

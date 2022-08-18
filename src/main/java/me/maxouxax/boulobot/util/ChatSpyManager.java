@@ -39,7 +39,7 @@ public class ChatSpyManager {
 
         final ResultSet resultSet = preparedStatement.executeQuery();
 
-        while(resultSet.next()){
+        while (resultSet.next()) {
             String username = resultSet.getString("username");
             ignoredUsers.add(username);
         }
@@ -67,7 +67,7 @@ public class ChatSpyManager {
     }
 
     private void postMessages() {
-        if(!stringsToPost.isEmpty()) {
+        if (!stringsToPost.isEmpty()) {
             ArrayList<StringBuilder> stringBuilderArrayList = new ArrayList<>();
             stringBuilderArrayList.add(new StringBuilder());
             AtomicReference<Integer> listIndex = new AtomicReference<>(0);
@@ -89,7 +89,7 @@ public class ChatSpyManager {
         stringsToPost.clear();
     }
 
-    public void stopSpying(){
+    public void stopSpying() {
         scheduleChatSpy.cancel(false);
     }
 
@@ -100,7 +100,7 @@ public class ChatSpyManager {
         }
     }
 
-    public boolean isIgnored(String userName){
+    public boolean isIgnored(String userName) {
         for (String s : ignoredUsers) {
             if (s.equalsIgnoreCase(userName)) {
                 return true;

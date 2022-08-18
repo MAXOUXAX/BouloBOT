@@ -9,7 +9,7 @@ public class SimpleTwitchCommand {
     private final Object object;
     private final Method method;
 
-    public SimpleTwitchCommand(String name, String description, String help, String exemple, TwitchCommand.ExecutorRank executorRank, Object object, Method method){
+    public SimpleTwitchCommand(String name, String description, String help, String exemple, TwitchCommand.ExecutorRank executorRank, Object object, Method method) {
         super();
         this.name = name;
         this.description = description;

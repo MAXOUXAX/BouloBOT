@@ -15,26 +15,22 @@ public class DatabaseAccess {
         this.databaseCredentials = databaseCredentials;
     }
 
-    private void setupHikariCP(){
+    public void initPool() {
         final HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setMaximumPoolSize(10);
         hikariConfig.setJdbcUrl(databaseCredentials.toURI());
         hikariConfig.setDriverClassName(org.mariadb.jdbc.Driver.class.getName());
         hikariConfig.setUsername(databaseCredentials.getUser());
         hikariConfig.setPassword(databaseCredentials.getPassword());
-        hikariConfig.setMaxLifetime(300*1000);
-        hikariConfig.setIdleTimeout(28*1000);
-        hikariConfig.setLeakDetectionThreshold(60*1000);
-        hikariConfig.setConnectionTimeout(10*1000);
+        hikariConfig.setMaxLifetime(300 * 1000);
+        hikariConfig.setIdleTimeout(28 * 1000);
+        hikariConfig.setLeakDetectionThreshold(60 * 1000);
+        hikariConfig.setConnectionTimeout(10 * 1000);
 
         this.hikariDataSource = new HikariDataSource(hikariConfig);
     }
 
-    public void initPool(){
-        setupHikariCP();
-    }
-
-    public void closePool(){
+    public void closePool() {
         this.hikariDataSource.close();
     }
 

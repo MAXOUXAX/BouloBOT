@@ -17,18 +17,18 @@ public class CommandVersion {
         this.bot = BOT.getInstance();
     }
 
-    @Command(name="version",description="Affiche les informations sur la version du BOT", help = ".version", example = ".version", guildOnly = false)
-    private void version(TextChannel channel, SlashCommandEvent slashCommandEvent){
-        try{
+    @Command(name = "version", description = "Affiche les informations sur la version du BOT", help = ".version", example = ".version", guildOnly = false)
+    private void version(TextChannel channel, SlashCommandEvent slashCommandEvent) {
+        try {
             EmbedCrafter embedCrafter = new EmbedCrafter();
             embedCrafter.setTitle("BouloBOT by MAXOUXAX • Amazingly powerful.", bot.getConfigurationManager().getStringValue("websiteUrl"))
-                .setColor(3447003)
-                .addField("Je suis en version", bot.getVersion(), true)
-                .addField("Je gère", commandMap.getDiscordCommands().size()+" commandes Discord", true)
-                .addField("Je gère", commandMap.getTwitchCommands().size()+" commandes Twitch", true)
-                .addField("J'ai souhaité la bienvenue à", commandMap.getUserIds().size()+" viewers", true);
+                    .setColor(3447003)
+                    .addField("Je suis en version", bot.getVersion(), true)
+                    .addField("Je gère", commandMap.getDiscordCommands().size() + " commandes Discord", true)
+                    .addField("Je gère", commandMap.getTwitchCommands().size() + " commandes Twitch", true)
+                    .addField("J'ai souhaité la bienvenue à", commandMap.getUserIds().size() + " viewers", true);
             slashCommandEvent.replyEmbeds(embedCrafter.build()).queue();
-        }catch (Exception e) {
+        } catch (Exception e) {
             bot.getErrorHandler().handleException(e);
             slashCommandEvent.reply("An error occured. > " + e.getMessage()).queue();
         }

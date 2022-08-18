@@ -17,21 +17,21 @@ public class CommandOctogone {
     private final BOT bot;
     private final CommandMap commandMap;
 
-    public CommandOctogone(CommandMap commandMap){
+    public CommandOctogone(CommandMap commandMap) {
         this.commandMap = commandMap;
         this.bot = BOT.getInstance();
     }
 
     @Command(name = "octogone", description = "Vous voulez vous battre ? Bah battez vous !", help = ".octogone @<participants...>", example = ".octogone @LYORINE @MAXOUXAX @DJOXX")
-    public void octogone(User user, TextChannel textChannel, Message message, String[] args){
+    public void octogone(User user, TextChannel textChannel, Message message, String[] args) {
         textChannel.sendTyping().queue();
         List<Member> participants = message.getMentionedMembers();
-        if(participants.isEmpty()){
+        if (participants.isEmpty()) {
             textChannel.sendMessage(commandMap.getHelpEmbed("octogone")).queue();
-        }else{
-            if(participants.size() == 1 && participants.get(0).getId().equalsIgnoreCase(user.getId())){
+        } else {
+            if (participants.size() == 1 && participants.get(0).getId().equalsIgnoreCase(user.getId())) {
                 textChannel.sendMessage(commandMap.getHelpEmbed("octogone")).queue();
-            }else{
+            } else {
                 int random = new Random().nextInt(participants.size());
                 Member winner = participants.get(random);
                 StringBuilder participantsStr = new StringBuilder();
@@ -46,11 +46,11 @@ public class CommandOctogone {
 
                 EmbedCrafter embedCrafter = new EmbedCrafter();
                 embedCrafter.setTitle("Octogone", bot.getConfigurationManager().getStringValue("websiteUrl"))
-                    .setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl()+"?size=256")
-                    .addField(participants.size()+" participants", participantsStr.toString(), true)
-                    .addField("Vainqueur", winner.getAsMention(), true)
-                    .setDescription("Bien joué à "+winner.getAsMention()+" qui a écrabouillé(e) ses adversaires. Quel(le) malade !")
-                    .setColor(15528177);
+                        .setAuthor(user.getName(), bot.getConfigurationManager().getStringValue("websiteUrl"), user.getAvatarUrl() + "?size=256")
+                        .addField(participants.size() + " participants", participantsStr.toString(), true)
+                        .addField("Vainqueur", winner.getAsMention(), true)
+                        .setDescription("Bien joué à " + winner.getAsMention() + " qui a écrabouillé(e) ses adversaires. Quel(le) malade !")
+                        .setColor(15528177);
                 textChannel.sendMessage(embedCrafter.build()).queue();
             }
         }

@@ -54,14 +54,12 @@ public final class CommandMap {
                 new MusicCommand(this),
                 new CommandWeather(this),
                 new CommandNotif(this),
-                //new CommandChangelog(this),
                 new CommandVersion(this),
                 //new CommandSession(this),
-                //new CommandOctogone(this),
+                new CommandOctogone(this),
                 new CommandSay(this),
                 new CommandEmbed(this),
                 new CommandIgnore(this),
-                //new CommandLock(),
                 new TwitchWeather(this),
                 new TwitchHelp(this),
                 new TwitchNotif(this),
@@ -347,7 +345,8 @@ public final class CommandMap {
             else if (parameters[i].getType() == User.class) objects[i] = slashCommandEvent.getUser();
             else if (parameters[i].getType() == Member.class) objects[i] = slashCommandEvent.getMember();
             else if (parameters[i].getType() == TextChannel.class) objects[i] = slashCommandEvent.getTextChannel();
-            else if (parameters[i].getType() == PrivateChannel.class)objects[i] = slashCommandEvent.getPrivateChannel();
+            else if (parameters[i].getType() == PrivateChannel.class)
+                objects[i] = slashCommandEvent.getPrivateChannel();
             else if (parameters[i].getType() == Guild.class) objects[i] = slashCommandEvent.getGuild();
             else if (parameters[i].getType() == String.class) objects[i] = slashCommandEvent.getName();
             else if (parameters[i].getType() == SlashCommandEvent.class) objects[i] = slashCommandEvent;
@@ -447,7 +446,8 @@ public final class CommandMap {
             for (int i = 0; i < parameters.length; i++) {
                 if (parameters[i].getType() == User.class) objects[i] = buttonClickEvent.getUser();
                 else if (parameters[i].getType() == TextChannel.class) objects[i] = buttonClickEvent.getTextChannel();
-                else if (parameters[i].getType() == PrivateChannel.class)objects[i] = buttonClickEvent.getPrivateChannel();
+                else if (parameters[i].getType() == PrivateChannel.class)
+                    objects[i] = buttonClickEvent.getPrivateChannel();
                 else if (parameters[i].getType() == Guild.class) objects[i] = buttonClickEvent.getGuild();
                 else if (parameters[i].getType() == ButtonClickEvent.class) objects[i] = buttonClickEvent;
                 else if (parameters[i].getType() == JDA.class) objects[i] = bot.getJda();

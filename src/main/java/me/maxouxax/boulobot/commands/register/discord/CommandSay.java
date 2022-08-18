@@ -9,13 +9,13 @@ public class CommandSay {
     private final BOT bot;
     private final CommandMap commandMap;
 
-    public CommandSay(CommandMap commandMap){
+    public CommandSay(CommandMap commandMap) {
         this.commandMap = commandMap;
         this.bot = BOT.getInstance();
     }
 
     @ConsoleCommand(name = "say", description = "Permet d'envoyer un message personnalisé dans le tchat twitch", help = "say")
-    public void say(String[] args){
+    public void say(String[] args) {
         StringBuilder messageStr = new StringBuilder();
         for (String arg : args) {
             messageStr.append(arg).append(" ");

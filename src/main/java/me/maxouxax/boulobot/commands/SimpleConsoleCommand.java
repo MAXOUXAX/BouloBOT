@@ -8,7 +8,7 @@ public final class SimpleConsoleCommand {
     private final Object object;
     private final Method method;
 
-    public SimpleConsoleCommand(String name, String description, String help, Object object, Method method){
+    public SimpleConsoleCommand(String name, String description, String help, Object object, Method method) {
         super();
         this.name = name;
         this.description = description;

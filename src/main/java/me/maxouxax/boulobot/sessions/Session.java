@@ -229,10 +229,11 @@ public class Session {
         Role notif = discord.getRoleById(bot.getConfigurationManager().getStringValue("notificationRoleId"));
         String channelName = bot.getChannelName();
         bot.getLogger().log(Level.INFO, "> Updating session message!");
+
         EmbedCrafter embedCrafter = new EmbedCrafter();
         embedCrafter.setTitle("Notification \uD83D\uDD14", "https://twitch.tv/" + channelName.toUpperCase())
                 .setColor(3066993)
-                .setDescription("Coucou les " + Objects.requireNonNull(notif).getAsMention() + " !\n**" + Objects.requireNonNull(lyorine).getAsMention() + "** est en live, rejoignez là !\n» https://lyor.in/twitch")
+                .setDescription("Coucou les " + (notif != null ? notif.getAsMention() : "chats") + " !\n**" + (lyorine != null ? lyorine.getAsMention() : "Lyorine") + "** est en live, rejoignez là !\n» https://lyor.in/twitch")
                 .addField(new MessageEmbed.Field("Titre", title, true));
         GameList resultList = bot.getTwitchClient().getHelix().getGames(bot.getConfigurationManager().getStringValue("oauth2Token"), Collections.singletonList(currentGameId), null).execute();
         final AtomicReference<String> gameName = new AtomicReference<>("Aucun jeu");
@@ -292,6 +293,12 @@ public class Session {
 
         embedCrafter.addField("Durée", hours + "h" + (minutes < 10 ? "0" : "") + minutes, true);
         bot.getJda().getPresence().setActivity(Activity.playing("Amazingly powerful"));
+        if(sessionMessage == null){
+            Guild discord = bot.getJda().getGuildById(bot.getConfigurationManager().getStringValue("guildId"));
+            TextChannel toSend = discord.getTextChannelById(bot.getConfigurationManager().getStringValue("noticationTextChannelId"));
+            if(toSend == null) throw new IllegalStateException("Notification text channel not found");
+            toSend.sendMessageEmbeds(embedCrafter.build()).queue();
+        }
         getSessionMessage().editMessage(" ").embed(embedCrafter.build()).queue();
         bot.getLogger().log(Level.INFO, "> Updated!");
     }
